@@ -25,4 +25,54 @@ export default function Home() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-        ></motion.section>
+        >
+            <div className="container">
+            <div className="row align-items-center">
+              <div className="col-lg-6 text-white">
+                <motion.h1
+                  className="display-4 fw-bold mb-4"
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2, duration: 0.6 }}
+                >
+                  Sistema de Gestión de Notas
+                </motion.h1>
+                <motion.p
+                  className="lead mb-4 opacity-75"
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4, duration: 0.6 }}
+                >
+                  Administra estudiantes, cursos y notas de manera eficiente y
+                  profesional. Visualiza el rendimiento académico con nuestro
+                  dashboard interactivo.
+                </motion.p>
+                <motion.div
+                  className="d-flex flex-wrap gap-4 mb-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6, duration: 0.6 }}
+                >
+                  <div className="d-flex align-items-center">
+                    <div
+                      className="bg-white bg-opacity-25 rounded-circle  d-flex align-items-center justify-content-center p-3 me-3"
+                      style={{
+                        width: "60px",
+                        height: "60px",
+                      }}
+                    >
+                      <i className="bi bi-people-fill fs-4 text-white"></i>
+                    </div>
+                    <div>
+                      <h6 className="mb-0 fw-semibold">Estudiantes</h6>
+                      <small className="opacity-75">Gestión completa</small>
+                    </div>
+                  </div>
+                  <div className="d-flex align-items-center">
+                    <div
+                      className="bg-white bg-opacity-25 rounded-circle  d-flex align-items-center justify-content-center p-3 me-3"
+                      style={{
+                        width: "60px",
+                        height: "60px",
+                      }}
+                    ></div>
