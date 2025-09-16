@@ -76,3 +76,70 @@ export default function Home() {
                         height: "60px",
                       }}
                     ></div>
+                     <i className="bi bi-journal-bookmark-fill fs-4 text-white"></i>
+                    </div>
+                    <div>
+                      <h6 className="mb-0 fw-semibold">Cursos</h6>
+                      <small className="opacity-75">
+                        Organización avanzada
+                      </small>
+                    </div>
+                  </div>
+                  <div className="d-flex align-items-center">
+                    <div
+                      className="bg-white bg-opacity-25 rounded-circle  d-flex align-items-center justify-content-center p-3 me-3"
+                      style={{
+                        width: "60px",
+                        height: "60px",
+                      }}
+                    >
+                      <i className="bi bi-clipboard-data-fill fs-4 text-white"></i>
+                    </div>
+                    <div>
+                      <h6 className="mb-0 fw-semibold">Notas</h6>
+                      <small className="opacity-75">
+                        Seguimiento detallado
+                      </small>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+              <div className="col-lg-6 text-center">
+                <motion.div
+                  className="position-relative"
+                  animate={{
+                    y: [0, -20, 0], // Animación flotante
+                  }}
+                  transition={{
+                    duration: 3,
+                    ease: "easeInOut",
+                    repeat: Infinity,
+                  }}
+                >
+                  <div
+                    className="bg-white bg-opacity-20 backdrop-blur rounded-circle mx-auto"
+                    style={{
+                      width: "250px",
+                      height: "250px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <img
+                      src={gif}
+                      alt="Estudiante animado"
+                      style={{
+                        width: "200px",
+                        height: "200px",
+                        objectFit: "cover",
+                        borderRadius: "50%",
+                        border: "4px solid rgba(255,255,255,0.3)",
+                      }}
+                    />
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+          </div>
+        </motion.section>
