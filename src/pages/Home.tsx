@@ -143,3 +143,75 @@ export default function Home() {
             </div>
           </div>
         </motion.section>
+         {/* Dashboard Section con mejor diseño */}
+        <section className="py-5" style={{ backgroundColor: "#f8f9fa" }}>
+          <div className="container">
+            <motion.div
+              className="row mb-5"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.6 }}
+            >
+              <div className="col-12 text-center">
+                <h2 className="display-6 fw-bold text-dark mb-3">
+                  <i className="bi bi-graph-up me-3 text-primary"></i>
+                  Dashboard de Rendimiento
+                </h2>
+                <p className="lead text-muted mb-4">
+                  Visualiza y analiza el rendimiento académico de forma
+                  intuitiva
+                </p>
+
+                {/* Selector de vista mejorado */}
+                <div className="d-inline-flex bg-white rounded-pill p-1 shadow-sm">
+                  <button
+                    type="button"
+                    className={`btn rounded-pill px-4 transition-all ${
+                      viewMode === "estudiantes"
+                        ? "btn-primary shadow-sm"
+                        : "btn-ghost text-muted"
+                    }`}
+                    onClick={() => setViewMode("estudiantes")}
+                  >
+                    <i className="bi bi-people me-2"></i>
+                    Vista por Estudiantes
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn rounded-pill px-4 transition-all ${
+                      viewMode === "cursos"
+                        ? "btn-primary shadow-sm"
+                        : "btn-ghost text-muted"
+                    }`}
+                    onClick={() => setViewMode("cursos")}
+                  >
+                    <i className="bi bi-journal-bookmark me-2"></i>
+                    Vista por Cursos
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Dashboard Stats */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.6 }}
+            >
+              <DashboardStats />
+            </motion.div>
+
+            {/* Dashboard Component */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1, duration: 0.6 }}
+            >
+              <DashboardPremium viewMode={viewMode} />
+            </motion.div>
+          </div>
+        </section>
+      </div>
+    </Layout>
+  );
+}
