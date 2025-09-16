@@ -23,8 +23,8 @@ export default function Estudiantes() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-        ></motion.p>
-        Aquí puedes ver la lista de estudiantes.
+        >
+          Aquí puedes ver la lista de estudiantes.
         </motion.p>
         <ListEstudiante />
       </motion.div>

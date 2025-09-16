@@ -75,8 +75,8 @@ export default function Home() {
                         width: "60px",
                         height: "60px",
                       }}
-                    ></div>
-                     <i className="bi bi-journal-bookmark-fill fs-4 text-white"></i>
+                    >
+                      <i className="bi bi-journal-bookmark-fill fs-4 text-white"></i>
                     </div>
                     <div>
                       <h6 className="mb-0 fw-semibold">Cursos</h6>
