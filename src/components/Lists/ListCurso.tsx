@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import type { Curso } from "../../interfaces/Curso";
-import api from "../../api/axiosConfig";
 import FormCurso from "../Forms/FormCurso";
 import { Modal } from "bootstrap";
 import { ModalAgregar } from "../Modals/ModalAgregar";
@@ -41,7 +40,7 @@ export default function ListCurso() {
     if (!cursoAEliminar) return;
 
     try {
-      await api.delete(`/curso/${cursoAEliminar.idCurso}`);
+      await CursoService.eliminar(cursoAEliminar.idCurso!);
       await cargarCursos();
       setCursoAEliminar(null);
       setToast({ show: true, message: "Curso eliminado", type: "danger" });

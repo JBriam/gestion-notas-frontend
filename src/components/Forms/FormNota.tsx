@@ -2,18 +2,13 @@ import { useEffect, useState } from "react";
 import type { Estudiante } from "../../interfaces/Estudiante";
 import type { Curso } from "../../interfaces/Curso";
 import type { NotaForm } from "../../interfaces/Nota";
-import api from "../../api/axiosConfig";
 import { NotaService } from "../../api/NotaService";
+import { EstudianteService } from "../../api/EstudianteService";
+import { CursoService } from "../../api/CursoService";
 import ToastMessage from "../Modals/ToastMessage";
 
 interface FormNotaProps {
   onSaved?: () => void;
-}
-
-interface NotaRequest {
-  estudiante: Estudiante;
-  curso: Curso;
-  nota: number;
 }
 
 export default function FormNota({ onSaved }: FormNotaProps) {
@@ -34,12 +29,12 @@ export default function FormNota({ onSaved }: FormNotaProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [resEstudiantes, resCursos] = await Promise.all([
-          api.get("/estudiante"),
-          api.get("/curso"),
+        const [estudiantes, cursos] = await Promise.all([
+          EstudianteService.listar(),
+          CursoService.listar(),
         ]);
-        setEstudiantes(resEstudiantes.data);
-        setCursos(resCursos.data);
+        setEstudiantes(estudiantes);
+        setCursos(cursos);
       } catch (error) {
         console.error("Error cargando datos:", error);
       }
@@ -72,21 +67,8 @@ export default function FormNota({ onSaved }: FormNotaProps) {
     
     setIsLoading(true);
     try {
-      const estudianteSeleccionado = estudiantes.find(est => est.idEstudiante === form.idEstudiante);
-      const cursoSeleccionado = cursos.find(cur => cur.idCurso === form.idCurso);
-      
-      if (!estudianteSeleccionado || !cursoSeleccionado) {
-        showToast("Error: Estudiante o curso no encontrado", "danger");
-        return;
-      }
-      
-      const notaData: NotaRequest = {
-        estudiante: estudianteSeleccionado,
-        curso: cursoSeleccionado,
-        nota: Number(form.nota)
-      };
-      
-      await NotaService.crear(notaData);
+      // Usar directamente el form que ya tiene la estructura correcta
+      await NotaService.crear(form);
       
       // Limpiar formulario
       setForm({
@@ -104,9 +86,8 @@ export default function FormNota({ onSaved }: FormNotaProps) {
       }
     } catch (error: unknown) {
       console.error("Error al guardar nota:", error);
-      const axiosError = error as { response?: { data?: { message?: string } } };
-      const errorMessage = axiosError.response?.data?.message || "Error al registrar la nota";
-      showToast(errorMessage, "danger");
+      const message = error instanceof Error ? error.message : "Error al registrar la nota";
+      showToast(message, "danger");
     } finally {
       setIsLoading(false);
     }
