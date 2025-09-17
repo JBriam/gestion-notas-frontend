@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/Logo_Colegio_sin_fondo.png";
 
 // Animaciones para los ítems del menú
 const navItemVariants = {
