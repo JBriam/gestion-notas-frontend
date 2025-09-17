@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+import FormNota from "../components/Forms/FormNota";
 import Layout from "../components/Layout/Layout";
 
 export default function Notas() {

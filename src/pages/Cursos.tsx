@@ -1,4 +1,6 @@
+import { motion } from "framer-motion";
 import Layout from "../components/Layout/Layout";
+import ListCurso from "../components/Lists/ListCurso";
 
 export default function Cursos() {
   return (
