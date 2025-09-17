@@ -1,7 +1,7 @@
 import type { Estudiante } from "./Estudiante";
 import type { Curso } from "./Curso";
 
-export interface Nota {
+export interface Nota extends Record<string, unknown> {
   idNota?: number; // Opcional al crear
   estudiante: Estudiante;
   curso: Curso;

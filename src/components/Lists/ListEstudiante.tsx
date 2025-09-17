@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import type { Estudiante } from "../../interfaces/Estudiante";
-import api from "../../api/axiosConfig";
 import FormEstudiante from "../Forms/FormEstudiante";
 import { Modal } from "bootstrap";
 import { ModalAgregar } from "../Modals/ModalAgregar";
@@ -44,7 +43,7 @@ export default function ListEstudiante() {
     if (!estudianteAEliminar) return;
 
     try {
-      await api.delete(`/estudiante/${estudianteAEliminar.idEstudiante}`);
+      await EstudianteService.eliminar(estudianteAEliminar.idEstudiante!);
       await cargarEstudiantes();
       setEstudianteAEliminar(null);
       setToast({ show: true, message: "Estudiante eliminado", type: "danger" });
