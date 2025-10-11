@@ -1,56 +1,69 @@
-import { LocalStorageService } from "../localStorage/LocalStorageService";
-import type { Nota, NotaForm } from "../interfaces/Nota";
-import type { Estudiante } from "../interfaces/Estudiante";
-import type { Curso } from "../interfaces/Curso";
-
-// Instancia del servicio localStorage para notas
-const notaStorage = new LocalStorageService<Nota>('notas', 'idNota');
-
-// Servicios auxiliares para obtener datos relacionados
-const getEstudiantes = (): Estudiante[] => {
-  const data = localStorage.getItem('estudiantes');
-  return data ? JSON.parse(data) : [];
-};
-
-const getCursos = (): Curso[] => {
-  const data = localStorage.getItem('cursos');
-  return data ? JSON.parse(data) : [];
-};
+import axios from 'axios';
+import axiosInstance from './axiosConfig';
+import type { Nota, NotaForm, NotaBackend } from "../interfaces/Nota";
 
 export const NotaService = {
-  async listar(): Promise<Nota[]> {
-    return await notaStorage.getAll();
+  // Obtener todas las notas
+  async listar(): Promise<NotaBackend[]> {
+    try {
+      const response = await axiosInstance.get('/notas');
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Error al obtener notas');
+      }
+      throw new Error('Error de conexión con el servidor');
+    }
   },
 
+  // Obtener notas por estudiante
+  async obtenerPorEstudiante(idEstudiante: number): Promise<Nota[]> {
+    try {
+      const response = await axiosInstance.get(`/notas/estudiante/${idEstudiante}`);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Error al obtener notas del estudiante');
+      }
+      throw new Error('Error de conexión con el servidor');
+    }
+  },
+
+  // Crear nota
   async crear(notaForm: NotaForm): Promise<Nota> {
-    const estudiantes = getEstudiantes();
-    const cursos = getCursos();
-    
-    const estudiante = estudiantes.find(e => e.idEstudiante === notaForm.idEstudiante);
-    const curso = cursos.find(c => c.idCurso === notaForm.idCurso);
-    
-    if (!estudiante) {
-      throw new Error(`Estudiante con ID ${notaForm.idEstudiante} no encontrado`);
+    try {
+      const response = await axiosInstance.post('/notas', notaForm);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Error al crear nota');
+      }
+      throw new Error('Error de conexión con el servidor');
     }
-    
-    if (!curso) {
-      throw new Error(`Curso con ID ${notaForm.idCurso} no encontrado`);
-    }
-    
-    const notaCompleta: Omit<Nota, 'idNota'> = {
-      estudiante,
-      curso,
-      nota: notaForm.nota
-    };
-    
-    return await notaStorage.create(notaCompleta);
   },
 
+  // Actualizar nota
   async actualizar(nota: Nota): Promise<Nota> {
-    return await notaStorage.update(nota);
+    try {
+      const response = await axiosInstance.put(`/notas/${nota.idNota}`, nota);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Error al actualizar nota');
+      }
+      throw new Error('Error de conexión con el servidor');
+    }
   },
 
+  // Eliminar nota
   async eliminar(id: number): Promise<void> {
-    await notaStorage.delete(id);
+    try {
+      await axiosInstance.delete(`/notas/${id}`);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Error al eliminar nota');
+      }
+      throw new Error('Error de conexión con el servidor');
+    }
   },
 };
