@@ -1,32 +1,56 @@
-import { LocalStorageService } from "../localStorage/LocalStorageService";
+import axios from 'axios';
+import axiosInstance from './axiosConfig';
 import type { Curso } from "../interfaces/Curso";
 
-// Instancia del servicio localStorage para cursos
-const cursoStorage = new LocalStorageService<Curso>('cursos', 'idCurso');
-
-// Inicializar con datos por defecto si está vacío
-cursoStorage.initializeWithDefaults([
-  { idCurso: 1, nombre: "Matemáticas" },
-  { idCurso: 2, nombre: "Español" },
-  { idCurso: 3, nombre: "Ciencias Naturales" },
-  { idCurso: 4, nombre: "Historia" },
-  { idCurso: 5, nombre: "Inglés" }
-]);
-
 export const CursoService = {
+  // Obtener todos los cursos
   async listar(): Promise<Curso[]> {
-    return await cursoStorage.getAll();
+    try {
+      const response = await axiosInstance.get('/cursos');
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Error al obtener cursos');
+      }
+      throw new Error('Error de conexión con el servidor');
+    }
   },
 
+  // Crear curso
   async crear(curso: Omit<Curso, 'idCurso'>): Promise<Curso> {
-    return await cursoStorage.create(curso);
+    try {
+      const response = await axiosInstance.post('/cursos', curso);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Error al crear curso');
+      }
+      throw new Error('Error de conexión con el servidor');
+    }
   },
 
+  // Actualizar curso
   async actualizar(curso: Curso): Promise<Curso> {
-    return await cursoStorage.update(curso);
+    try {
+      const response = await axiosInstance.put(`/cursos/${curso.idCurso}`, curso);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Error al actualizar curso');
+      }
+      throw new Error('Error de conexión con el servidor');
+    }
   },
 
+  // Eliminar curso
   async eliminar(id: number): Promise<void> {
-    await cursoStorage.delete(id);
+    try {
+      await axiosInstance.delete(`/cursos/${id}`);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Error al eliminar curso');
+      }
+      throw new Error('Error de conexión con el servidor');
+    }
   },
 };

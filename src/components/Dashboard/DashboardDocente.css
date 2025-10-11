@@ -1,0 +1,614 @@
+/* Estilos para el Dashboard del Docente */
+
+.dashboard-docente {
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+.dashboard-header {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  padding: 20px 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.user-info h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.user-info p {
+  margin: 4px 0 0 0;
+  opacity: 0.9;
+  font-size: 14px;
+}
+
+.logout-button {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.dashboard-nav {
+  background: white;
+  padding: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  overflow-x: auto;
+}
+
+.nav-button {
+  background: none;
+  border: none;
+  padding: 16px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  min-width: fit-content;
+}
+
+.nav-button:hover {
+  background: #f8f9fa;
+  color: #007bff;
+}
+
+.nav-button.active {
+  color: #007bff;
+  border-bottom-color: #007bff;
+  background: #f8f9fa;
+}
+
+.dashboard-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+.section-header {
+  margin-bottom: 24px;
+}
+
+.section-header h2 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.section-header p {
+  margin: 0;
+  color: #666;
+  font-size: 16px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background: linear-gradient(45deg, #007bff, #0056b3);
+  color: white;
+  flex-shrink: 0;
+}
+
+.stat-content h3 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.stat-number {
+  margin: 0 0 4px 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: #007bff;
+}
+
+.stat-subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.welcome-card {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.welcome-card h2 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.welcome-card p {
+  margin: 0 0 16px 0;
+  color: #666;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.welcome-card ul {
+  margin: 16px 0;
+  padding-left: 20px;
+}
+
+.welcome-card li {
+  margin-bottom: 8px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.empty-state h3 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 20px;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 16px;
+}
+
+.content-section {
+  padding: 0;
+  background: transparent;
+}
+
+/* Estilos para cursos */
+.cursos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+.curso-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.curso-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.curso-header {
+  padding: 20px 20px 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.curso-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.curso-codigo {
+  background: #007bff;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.curso-details {
+  padding: 16px 20px;
+}
+
+.curso-details p {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.curso-details p:last-child {
+  margin-bottom: 0;
+}
+
+.curso-details strong {
+  color: #333;
+  font-weight: 600;
+}
+
+/* Estilos para estudiantes */
+.estudiantes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.estudiante-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.estudiante-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.estudiante-header {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.estudiante-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e9ecef;
+  flex-shrink: 0;
+}
+
+.estudiante-header h3 {
+  margin: 0 0 4px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.estudiante-codigo {
+  margin: 0;
+  color: #007bff;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.estudiante-details {
+  padding: 16px 20px;
+}
+
+.estudiante-details p {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.estudiante-details p:last-child {
+  margin-bottom: 0;
+}
+
+.estudiante-details strong {
+  color: #333;
+  font-weight: 600;
+}
+
+/* Estilos para tabla de notas */
+.notas-table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.notas-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.notas-table th {
+  background: #f8f9fa;
+  color: #333;
+  font-weight: 600;
+  padding: 16px;
+  text-align: left;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.notas-table td {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+
+.notas-table tr:hover {
+  background: #f8f9fa;
+}
+
+.estudiante-info strong {
+  display: block;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.estudiante-info small {
+  color: #666;
+  font-size: 12px;
+}
+
+.nota-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.nota-badge.aprobado {
+  background: #d4edda;
+  color: #155724;
+}
+
+.nota-badge.desaprobado {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.estado-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.estado-badge.aprobado {
+  background: #d4edda;
+  color: #155724;
+}
+
+.estado-badge.desaprobado {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .user-info {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .user-avatar {
+    width: 50px;
+    height: 50px;
+  }
+
+  .user-info h1 {
+    font-size: 20px;
+  }
+
+  .dashboard-main {
+    padding: 20px 15px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+
+  .cursos-grid,
+  .estudiantes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .curso-header {
+    flex-direction: column;
+    align-items: start;
+  }
+
+  .notas-table-container {
+    overflow-x: auto;
+  }
+
+  .notas-table {
+    min-width: 600px;
+  }
+
+  .section-header h2 {
+    font-size: 24px;
+  }
+
+  .welcome-card {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-main {
+    padding: 15px 10px;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .welcome-card {
+    padding: 16px;
+  }
+
+  .welcome-card h2 {
+    font-size: 20px;
+  }
+
+  .curso-card,
+  .estudiante-card {
+    margin: 0 -5px;
+  }
+}
+
+/* Estilos para badges de tipo de evaluación */
+.tipo-evaluacion-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  color: white;
+  text-align: center;
+  min-width: 70px;
+}
+
+.tipo-evaluacion-badge.tipo-parcial {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.tipo-evaluacion-badge.tipo-final {
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+}
+
+.tipo-evaluacion-badge.tipo-tarea {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.3);
+}
+
+.tipo-evaluacion-badge.tipo-practica {
+  background: linear-gradient(135deg, #ca8a04, #a16207);
+  box-shadow: 0 2px 8px rgba(202, 138, 4, 0.3);
+}
+
+.tipo-evaluacion-badge.tipo-default {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
+}
+
+/* Hover effects para los badges */
+.tipo-evaluacion-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
