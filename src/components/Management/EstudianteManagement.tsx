@@ -1,37 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import { EstudianteService } from '../../api/EstudianteService';
-import type { Estudiante } from '../../interfaces/Estudiante';
-import './EstudianteManagement.css';
+import React, { useState, useEffect } from "react";
+import { EstudianteService } from "../../api/EstudianteService";
+import type { Estudiante } from "../../interfaces/Estudiante";
+import "./EstudianteManagement.css";
 
 interface EstudianteForm extends Record<string, unknown> {
   nombres: string;
   apellidos: string;
   telefono: string;
+  direccion: string;
   distrito: string;
   foto: string;
   fechaNacimiento: string;
   codigoEstudiante: string;
   email: string;
+  password?: string;
+  confirmPassword?: string;
 }
 
 const EstudianteManagement: React.FC = () => {
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterDistrito, setFilterDistrito] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterDistrito, setFilterDistrito] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedEstudiante, setSelectedEstudiante] = useState<Estudiante | null>(null);
+  const [selectedEstudiante, setSelectedEstudiante] =
+    useState<Estudiante | null>(null);
   const [formData, setFormData] = useState<EstudianteForm>({
-    nombres: '',
-    apellidos: '',
-    telefono: '',
-    distrito: '',
-    foto: '',
-    fechaNacimiento: '',
-    codigoEstudiante: '',
-    email: ''
+    nombres: "",
+    apellidos: "",
+    telefono: "",
+    direccion: "",
+    distrito: "",
+    foto: "",
+    fechaNacimiento: "",
+    codigoEstudiante: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -46,8 +53,8 @@ const EstudianteManagement: React.FC = () => {
       const data = await EstudianteService.listar();
       setEstudiantes(data);
     } catch (error) {
-      console.error('Error al cargar estudiantes:', error);
-      setError('Error al cargar la lista de estudiantes');
+      console.error("Error al cargar estudiantes:", error);
+      setError("Error al cargar la lista de estudiantes");
     } finally {
       setLoading(false);
     }
@@ -58,13 +65,13 @@ const EstudianteManagement: React.FC = () => {
     try {
       setLoading(true);
       await EstudianteService.crear(formData);
-      setSuccess('Estudiante creado exitosamente');
+      setSuccess("Estudiante creado exitosamente");
       setShowCreateModal(false);
       resetForm();
       await loadEstudiantes();
     } catch (error) {
-      console.error('Error al crear estudiante:', error);
-      setError('Error al crear el estudiante');
+      console.error("Error al crear estudiante:", error);
+      setError("Error al crear el estudiante");
     } finally {
       setLoading(false);
     }
@@ -73,21 +80,21 @@ const EstudianteManagement: React.FC = () => {
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedEstudiante?.idEstudiante) return;
-    
+
     try {
       setLoading(true);
       const updatedEstudiante = {
         ...selectedEstudiante,
-        ...formData
+        ...formData,
       };
       await EstudianteService.actualizar(updatedEstudiante);
-      setSuccess('Estudiante actualizado exitosamente');
+      setSuccess("Estudiante actualizado exitosamente");
       setShowEditModal(false);
       resetForm();
       await loadEstudiantes();
     } catch (error) {
-      console.error('Error al actualizar estudiante:', error);
-      setError('Error al actualizar el estudiante');
+      console.error("Error al actualizar estudiante:", error);
+      setError("Error al actualizar el estudiante");
     } finally {
       setLoading(false);
     }
@@ -95,17 +102,17 @@ const EstudianteManagement: React.FC = () => {
 
   const handleDelete = async () => {
     if (!selectedEstudiante?.idEstudiante) return;
-    
+
     try {
       setLoading(true);
       await EstudianteService.eliminar(selectedEstudiante.idEstudiante);
-      setSuccess('Estudiante eliminado exitosamente');
+      setSuccess("Estudiante eliminado exitosamente");
       setShowDeleteModal(false);
       setSelectedEstudiante(null);
       await loadEstudiantes();
     } catch (error) {
-      console.error('Error al eliminar estudiante:', error);
-      setError('Error al eliminar el estudiante');
+      console.error("Error al eliminar estudiante:", error);
+      setError("Error al eliminar el estudiante");
     } finally {
       setLoading(false);
     }
@@ -121,12 +128,13 @@ const EstudianteManagement: React.FC = () => {
     setFormData({
       nombres: estudiante.nombres,
       apellidos: estudiante.apellidos,
-      telefono: (estudiante.telefono as string) || '',
-      distrito: (estudiante.distrito as string) || '',
-      foto: (estudiante.foto as string) || '',
-      fechaNacimiento: (estudiante.fechaNacimiento as string) || '',
+      telefono: (estudiante.telefono as string) || "",
+      direccion: (estudiante.direccion as string) || "",
+      distrito: (estudiante.distrito as string) || "",
+      foto: (estudiante.foto as string) || "",
+      fechaNacimiento: (estudiante.fechaNacimiento as string) || "",
       codigoEstudiante: estudiante.codigoEstudiante as string,
-      email: estudiante.email as string
+      email: estudiante.email as string,
     });
     setShowEditModal(true);
   };
@@ -138,14 +146,17 @@ const EstudianteManagement: React.FC = () => {
 
   const resetForm = () => {
     setFormData({
-      nombres: '',
-      apellidos: '',
-      codigoEstudiante: '',
-      telefono: '',
-      foto: '',
-      fechaNacimiento: '',
-      distrito: '',
-      email: ''
+      nombres: "",
+      apellidos: "",
+      codigoEstudiante: "",
+      telefono: "",
+      foto: "",
+      fechaNacimiento: "",
+      direccion: "",
+      distrito: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
     });
     setSelectedEstudiante(null);
   };
@@ -157,21 +168,28 @@ const EstudianteManagement: React.FC = () => {
     resetForm();
   };
 
-  const filteredEstudiantes = estudiantes.filter(estudiante => {
-    const matchesSearch = 
+  const filteredEstudiantes = estudiantes.filter((estudiante) => {
+    const matchesSearch =
       estudiante.nombres.toLowerCase().includes(searchTerm.toLowerCase()) ||
       estudiante.apellidos.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (estudiante.email as string)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (estudiante.codigoEstudiante as string)?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesDistrito = !filterDistrito || (estudiante.distrito as string)?.toLowerCase() === filterDistrito.toLowerCase();
-    
+      (estudiante.email as string)
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (estudiante.codigoEstudiante as string)
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+    const matchesDistrito =
+      !filterDistrito ||
+      (estudiante.distrito as string)?.toLowerCase() ===
+        filterDistrito.toLowerCase();
+
     return matchesSearch && matchesDistrito;
   });
 
-  const uniqueDistritos = Array.from(new Set(
-    estudiantes.map(e => e.distrito as string).filter(Boolean)
-  ));
+  const uniqueDistritos = Array.from(
+    new Set(estudiantes.map((e) => e.distrito as string).filter(Boolean))
+  );
 
   // Auto-hide messages
   useEffect(() => {
@@ -204,8 +222,10 @@ const EstudianteManagement: React.FC = () => {
             className="filter-select"
           >
             <option value="">Todos los distritos</option>
-            {uniqueDistritos.map(distrito => (
-              <option key={distrito} value={distrito}>{distrito}</option>
+            {uniqueDistritos.map((distrito) => (
+              <option key={distrito} value={distrito}>
+                {distrito}
+              </option>
             ))}
           </select>
           <button
@@ -230,10 +250,9 @@ const EstudianteManagement: React.FC = () => {
         <div className="empty-state">
           <h3>No se encontraron estudiantes</h3>
           <p>
-            {searchTerm || filterDistrito 
-              ? 'No hay estudiantes que coincidan con los filtros aplicados.' 
-              : 'Aún no hay estudiantes registrados en el sistema.'
-            }
+            {searchTerm || filterDistrito
+              ? "No hay estudiantes que coincidan con los filtros aplicados."
+              : "Aún no hay estudiantes registrados en el sistema."}
           </p>
         </div>
       ) : (
@@ -242,28 +261,38 @@ const EstudianteManagement: React.FC = () => {
             <div key={estudiante.idEstudiante} className="estudiante-card">
               <div className="estudiante-header">
                 <img
-                  src={estudiante.foto || '/src/assets/imgs/student.gif'}
+                  src={estudiante.foto || "/src/assets/imgs/student.gif"}
                   alt="Estudiante"
                   className="estudiante-avatar"
                 />
                 <div className="estudiante-info">
-                  <h3>{estudiante.nombres} {estudiante.apellidos}</h3>
-                  <p className="codigo">{estudiante.codigoEstudiante as string}</p>
+                  <h3>
+                    {estudiante.nombres} {estudiante.apellidos}
+                  </h3>
+                  <p className="codigo">
+                    {estudiante.codigoEstudiante as string}
+                  </p>
                 </div>
               </div>
-              
+
               <div className="estudiante-details">
                 <div className="detail-row">
                   <span className="label">Teléfono:</span>
-                  <span>{(estudiante.telefono as string) || 'No registrado'}</span>
+                  <span>
+                    {(estudiante.telefono as string) || "No registrado"}
+                  </span>
                 </div>
                 <div className="detail-row">
                   <span className="label">Distrito:</span>
-                  <span>{(estudiante.distrito as string) || 'No especificado'}</span>
+                  <span>
+                    {(estudiante.distrito as string) || "No especificado"}
+                  </span>
                 </div>
                 <div className="detail-row">
                   <span className="label">Email:</span>
-                  <span>{(estudiante.email as string) || 'No especificado'}</span>
+                  <span>
+                    {(estudiante.email as string) || "No especificado"}
+                  </span>
                 </div>
               </div>
 
@@ -291,13 +320,15 @@ const EstudianteManagement: React.FC = () => {
       {/* Modal para crear estudiante */}
       {showCreateModal && (
         <div className="modal-overlay" onClick={closeModals}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header create-header">
               <h3>
                 <i className="bi bi-person-plus-fill"></i>
                 Crear Nuevo Estudiante
               </h3>
-              <button onClick={closeModals} className="modal-close">×</button>
+              <button onClick={closeModals} className="modal-close">
+                ×
+              </button>
             </div>
             <form onSubmit={handleCreate} className="modal-form">
               <div className="form-row">
@@ -306,7 +337,9 @@ const EstudianteManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.nombres}
-                    onChange={(e) => setFormData({...formData, nombres: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, nombres: e.target.value })
+                    }
                     required
                     disabled={loading}
                   />
@@ -316,7 +349,9 @@ const EstudianteManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.apellidos}
-                    onChange={(e) => setFormData({...formData, apellidos: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, apellidos: e.target.value })
+                    }
                     required
                     disabled={loading}
                   />
@@ -324,25 +359,28 @@ const EstudianteManagement: React.FC = () => {
               </div>
 
               <div className="form-row">
-                <div className="form-group">
-                  <label>Código de Estudiante *</label>
-                  <input
-                    type="text"
-                    value={formData.codigoEstudiante}
-                    placeholder='Ej: EST000001'
-                    onChange={(e) => setFormData({...formData, codigoEstudiante: e.target.value})}
-                    required
-                    disabled={loading}
-                  />
-                </div>
                 <div className="form-group">
                   <label>Email *</label>
                   <input
                     type="email"
                     value={formData.email}
-                    placeholder='Ej: estudiante@ejemplo.com'
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    placeholder="Ej: estudiante@ejemplo.com"
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     required
+                    disabled={loading}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Teléfono</label>
+                  <input
+                    type="tel"
+                    value={formData.telefono}
+                    placeholder="Ej: 987654321"
+                    onChange={(e) =>
+                      setFormData({ ...formData, telefono: e.target.value })
+                    }
                     disabled={loading}
                   />
                 </div>
@@ -350,21 +388,36 @@ const EstudianteManagement: React.FC = () => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Teléfono</label>
+                  <label>Contraseña *</label>
                   <input
-                    type="tel"
-                    value={formData.telefono}
-                    placeholder='Ej: 987654321'
-                    onChange={(e) => setFormData({...formData, telefono: e.target.value})}
+                    type="password"
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                    required
+                    placeholder="Mínimo 6 caracteres"
                     disabled={loading}
+                    minLength={6}
                   />
                 </div>
                 <div className="form-group">
-                  <label>Fecha de Nacimiento</label>
+                  <label>Confirmar Contraseña *</label>
                   <input
-                    type="date"
-                    value={formData.fechaNacimiento}
-                    onChange={(e) => setFormData({...formData, fechaNacimiento: e.target.value})}
+                    type="password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
+                    required
+                    placeholder="Repite tu contraseña"
                     disabled={loading}
                   />
                 </div>
@@ -376,28 +429,54 @@ const EstudianteManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.distrito}
-                    onChange={(e) => setFormData({...formData, distrito: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, distrito: e.target.value })
+                    }
                     disabled={loading}
                   />
                 </div>
                 <div className="form-group">
-                  <label>URL de Foto</label>
+                  <label>Fecha de Nacimiento</label>
                   <input
-                    type="url"
-                    placeholder='https://ejemplo.com/foto.jpg'
-                    value={formData.foto}
-                    onChange={(e) => setFormData({...formData, foto: e.target.value})}
+                    type="date"
+                    value={formData.fechaNacimiento}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        fechaNacimiento: e.target.value,
+                      })
+                    }
                     disabled={loading}
                   />
                 </div>
               </div>
 
+              <div className="form-group">
+                <label>Dirección</label>
+                <input
+                  type="text"
+                  value={formData.direccion}
+                  onChange={(e) =>
+                    setFormData({ ...formData, direccion: e.target.value })
+                  }
+                  disabled={loading}
+                />
+              </div>
+
               <div className="modal-actions">
-                <button type="button" onClick={closeModals} className="btn-secondary">
+                <button
+                  type="button"
+                  onClick={closeModals}
+                  className="btn-secondary"
+                >
                   Cancelar
                 </button>
-                <button type="submit" className="btn-primary" disabled={loading}>
-                  {loading ? 'Creando...' : 'Crear Estudiante'}
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={loading}
+                >
+                  {loading ? "Creando..." : "Crear Estudiante"}
                 </button>
               </div>
             </form>
@@ -408,13 +487,15 @@ const EstudianteManagement: React.FC = () => {
       {/* Modal para editar estudiante */}
       {showEditModal && selectedEstudiante && (
         <div className="modal-overlay" onClick={closeModals}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header edit-header">
               <h3>
                 <i className="bi bi-pencil-square"></i>
                 Editar Estudiante
               </h3>
-              <button onClick={closeModals} className="modal-close">×</button>
+              <button onClick={closeModals} className="modal-close">
+                ×
+              </button>
             </div>
             <form onSubmit={handleEdit} className="modal-form">
               <div className="form-row">
@@ -423,7 +504,9 @@ const EstudianteManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.nombres}
-                    onChange={(e) => setFormData({...formData, nombres: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, nombres: e.target.value })
+                    }
                     required
                     disabled={loading}
                   />
@@ -433,7 +516,9 @@ const EstudianteManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.apellidos}
-                    onChange={(e) => setFormData({...formData, apellidos: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, apellidos: e.target.value })
+                    }
                     required
                     disabled={loading}
                   />
@@ -441,44 +526,26 @@ const EstudianteManagement: React.FC = () => {
               </div>
 
               <div className="form-row">
-                <div className="form-group">
-                  <label>Código de Estudiante *</label>
-                  <input
-                    type="text"
-                    value={formData.codigoEstudiante}
-                    onChange={(e) => setFormData({...formData, codigoEstudiante: e.target.value})}
-                    required
-                    disabled={loading}
-                  />
-                </div>
                 <div className="form-group">
                   <label>Email *</label>
                   <input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     required
                     disabled={loading}
                   />
                 </div>
-              </div>
-
-              <div className="form-row">
                 <div className="form-group">
                   <label>Teléfono</label>
                   <input
                     type="tel"
                     value={formData.telefono}
-                    onChange={(e) => setFormData({...formData, telefono: e.target.value})}
-                    disabled={loading}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Fecha de Nacimiento</label>
-                  <input
-                    type="date"
-                    value={formData.fechaNacimiento}
-                    onChange={(e) => setFormData({...formData, fechaNacimiento: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, telefono: e.target.value })
+                    }
                     disabled={loading}
                   />
                 </div>
@@ -490,28 +557,54 @@ const EstudianteManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.distrito}
-                    onChange={(e) => setFormData({...formData, distrito: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, distrito: e.target.value })
+                    }
                     disabled={loading}
                   />
                 </div>
                 <div className="form-group">
-                  <label>URL de Foto</label>
+                  <label>Fecha de Nacimiento</label>
                   <input
-                    type="url"
-                    value={formData.foto}
-                    placeholder="https://ejemplo.com/foto.jpg"
-                    onChange={(e) => setFormData({...formData, foto: e.target.value})}
+                    type="date"
+                    value={formData.fechaNacimiento}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        fechaNacimiento: e.target.value,
+                      })
+                    }
                     disabled={loading}
                   />
                 </div>
               </div>
 
+              <div className="form-group">
+                <label>Dirección</label>
+                <input
+                  type="text"
+                  value={formData.direccion}
+                  onChange={(e) =>
+                    setFormData({ ...formData, direccion: e.target.value })
+                  }
+                  disabled={loading}
+                />
+              </div>
+
               <div className="modal-actions">
-                <button type="button" onClick={closeModals} className="btn-secondary">
+                <button
+                  type="button"
+                  onClick={closeModals}
+                  className="btn-secondary"
+                >
                   Cancelar
                 </button>
-                <button type="submit" className="btn-primary" disabled={loading}>
-                  {loading ? 'Actualizando...' : 'Actualizar Estudiante'}
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={loading}
+                >
+                  {loading ? "Actualizando..." : "Actualizar Estudiante"}
                 </button>
               </div>
             </form>
@@ -522,19 +615,26 @@ const EstudianteManagement: React.FC = () => {
       {/* Modal para eliminar estudiante */}
       {showDeleteModal && selectedEstudiante && (
         <div className="modal-overlay" onClick={closeModals}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header delete-header">
               <h3>
                 <i className="bi bi-trash-fill"></i>
                 Eliminar Estudiante
               </h3>
-              <button onClick={closeModals} className="modal-close">×</button>
+              <button onClick={closeModals} className="modal-close">
+                ×
+              </button>
             </div>
             <div className="modal-body">
               <p>¿Estás seguro de que deseas eliminar este estudiante?</p>
               <div className="delete-info">
-                <strong>{selectedEstudiante.nombres} {selectedEstudiante.apellidos}</strong>
-                <p>{selectedEstudiante.codigoEstudiante as string} - {selectedEstudiante.email}</p>
+                <strong>
+                  {selectedEstudiante.nombres} {selectedEstudiante.apellidos}
+                </strong>
+                <p>
+                  {selectedEstudiante.codigoEstudiante as string} -{" "}
+                  {selectedEstudiante.email}
+                </p>
               </div>
               <p className="warning">Esta acción no se puede deshacer.</p>
             </div>
@@ -542,8 +642,12 @@ const EstudianteManagement: React.FC = () => {
               <button onClick={closeModals} className="btn-secondary">
                 Cancelar
               </button>
-              <button onClick={handleDelete} className="btn-danger" disabled={loading}>
-                {loading ? 'Eliminando...' : 'Eliminar Estudiante'}
+              <button
+                onClick={handleDelete}
+                className="btn-danger"
+                disabled={loading}
+              >
+                {loading ? "Eliminando..." : "Eliminar Estudiante"}
               </button>
             </div>
           </div>

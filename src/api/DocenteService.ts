@@ -1,6 +1,6 @@
 import api from './axiosConfig';
 import axios from 'axios';
-import type { Docente, CrearDocenteRequest, ActualizarDocenteRequest } from '../interfaces/Docente';
+import type { Docente } from '../interfaces/Docente';
 import type { DocenteProfile, ActualizarPerfilDocenteRequest } from '../interfaces/Auth';
 
 export const DocenteService = {
@@ -111,9 +111,9 @@ export const DocenteService = {
   },
 
   // Crear docente
-  async crear(docente: CrearDocenteRequest): Promise<Docente> {
+  async crear(docente: Omit<Docente, 'idDocente'>): Promise<Docente> {
     try {
-      const response = await api.post('/docentes', docente);
+      const response = await api.post('/docentes/completo', docente);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -124,9 +124,9 @@ export const DocenteService = {
   },
 
   // Actualizar docente
-  async actualizar(id: number, docente: ActualizarDocenteRequest): Promise<Docente> {
+  async actualizar(docente: Docente): Promise<Docente> {
     try {
-      const response = await api.put(`/docentes/${id}`, docente);
+      const response = await api.put(`/docentes/${docente.idDocente}`, docente);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
