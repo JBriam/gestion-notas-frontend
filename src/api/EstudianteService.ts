@@ -46,7 +46,7 @@ export const EstudianteService = {
   // Crear estudiante (para admin/docente)
   async crear(estudiante: Omit<Estudiante, 'idEstudiante'>): Promise<Estudiante> {
     try {
-      const response = await api.post('/estudiantes', estudiante);
+      const response = await api.post('/estudiantes/completo', estudiante);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
