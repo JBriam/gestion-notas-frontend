@@ -1,7 +1,17 @@
 import "./App.css";
+import { BrowserRouter } from "react-router-dom";
+import { AuthProvider } from "./context";
+import { AuthWrapper } from "./components/Auth/AuthWrapper";
 import AppRouter from "./routes/router";
 
 export default function App() {
-  return <AppRouter />;
-
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AuthWrapper>
+          <AppRouter />
+        </AuthWrapper>
+      </AuthProvider>
+    </BrowserRouter>
+  );
 }

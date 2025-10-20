@@ -13,6 +13,254 @@ html, body, #root {
   flex: 1 1 auto;
 }
 
+/* === MODAL STYLES === */
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  background-color: #ffffff !important;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.modal-body {
+  background-color: #ffffff;
+}
+
+.modal-footer {
+  background-color: #ffffff;
+  border-top: 1px solid #dee2e6;
+}
+
+/* === MODAL CUSTOM STYLES FOR MANAGEMENT COMPONENTS === */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-overlay .modal-content {
+  background: #ffffff !important;
+  opacity: 1 !important;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  animation: modalSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* === MODAL HEADER COLORS === */
+.modal-overlay .modal-content .modal-header.create-header {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+  color: white !important;
+  padding: 20px 30px !important;
+  border-bottom: none !important;
+}
+
+.modal-overlay .modal-content .modal-header.edit-header {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: white !important;
+  padding: 20px 30px !important;
+  border-bottom: none !important;
+}
+
+.modal-overlay .modal-content .modal-header.delete-header {
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  color: white !important;
+  padding: 20px 30px !important;
+  border-bottom: none !important;
+}
+
+.modal-overlay .modal-content .modal-header h3 {
+  margin: 0 !important;
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  color: white !important;
+}
+
+.modal-overlay .modal-content .modal-header .modal-close {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border: none !important;
+  color: white !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+}
+
+.modal-overlay .modal-content .modal-header .modal-close:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  transform: rotate(90deg) !important;
+}
+
+/* === MODAL BODY AND FORM STYLES === */
+.modal-overlay .modal-content .modal-body,
+.modal-overlay .modal-content .modal-form {
+  padding: 30px !important;
+  background: #ffffff !important;
+}
+
+.modal-overlay .modal-content .modal-actions {
+  padding: 20px 30px !important;
+  background: #f8f9fa !important;
+  border-top: 1px solid #e9ecef !important;
+  display: flex !important;
+  gap: 12px !important;
+  justify-content: flex-end !important;
+}
+
+/* === FORM IMPROVEMENTS === */
+.modal-overlay .modal-content .form-row {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 20px !important;
+  margin-bottom: 20px !important;
+}
+
+.modal-overlay .modal-content .form-group {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.modal-overlay .modal-content .form-group label {
+  color: #374151 !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+  font-size: 14px !important;
+}
+
+.modal-overlay .modal-content .form-group input,
+.modal-overlay .modal-content .form-group select,
+.modal-overlay .modal-content .form-group textarea {
+  padding: 12px 16px !important;
+  border: 2px solid #e5e7eb !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  transition: all 0.3s ease !important;
+  background: #ffffff !important;
+}
+
+.modal-overlay .modal-content .form-group input:focus,
+.modal-overlay .modal-content .form-group select:focus,
+.modal-overlay .modal-content .form-group textarea:focus {
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+  background: #fefefe !important;
+}
+
+/* === BUTTON IMPROVEMENTS === */
+.modal-overlay .modal-content .btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important;
+  color: white !important;
+  border: none !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.modal-overlay .modal-content .btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb, #1e40af) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4) !important;
+}
+
+.modal-overlay .modal-content .btn-secondary {
+  background: #6b7280 !important;
+  color: white !important;
+  border: none !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+}
+
+.modal-overlay .modal-content .btn-secondary:hover:not(:disabled) {
+  background: #4b5563 !important;
+  transform: translateY(-1px) !important;
+}
+
+.modal-overlay .modal-content .btn-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  color: white !important;
+  border: none !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+}
+
+.modal-overlay .modal-content .btn-danger:hover:not(:disabled) {
+  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
+}
+
+/* === DELETE MODAL SPECIFIC STYLES === */
+.modal-overlay .modal-content .delete-info {
+  background: #fef2f2 !important;
+  border: 1px solid #fecaca !important;
+  border-radius: 8px !important;
+  padding: 16px !important;
+  margin: 16px 0 !important;
+}
+
+.modal-overlay .modal-content .delete-info strong {
+  color: #dc2626 !important;
+  display: block !important;
+  margin-bottom: 4px !important;
+}
+
+.modal-overlay .modal-content .warning {
+  color: #92400e !important;
+  font-size: 13px !important;
+  font-style: italic !important;
+  margin-top: 16px !important;
+}
+
 .tarjeta {
     transition: transform 0.6s ease, box-shadow 0.3s;
     background: linear-gradient(120deg, #f1f5fb 80%, #e3e8ef 100%);
