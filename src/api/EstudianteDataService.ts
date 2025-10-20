@@ -49,11 +49,9 @@ export const EstudianteDataService = {
    */
   async obtenerNotasEstudiante(idEstudiante: number): Promise<NotaEstudiante[]> {
     try {
-      console.log(`[EstudianteDataService] Obteniendo notas para estudiante ${idEstudiante}`);
       
       // Obtener notas del estudiante - el método devuelve la estructura real del backend
       const notasResponse = await NotaService.obtenerPorEstudiante(idEstudiante) as unknown as NotaEstudianteBackend[];
-      console.log('[EstudianteDataService] Notas obtenidas:', notasResponse);
       
       // El backend ya incluye toda la información del curso en la respuesta
       // No necesitamos hacer consultas adicionales
@@ -96,7 +94,6 @@ export const EstudianteDataService = {
         });
       }
       
-      console.log(`[EstudianteDataService] Notas transformadas: ${notasEstudiante.length} notas`);
       return notasEstudiante;
       
     } catch (error) {

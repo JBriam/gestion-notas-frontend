@@ -11,22 +11,16 @@ export class DocenteDataService {
    */
   static async obtenerCursosDelDocente(idDocente: number): Promise<Curso[]> {
     try {
-      console.log('🔍 Obteniendo cursos para docente:', idDocente);
       const todosCursos = await CursoService.listar();
-      console.log('📚 Todos los cursos obtenidos:', todosCursos);
       
       // Filtrar solo los cursos asignados al docente
       // La estructura real del backend tiene idDocente directamente en el curso
       const cursosDelDocente = todosCursos.filter((curso: Curso) => {
-        console.log('🔍 Verificando curso:', curso);
-        console.log('📋 idDocente en curso:', curso.idDocente);
-        console.log('🆔 ID docente buscado:', idDocente);
         
         // Verificar si el curso tiene idDocente que coincida
         return curso.idDocente === idDocente;
       });
-      
-      console.log('✅ Cursos filtrados para el docente:', cursosDelDocente);
+
       return cursosDelDocente;
     } catch (error) {
       console.error('Error al obtener cursos del docente:', error);
@@ -39,20 +33,15 @@ export class DocenteDataService {
    */
   static async obtenerNotasDelDocente(idDocente: number): Promise<Nota[]> {
     try {
-      console.log('🔍 Obteniendo notas para docente:', idDocente);
       const cursosDelDocente = await this.obtenerCursosDelDocente(idDocente);
       const idsCarsos = cursosDelDocente.map(curso => curso.idCurso);
-      console.log('📋 IDs de cursos del docente:', idsCarsos);
       
       const todasLasNotasBackend = await NotaService.listar();
-      console.log('📊 Todas las notas del backend:', todasLasNotasBackend);
       
       // Filtrar solo las notas de los cursos del docente
       const notasDelDocente = todasLasNotasBackend.filter((nota: NotaBackend) => 
         nota.idCurso && idsCarsos.includes(nota.idCurso)
       );
-      
-      console.log('✅ Notas filtradas del docente:', notasDelDocente);
       
       // Convertir a la estructura esperada por el frontend
       const estudiantes = await EstudianteService.listar();

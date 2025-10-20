@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { ProfileStudent } from '../Profile/ProfileStudent';
-import { EstudianteDataService, type NotaEstudiante, type CursoConNotas } from '../../api/EstudianteDataService';
+import { EstudianteDataService, type CursoConNotas } from '../../api/EstudianteDataService';
 import './DashboardStudent.css';
 
 export const DashboardStudent: React.FC = () => {
@@ -13,15 +13,12 @@ export const DashboardStudent: React.FC = () => {
   useEffect(() => {
     const cargarNotasEstudiante = async () => {
       if (!state.perfilEstudiante?.idEstudiante) {
-        console.log('[DashboardStudent] No hay ID de estudiante disponible');
         return;
       }
 
       setLoading(true);
       try {
-        console.log(`[DashboardStudent] Cargando notas para estudiante ${state.perfilEstudiante.idEstudiante}`);
         const cursosData = await EstudianteDataService.obtenerNotasPorCurso(state.perfilEstudiante.idEstudiante);
-        console.log('[DashboardStudent] Cursos con notas cargados:', cursosData);
         setCursosConNotas(cursosData);
       } catch (error) {
         console.error('[DashboardStudent] Error al cargar notas:', error);
@@ -133,7 +130,7 @@ export const DashboardStudent: React.FC = () => {
                             </div>
                             <div className="evaluacion-details">
                               <p className="fecha">
-                                📅 {new Date(nota.fecha).toLocaleDateString('es-PE')}
+                                📅 {new Date(nota.fecha + 'T00:00:00').toLocaleDateString('es-PE')}
                               </p>
                               {nota.observaciones && (
                                 <p className="observaciones">

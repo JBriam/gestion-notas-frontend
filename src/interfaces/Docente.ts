@@ -5,12 +5,13 @@ export interface Docente {
   nombres: string;
   apellidos: string;
   telefono?: string;
+  direccion?: string;
   distrito?: string;
   foto?: string;
   especialidad?: string;
   fechaContratacion?: string;
+  codigoDocente: string;
   // Información del usuario asociado
-  username?: string;
   email?: string;
   rolUsuario?: string;
   usuarioActivo?: boolean;

@@ -129,7 +129,6 @@ export const DashboardService = {
         idEstudiante: estudiante.idEstudiante!,
         nombres: estudiante.nombres,
         apellidos: estudiante.apellidos,
-        email: estudiante.email,
         notas: notasCurso,
         promedio
       };

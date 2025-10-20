@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { EstudianteService } from '../../api/EstudianteService';
-import type { ActualizarPerfilEstudianteRequest } from '../../interfaces/Auth';
+import { DocenteService } from '../../api/DocenteService';
+import type { ActualizarPerfilDocenteRequest } from '../../interfaces/Auth';
 import './Profile.css';
 
-export const ProfileStudent: React.FC = () => {
+export const ProfileDocente: React.FC = () => {
   const { state, updateProfile } = useAuth();
-  const [formData, setFormData] = useState<ActualizarPerfilEstudianteRequest>({
+  const [formData, setFormData] = useState<ActualizarPerfilDocenteRequest>({
     nombres: '',
     apellidos: '',
     telefono: '',
     direccion: '',
     distrito: '',
     foto: '',
-    fechaNacimiento: '',
+    fechaContratacion: '',
+    especialidad: '',
     email: '',
   });
   const [loading, setLoading] = useState(false);
@@ -23,19 +24,20 @@ export const ProfileStudent: React.FC = () => {
 
   // Cargar datos del perfil al montar el componente
   useEffect(() => {
-    if (state.perfilEstudiante) {
+    if (state.perfilDocente) {
       setFormData({
-        nombres: state.perfilEstudiante.nombres || '',
-        apellidos: state.perfilEstudiante.apellidos || '',
-        telefono: state.perfilEstudiante.telefono || '',
-        direccion: state.perfilEstudiante.direccion || '',
-        distrito: state.perfilEstudiante.distrito || '',
-        foto: state.perfilEstudiante.foto || '',
-        fechaNacimiento: state.perfilEstudiante.fechaNacimiento || '',
-        email: state.perfilEstudiante.email || '',
+        nombres: state.perfilDocente.nombres || '',
+        apellidos: state.perfilDocente.apellidos || '',
+        telefono: state.perfilDocente.telefono || '',
+        direccion: state.perfilDocente.direccion || '',
+        distrito: state.perfilDocente.distrito || '',
+        foto: state.perfilDocente.foto || '',
+        fechaContratacion: state.perfilDocente.fechaContratacion || '',
+        especialidad: state.perfilDocente.especialidad || '',
+        email: state.perfilDocente.email || '',
       });
     }
-  }, [state.perfilEstudiante]);
+  }, [state.perfilDocente]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -49,8 +51,8 @@ export const ProfileStudent: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!state.perfilEstudiante?.idEstudiante) {
-      setError('No se encontró el ID del estudiante');
+    if (!state.perfilDocente?.idDocente) {
+      setError('No se encontró el ID del docente');
       return;
     }
 
@@ -59,13 +61,13 @@ export const ProfileStudent: React.FC = () => {
     setSuccess('');
 
     try {
-      const perfilActualizado = await EstudianteService.actualizarPerfil(
-        state.perfilEstudiante.idEstudiante,
+      const perfilActualizado = await DocenteService.actualizarPerfil(
+        state.perfilDocente.idDocente,
         formData
       );
       
       // Actualizar el contexto con los nuevos datos
-      updateProfile(perfilActualizado, undefined);
+      updateProfile(undefined, perfilActualizado);
       
       setSuccess('Perfil actualizado correctamente');
       setIsEditing(false);
@@ -78,16 +80,17 @@ export const ProfileStudent: React.FC = () => {
 
   const handleCancel = () => {
     // Restaurar los datos originales
-    if (state.perfilEstudiante) {
+    if (state.perfilDocente) {
       setFormData({
-        nombres: state.perfilEstudiante.nombres || '',
-        apellidos: state.perfilEstudiante.apellidos || '',
-        telefono: state.perfilEstudiante.telefono || '',
-        direccion: state.perfilEstudiante.direccion || '',
-        distrito: state.perfilEstudiante.distrito || '',
-        foto: state.perfilEstudiante.foto || '',
-        fechaNacimiento: state.perfilEstudiante.fechaNacimiento || '',
-        email: state.perfilEstudiante.email || '',
+        nombres: state.perfilDocente.nombres || '',
+        apellidos: state.perfilDocente.apellidos || '',
+        telefono: state.perfilDocente.telefono || '',
+        direccion: state.perfilDocente.direccion || '',
+        distrito: state.perfilDocente.distrito || '',
+        foto: state.perfilDocente.foto || '',
+        fechaContratacion: state.perfilDocente.fechaContratacion || '',
+        especialidad: state.perfilDocente.especialidad || '',
+        email: state.perfilDocente.email || '',
       });
     }
     setIsEditing(false);
@@ -95,12 +98,12 @@ export const ProfileStudent: React.FC = () => {
     setSuccess('');
   };
 
-  if (!state.perfilEstudiante) {
+  if (!state.perfilDocente) {
     return (
       <div className="profile-container">
         <div className="profile-card">
           <h2>Perfil no encontrado</h2>
-          <p>No se pudo cargar la información del perfil del estudiante.</p>
+          <p>No se pudo cargar la información del perfil del docente.</p>
         </div>
       </div>
     );
@@ -122,9 +125,9 @@ export const ProfileStudent: React.FC = () => {
           </div>
           <div className="profile-info">
             <h2>{`${formData.nombres} ${formData.apellidos}`}</h2>
-            <p className="profile-role">Estudiante</p>
+            <p className="profile-role">Docente</p>
             <p className="profile-code">
-              Código: {state.perfilEstudiante.codigoEstudiante || 'No asignado'}
+              Código: {state.perfilDocente.codigoDocente || 'No asignado'}
             </p>
           </div>
           <div className="profile-actions">
@@ -206,6 +209,18 @@ export const ProfileStudent: React.FC = () => {
 
           <div className="form-row">
             <div className="form-group">
+              <label htmlFor="especialidad">Especialidad</label>
+              <input
+                type="text"
+                id="especialidad"
+                name="especialidad"
+                value={formData.especialidad}
+                onChange={handleInputChange}
+                disabled={!isEditing || loading}
+                required
+              />
+            </div>
+            <div className="form-group">
               <label htmlFor="distrito">Distrito</label>
               <input
                 type="text"
@@ -217,12 +232,12 @@ export const ProfileStudent: React.FC = () => {
               />
             </div>
             <div className="form-group">
-              <label htmlFor="fechaNacimiento">Fecha de Nacimiento</label>
+              <label htmlFor="fechaContratacion">Fecha de Contratación</label>
               <input
                 type="date"
-                id="fechaNacimiento"
-                name="fechaNacimiento"
-                value={formData.fechaNacimiento}
+                id="fechaContratacion"
+                name="fechaContratacion"
+                value={formData.fechaContratacion}
                 onChange={handleInputChange}
                 disabled={!isEditing || loading}
               />

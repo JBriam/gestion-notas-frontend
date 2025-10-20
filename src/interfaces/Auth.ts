@@ -1,12 +1,14 @@
 // Interfaces que corresponden a los DTOs del backend
 
 export interface LoginRequest {
-  username: string;
+  email: string;
   password: string;
 }
 
 export interface RegisterRequest {
-  username: string;
+  nombres: string;
+  apellidos: string;
+  telefono?: string;
   email: string;
   password: string;
   rol: 'ADMIN' | 'DOCENTE' | 'ESTUDIANTE';
@@ -14,7 +16,6 @@ export interface RegisterRequest {
 
 export interface Usuario {
   idUsuario: number;
-  username: string;
   email: string;
   rol: 'ADMIN' | 'DOCENTE' | 'ESTUDIANTE';
   activo: boolean;
@@ -25,23 +26,29 @@ export interface EstudianteProfile {
   idEstudiante: number;
   nombres: string;
   apellidos: string;
-  email?: string;
   telefono?: string;
+  direccion?: string;
   distrito?: string;
   foto?: string;
   fechaNacimiento?: string;
   codigoEstudiante?: string;
-  usuario?: Usuario;
+  // Información del usuario asociado
+  email?: string;
 }
 
 export interface DocenteProfile {
   idDocente: number;
   nombres: string;
   apellidos: string;
-  email?: string;
   telefono?: string;
+  direccion?: string;
+  distrito?: string;
+  foto?: string;
+  fechaContratacion?: string;
   especialidad?: string;
-  usuario?: Usuario;
+  codigoDocente?: string;
+  // Información del usuario asociado
+  email?: string;
 }
 
 export interface LoginResponse {
@@ -55,9 +62,24 @@ export interface LoginResponse {
 export interface ActualizarPerfilEstudianteRequest {
   nombres?: string;
   apellidos?: string;
-  email?: string;
   telefono?: string;
+  direccion?: string;
   distrito?: string;
   foto?: string;
   fechaNacimiento?: string;
+  // Información del usuario asociado
+  email?: string;
+}
+
+export interface ActualizarPerfilDocenteRequest {
+  nombres?: string;
+  apellidos?: string;
+  telefono?: string;
+  direccion?: string;
+  distrito?: string;
+  foto?: string;
+  fechaContratacion?: string;
+  especialidad?: string;
+  // Información del usuario asociado
+  email?: string;
 }

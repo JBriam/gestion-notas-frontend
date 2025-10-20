@@ -3,15 +3,15 @@ import { EstudianteService } from '../../api/EstudianteService';
 import type { Estudiante } from '../../interfaces/Estudiante';
 import './EstudianteManagement.css';
 
-interface EstudianteForm {
+interface EstudianteForm extends Record<string, unknown> {
   nombres: string;
   apellidos: string;
+  telefono: string;
+  distrito: string;
+  foto: string;
+  fechaNacimiento: string;
   codigoEstudiante: string;
   email: string;
-  telefono: string;
-  direccion: string;
-  fechaNacimiento: string;
-  distrito: string;
 }
 
 const EstudianteManagement: React.FC = () => {
@@ -26,12 +26,12 @@ const EstudianteManagement: React.FC = () => {
   const [formData, setFormData] = useState<EstudianteForm>({
     nombres: '',
     apellidos: '',
-    codigoEstudiante: '',
-    email: '',
     telefono: '',
-    direccion: '',
+    distrito: '',
+    foto: '',
     fechaNacimiento: '',
-    distrito: ''
+    codigoEstudiante: '',
+    email: ''
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -121,12 +121,12 @@ const EstudianteManagement: React.FC = () => {
     setFormData({
       nombres: estudiante.nombres,
       apellidos: estudiante.apellidos,
-      codigoEstudiante: estudiante.codigoEstudiante as string,
-      email: estudiante.email,
       telefono: (estudiante.telefono as string) || '',
-      direccion: (estudiante.direccion as string) || '',
+      distrito: (estudiante.distrito as string) || '',
+      foto: (estudiante.foto as string) || '',
       fechaNacimiento: (estudiante.fechaNacimiento as string) || '',
-      distrito: (estudiante.distrito as string) || ''
+      codigoEstudiante: estudiante.codigoEstudiante as string,
+      email: estudiante.email as string
     });
     setShowEditModal(true);
   };
@@ -141,11 +141,11 @@ const EstudianteManagement: React.FC = () => {
       nombres: '',
       apellidos: '',
       codigoEstudiante: '',
-      email: '',
       telefono: '',
-      direccion: '',
+      foto: '',
       fechaNacimiento: '',
-      distrito: ''
+      distrito: '',
+      email: ''
     });
     setSelectedEstudiante(null);
   };
@@ -161,7 +161,7 @@ const EstudianteManagement: React.FC = () => {
     const matchesSearch = 
       estudiante.nombres.toLowerCase().includes(searchTerm.toLowerCase()) ||
       estudiante.apellidos.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      estudiante.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (estudiante.email as string)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (estudiante.codigoEstudiante as string)?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesDistrito = !filterDistrito || (estudiante.distrito as string)?.toLowerCase() === filterDistrito.toLowerCase();
@@ -242,14 +242,13 @@ const EstudianteManagement: React.FC = () => {
             <div key={estudiante.idEstudiante} className="estudiante-card">
               <div className="estudiante-header">
                 <img
-                  src="/src/assets/imgs/student.gif"
+                  src={estudiante.foto || '/src/assets/imgs/student.gif'}
                   alt="Estudiante"
                   className="estudiante-avatar"
                 />
                 <div className="estudiante-info">
                   <h3>{estudiante.nombres} {estudiante.apellidos}</h3>
                   <p className="codigo">{estudiante.codigoEstudiante as string}</p>
-                  <p className="email">{estudiante.email}</p>
                 </div>
               </div>
               
@@ -263,8 +262,8 @@ const EstudianteManagement: React.FC = () => {
                   <span>{(estudiante.distrito as string) || 'No especificado'}</span>
                 </div>
                 <div className="detail-row">
-                  <span className="label">Dirección:</span>
-                  <span>{(estudiante.direccion as string) || 'No registrada'}</span>
+                  <span className="label">Email:</span>
+                  <span>{(estudiante.email as string) || 'No especificado'}</span>
                 </div>
               </div>
 
@@ -330,6 +329,7 @@ const EstudianteManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.codigoEstudiante}
+                    placeholder='Ej: EST000001'
                     onChange={(e) => setFormData({...formData, codigoEstudiante: e.target.value})}
                     required
                     disabled={loading}
@@ -340,6 +340,7 @@ const EstudianteManagement: React.FC = () => {
                   <input
                     type="email"
                     value={formData.email}
+                    placeholder='Ej: estudiante@ejemplo.com'
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                     required
                     disabled={loading}
@@ -353,6 +354,7 @@ const EstudianteManagement: React.FC = () => {
                   <input
                     type="tel"
                     value={formData.telefono}
+                    placeholder='Ej: 987654321'
                     onChange={(e) => setFormData({...formData, telefono: e.target.value})}
                     disabled={loading}
                   />
@@ -379,11 +381,12 @@ const EstudianteManagement: React.FC = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Dirección</label>
+                  <label>URL de Foto</label>
                   <input
-                    type="text"
-                    value={formData.direccion}
-                    onChange={(e) => setFormData({...formData, direccion: e.target.value})}
+                    type="url"
+                    placeholder='https://ejemplo.com/foto.jpg'
+                    value={formData.foto}
+                    onChange={(e) => setFormData({...formData, foto: e.target.value})}
                     disabled={loading}
                   />
                 </div>
@@ -492,11 +495,12 @@ const EstudianteManagement: React.FC = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>Dirección</label>
+                  <label>URL de Foto</label>
                   <input
-                    type="text"
-                    value={formData.direccion}
-                    onChange={(e) => setFormData({...formData, direccion: e.target.value})}
+                    type="url"
+                    value={formData.foto}
+                    placeholder="https://ejemplo.com/foto.jpg"
+                    onChange={(e) => setFormData({...formData, foto: e.target.value})}
                     disabled={loading}
                   />
                 </div>

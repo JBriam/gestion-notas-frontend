@@ -15,15 +15,12 @@ export const CursoStatsService = {
    */
   async obtenerEstadisticasCurso(idCurso: number): Promise<EstadisticasCurso> {
     try {
-      console.log(`[CursoStatsService] Obteniendo estadísticas para curso ${idCurso}`);
-      
+            
       // Obtener todas las notas para filtrar por curso
       const todasLasNotas = await NotaService.listar() as unknown as NotaBackend[];
-      console.log('[CursoStatsService] Total de notas obtenidas:', todasLasNotas.length);
       
       // Filtrar notas del curso específico
       const notasDelCurso = todasLasNotas.filter(nota => nota.idCurso === idCurso);
-      console.log(`[CursoStatsService] Notas del curso ${idCurso}:`, notasDelCurso.length);
       
       // Obtener estudiantes únicos que tienen notas en este curso
       const estudiantesUnicos = [...new Set(notasDelCurso.map(nota => nota.idEstudiante))];
@@ -41,7 +38,6 @@ export const CursoStatsService = {
         estudiantes: estudiantesUnicos
       };
       
-      console.log(`[CursoStatsService] Estadísticas calculadas para curso ${idCurso}:`, estadisticas);
       return estadisticas;
       
     } catch (error) {
@@ -62,11 +58,9 @@ export const CursoStatsService = {
    */
   async obtenerEstadisticasMultiplesCursos(idsCursos: number[]): Promise<Map<number, EstadisticasCurso>> {
     try {
-      console.log('[CursoStatsService] Obteniendo estadísticas para múltiples cursos:', idsCursos);
       
       // Obtener todas las notas una sola vez
       const todasLasNotas = await NotaService.listar() as unknown as NotaBackend[];
-      console.log('[CursoStatsService] Total de notas obtenidas:', todasLasNotas.length);
       
       const estadisticasMap = new Map<number, EstadisticasCurso>();
       
@@ -92,7 +86,6 @@ export const CursoStatsService = {
         };
         
         estadisticasMap.set(idCurso, estadisticas);
-        console.log(`[CursoStatsService] Estadísticas para curso ${idCurso}:`, estadisticas);
       }
       
       return estadisticasMap;

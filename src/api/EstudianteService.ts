@@ -1,5 +1,5 @@
+import api from './axiosConfig';
 import axios from 'axios';
-import axiosInstance from './axiosConfig';
 import type { EstudianteProfile, ActualizarPerfilEstudianteRequest } from '../interfaces/Auth';
 import type { Estudiante } from "../interfaces/Estudiante";
 
@@ -7,7 +7,7 @@ export const EstudianteService = {
   // Obtener perfil del estudiante por ID
   async obtenerPerfil(id: number): Promise<EstudianteProfile> {
     try {
-      const response = await axiosInstance.get(`/estudiantes/${id}`);
+      const response = await api.get(`/estudiantes/${id}`);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -20,7 +20,7 @@ export const EstudianteService = {
   // Actualizar perfil del estudiante
   async actualizarPerfil(id: number, perfil: ActualizarPerfilEstudianteRequest): Promise<EstudianteProfile> {
     try {
-      const response = await axiosInstance.put(`/estudiantes/${id}/perfil`, perfil);
+      const response = await api.put(`/estudiantes/${id}/perfil`, perfil);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -33,7 +33,7 @@ export const EstudianteService = {
   // Obtener todos los estudiantes (para admin/docente)
   async listar(): Promise<Estudiante[]> {
     try {
-      const response = await axiosInstance.get('/estudiantes');
+      const response = await api.get('/estudiantes');
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -46,7 +46,7 @@ export const EstudianteService = {
   // Crear estudiante (para admin/docente)
   async crear(estudiante: Omit<Estudiante, 'idEstudiante'>): Promise<Estudiante> {
     try {
-      const response = await axiosInstance.post('/estudiantes', estudiante);
+      const response = await api.post('/estudiantes', estudiante);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -59,7 +59,7 @@ export const EstudianteService = {
   // Actualizar estudiante (para admin/docente)
   async actualizar(estudiante: Estudiante): Promise<Estudiante> {
     try {
-      const response = await axiosInstance.put(`/estudiantes/${estudiante.idEstudiante}`, estudiante);
+      const response = await api.put(`/estudiantes/${estudiante.idEstudiante}`, estudiante);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -72,7 +72,7 @@ export const EstudianteService = {
   // Eliminar estudiante (para admin/docente)
   async eliminar(id: number): Promise<void> {
     try {
-      await axiosInstance.delete(`/estudiantes/${id}`);
+      await api.delete(`/estudiantes/${id}`);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(error.response?.data?.message || 'Error al eliminar estudiante');

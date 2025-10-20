@@ -1,18 +1,12 @@
+import api from './axiosConfig';
 import axios from 'axios';
-import { API_CONFIG } from './config';
 import type { LoginRequest, LoginResponse, RegisterRequest } from '../interfaces/Auth';
-
-const authAPI = axios.create({
-  baseURL: `${API_CONFIG.BASE_URL}/usuarios`,
-  timeout: API_CONFIG.TIMEOUT,
-  headers: API_CONFIG.HEADERS,
-});
 
 export const AuthService = {
   // Login de usuario
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
     try {
-      const response = await authAPI.post('/login', credentials);
+      const response = await api.post('/usuarios/login', credentials);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -28,7 +22,7 @@ export const AuthService = {
   // Registro de usuario
   register: async (userData: RegisterRequest): Promise<{ success: boolean; message: string }> => {
     try {
-      await authAPI.post('/', userData);
+      await api.post('/usuarios/registro-completo', userData);
       return {
         success: true,
         message: 'Usuario registrado exitosamente',
