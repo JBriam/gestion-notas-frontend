@@ -11,7 +11,7 @@ interface LoginProps {
 export const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
   const { login, setLoading, state } = useAuth();
   const [formData, setFormData] = useState<LoginRequest>({
-    username: '',
+    email: '',
     password: '',
   });
   const [error, setError] = useState<string>('');
@@ -49,28 +49,28 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <img src="/src/assets/Logo_Colegio_sin_fondo.png" alt="Logo Colegio" className="auth-logo" />
+          <img src="/src/assets/logos/Logo_Colegio_sin_fondo.png" alt="Logo Colegio" className="auth-logo" />
           <h2>Iniciar Sesión</h2>
           <p>Accede a tu cuenta del sistema de gestión de notas</p>
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label htmlFor="username">Usuario</label>
+            <label htmlFor="email">Email *</label>
             <input
               type="text"
-              id="username"
-              name="username"
-              value={formData.username}
+              id="email"
+              name="email"
+              value={formData.email}
               onChange={handleInputChange}
               required
-              placeholder="Ingresa tu nombre de usuario"
+              placeholder="Ingresa tu email"
               disabled={state.loading}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Contraseña</label>
+            <label htmlFor="password">Contraseña *</label>
             <input
               type="password"
               id="password"

@@ -15,7 +15,7 @@
   padding: 40px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 450px;
+  max-width: 550px;
   animation: slideIn 0.5s ease-out;
 }
 
@@ -58,7 +58,7 @@
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
 }
 
 .form-group {
@@ -71,6 +71,10 @@
   font-weight: 500;
   margin-bottom: 8px;
   font-size: 14px;
+}
+
+.form-group #email {
+  margin-bottom: 15px;
 }
 
 .form-group input,
@@ -174,20 +178,66 @@
   cursor: not-allowed;
 }
 
+/* Estilos para validaciones */
+.input-error {
+  border-color: #e74c3c !important;
+  background: #fff5f5 !important;
+}
+
+.input-error:focus {
+  border-color: #e74c3c !important;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1) !important;
+}
+
+.field-error {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.field-error::before {
+  content: "⚠️";
+  font-size: 10px;
+}
+
+/* Estados de input */
+.input-success {
+  border-color: #27ae60 !important;
+  background: #f8fff8 !important;
+}
+
+.input-success:focus {
+  border-color: #27ae60 !important;
+  box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1) !important;
+}
+
+/* Botón deshabilitado por validación */
+.auth-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  background: #bdc3c7;
+}
+
 /* Responsive */
 @media (max-width: 480px) {
   .auth-container {
     padding: 10px;
   }
-  
+
   .auth-card {
     padding: 30px 20px;
   }
-  
+
   .auth-header h2 {
     font-size: 24px;
   }
-  
+
   .auth-header p {
     font-size: 14px;
   }

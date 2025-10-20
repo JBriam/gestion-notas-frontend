@@ -1,12 +1,39 @@
+import api from './axiosConfig';
 import axios from 'axios';
-import axiosInstance from './axiosConfig';
 import type { Docente, CrearDocenteRequest, ActualizarDocenteRequest } from '../interfaces/Docente';
+import type { DocenteProfile, ActualizarPerfilDocenteRequest } from '../interfaces/Auth';
 
 export const DocenteService = {
+  // Obtener perfil del docente por ID
+  async obtenerPerfil(id: number): Promise<DocenteProfile> {
+    try {
+      const response = await api.get(`/docentes/${id}`);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Error al obtener el perfil');
+      }
+      throw new Error('Error de conexión con el servidor');
+    }
+  },
+
+  // Actualizar perfil del docente
+  async actualizarPerfil(id: number, perfil: ActualizarPerfilDocenteRequest): Promise<DocenteProfile> {
+    try {
+      const response = await api.put(`/docentes/${id}/perfil`, perfil);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error(error.response?.data?.message || 'Error al actualizar el perfil');
+      }
+      throw new Error('Error de conexión con el servidor');
+    }
+  },
+
   // Obtener todos los docentes
   async listar(): Promise<Docente[]> {
     try {
-      const response = await axiosInstance.get('/docentes');
+      const response = await api.get('/docentes');
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -19,7 +46,7 @@ export const DocenteService = {
   // Obtener docentes activos
   async obtenerActivos(): Promise<Docente[]> {
     try {
-      const response = await axiosInstance.get('/docentes/activos');
+      const response = await api.get('/docentes/activos');
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -32,7 +59,7 @@ export const DocenteService = {
   // Obtener docente por ID
   async obtenerPorId(id: number): Promise<Docente> {
     try {
-      const response = await docenteAPI.get(`/${id}`);
+      const response = await api.get(`/docentes/${id}`);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -45,7 +72,7 @@ export const DocenteService = {
   // Obtener docente por ID de usuario
   async obtenerPorIdUsuario(idUsuario: number): Promise<Docente> {
     try {
-      const response = await docenteAPI.get(`/usuario/${idUsuario}`);
+      const response = await api.get(`/usuario/${idUsuario}`);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -58,7 +85,7 @@ export const DocenteService = {
   // Buscar docentes por nombre
   async buscar(termino: string): Promise<Docente[]> {
     try {
-      const response = await docenteAPI.get('/buscar', {
+      const response = await api.get('/buscar', {
         params: { termino }
       });
       return response.data;
@@ -73,7 +100,7 @@ export const DocenteService = {
   // Obtener docentes por especialidad
   async obtenerPorEspecialidad(especialidad: string): Promise<Docente[]> {
     try {
-      const response = await docenteAPI.get(`/especialidad/${especialidad}`);
+      const response = await api.get(`/especialidad/${especialidad}`);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -86,7 +113,7 @@ export const DocenteService = {
   // Crear docente
   async crear(docente: CrearDocenteRequest): Promise<Docente> {
     try {
-      const response = await docenteAPI.post('/', docente);
+      const response = await api.post('/docentes', docente);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -99,7 +126,7 @@ export const DocenteService = {
   // Actualizar docente
   async actualizar(id: number, docente: ActualizarDocenteRequest): Promise<Docente> {
     try {
-      const response = await docenteAPI.put(`/${id}`, docente);
+      const response = await api.put(`/docentes/${id}`, docente);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -109,23 +136,10 @@ export const DocenteService = {
     }
   },
 
-  // Actualizar perfil del docente
-  async actualizarPerfil(id: number, perfil: ActualizarDocenteRequest): Promise<Docente> {
-    try {
-      const response = await docenteAPI.put(`/${id}/perfil`, perfil);
-      return response.data;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        throw new Error(error.response?.data?.message || 'Error al actualizar perfil');
-      }
-      throw new Error('Error de conexión con el servidor');
-    }
-  },
-
   // Eliminar docente
   async eliminar(id: number): Promise<void> {
     try {
-      await docenteAPI.delete(`/${id}`);
+      await api.delete(`/docentes/${id}`);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(error.response?.data?.message || 'Error al eliminar docente');
@@ -137,7 +151,7 @@ export const DocenteService = {
   // Obtener estadísticas por especialidad
   async obtenerEstadisticasEspecialidad(): Promise<{ especialidad: string; cantidad: number }[]> {
     try {
-      const response = await docenteAPI.get('/estadisticas/especialidad');
+      const response = await api.get('/estadisticas/especialidad');
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {

@@ -223,11 +223,14 @@ const DocenteManagement: React.FC = () => {
                   <div className="docente-info">
                     <h3>{`${docente.nombres} ${docente.apellidos}`}</h3>
                     <p className="especialidad">{docente.especialidad || 'Sin especialidad'}</p>
-                    <p className="email">{docente.email || 'Sin email'}</p>
                   </div>
                 </div>
                 
                 <div className="docente-details">
+                  <div className="detail-row">
+                    <span className="label">Email:</span>
+                    <span>{docente.email || 'Sin email'}</span>
+                  </div>
                   <div className="detail-row">
                     <span className="label">Teléfono:</span>
                     <span>{docente.telefono || 'No registrado'}</span>
@@ -240,7 +243,7 @@ const DocenteManagement: React.FC = () => {
                     <span className="label">Fecha contratación:</span>
                     <span>
                       {docente.fechaContratacion 
-                        ? new Date(docente.fechaContratacion).toLocaleDateString('es-PE')
+                        ? new Date(docente.fechaContratacion + 'T00:00:00').toLocaleDateString('es-PE')
                         : 'No registrada'
                       }
                     </span>

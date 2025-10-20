@@ -1,13 +1,11 @@
-import React, { createContext, useReducer, useEffect } from 'react';
-import type { Usuario, EstudianteProfile, DocenteProfile } from '../interfaces/Auth';
+/**
+ * Provider del contexto de autenticación
+ * Este archivo SOLO exporta el componente Provider
+ */
 
-interface AuthState {
-  isAuthenticated: boolean;
-  usuario: Usuario | null;
-  perfilEstudiante: EstudianteProfile | null;
-  perfilDocente: DocenteProfile | null;
-  loading: boolean;
-}
+import React, { useReducer, useEffect } from 'react';
+import { AuthContext, type AuthState, type AuthContextType } from './AuthContext';
+import type { Usuario, EstudianteProfile, DocenteProfile } from '../interfaces/Auth';
 
 type AuthAction =
   | { type: 'LOGIN_START' }
@@ -46,9 +44,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         loading: false,
       };
     case 'LOGOUT':
-      return {
-        ...initialState,
-      };
+      return initialState;
     case 'UPDATE_PROFILE':
       return {
         ...state,
@@ -60,17 +56,11 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   }
 };
 
-interface AuthContextType {
-  state: AuthState;
-  login: (usuario: Usuario, perfilEstudiante?: EstudianteProfile, perfilDocente?: DocenteProfile) => void;
-  logout: () => void;
-  updateProfile: (perfilEstudiante?: EstudianteProfile, perfilDocente?: DocenteProfile) => void;
-  setLoading: (loading: boolean) => void;
+interface AuthProviderProps {
+  children: React.ReactNode;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   // Cargar datos de sesión desde localStorage al inicializar
@@ -152,4 +142,3 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };
-

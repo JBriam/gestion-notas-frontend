@@ -40,15 +40,6 @@ const NotaManagement: React.FC = () => {
         CursoService.listar()
       ]);
       
-      console.log('📊 Datos recibidos del backend:');
-      console.log('📋 Notas:', notasData);
-      console.log('👥 Estudiantes:', estudiantesData);
-      console.log('📚 Cursos:', cursosData);
-      
-      if (notasData.length > 0) {
-        console.log('🔍 Estructura de la primera nota:', notasData[0]);
-      }
-      
       // Combinar datos para crear la estructura que espera el frontend
       const notasConDatos: Nota[] = notasData.map((notaBackend: NotaBackend) => {
         const estudiante = estudiantesData.find((est: Estudiante) => 
@@ -77,8 +68,6 @@ const NotaManagement: React.FC = () => {
           observaciones: notaBackend.observaciones
         } as Nota;
       });
-      
-      console.log('✅ Notas procesadas con datos combinados:', notasConDatos);
       
       setNotas(notasConDatos);
       setEstudiantes(estudiantesData);

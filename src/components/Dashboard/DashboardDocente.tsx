@@ -4,9 +4,10 @@ import { DocenteDataService } from '../../api/DocenteDataService';
 import type { Estudiante } from '../../interfaces/Estudiante';
 import type { Nota } from '../../interfaces/Nota';
 import type { Curso } from '../../interfaces/Curso';
+import { ProfileDocente } from '../Profile/ProfileDocente';
 import './DashboardDocente.css';
 
-type DocenteTab = 'resumen' | 'mis-cursos' | 'estudiantes' | 'calificaciones';
+type DocenteTab = 'resumen' | 'mis-cursos' | 'estudiantes' | 'calificaciones' | 'perfil';
 
 interface DocenteStats {
   totalEstudiantesAtendidos: number;
@@ -35,16 +36,10 @@ export const DashboardDocente: React.FC = () => {
     try {
       setLoading(true);
       
-      console.log('🔍 Cargando datos del docente:', state.perfilDocente.idDocente);
-      console.log('👤 Perfil completo del docente:', state.perfilDocente);
-      console.log('🔑 Usuario completo:', state.usuario);
-      
       // Usar el servicio especializado para docentes
       const estadisticas = await DocenteDataService.obtenerEstadisticasDocente(
         state.perfilDocente.idDocente
       );
-      
-      console.log('📊 Estadísticas del docente recibidas:', estadisticas);
 
       setMisCursos(estadisticas.cursosDetalle);
       setMisEstudiantes(estadisticas.estudiantesDetalle);
@@ -87,7 +82,7 @@ export const DashboardDocente: React.FC = () => {
         <div className="header-content">
           <div className="user-info">
             <img
-              src="/src/assets/imgs/docente.png"
+              src={state.perfilDocente?.foto || "/src/assets/imgs/docente.png"}
               alt="Avatar"
               className="user-avatar"
             />
@@ -126,6 +121,12 @@ export const DashboardDocente: React.FC = () => {
           onClick={() => setActiveTab('calificaciones')}
         >
           📝 Calificaciones
+        </button>
+        <button
+          className={`nav-button ${activeTab === 'perfil' ? 'active' : ''}`}
+          onClick={() => setActiveTab('perfil')}
+        >
+          👤 Mi Perfil
         </button>
       </nav>
 
@@ -257,7 +258,7 @@ export const DashboardDocente: React.FC = () => {
                   <div key={estudiante.idEstudiante} className="estudiante-card">
                     <div className="estudiante-header">
                       <img
-                        src="/src/assets/imgs/student.gif"
+                        src={estudiante.foto || '/src/assets/imgs/student.gif'}
                         alt="Estudiante"
                         className="estudiante-avatar"
                       />
@@ -339,6 +340,8 @@ export const DashboardDocente: React.FC = () => {
             )}
           </div>
         )}
+
+        {activeTab === 'perfil' && <ProfileDocente />}
       </main>
     </div>
   );

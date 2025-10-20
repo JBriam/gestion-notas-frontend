@@ -6,11 +6,12 @@ import type { Curso } from '../../interfaces/Curso';
 import type { Docente } from '../../interfaces/Docente';
 import './CursoManagement.css';
 
-interface CursoForm {
+interface CursoForm extends Record<string, unknown> {
   nombre: string;
-  codigo: string;
+  codigoCurso: string;
   descripcion: string;
   creditos: number;
+  activo?: boolean;
   idDocente?: number;
 }
 
@@ -28,9 +29,10 @@ const CursoManagement: React.FC = () => {
   const [selectedCurso, setSelectedCurso] = useState<Curso | null>(null);
   const [formData, setFormData] = useState<CursoForm>({
     nombre: '',
-    codigo: '',
+    codigoCurso: '',
     descripcion: '',
     creditos: 1,
+    activo: true,
     idDocente: undefined
   });
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +45,6 @@ const CursoManagement: React.FC = () => {
   const loadEstadisticas = async (cursosData: Curso[]) => {
     try {
       setLoadingStats(true);
-      console.log('[CursoManagement] Cargando estadísticas para cursos:', cursosData.length);
       
       // Obtener IDs de cursos válidos
       const idsCursos = cursosData
@@ -53,7 +54,6 @@ const CursoManagement: React.FC = () => {
       if (idsCursos.length > 0) {
         const estadisticas = await CursoStatsService.obtenerEstadisticasMultiplesCursos(idsCursos);
         setEstadisticasCursos(estadisticas);
-        console.log('[CursoManagement] Estadísticas cargadas:', estadisticas);
       }
     } catch (error) {
       console.error('[CursoManagement] Error al cargar estadísticas:', error);
@@ -148,14 +148,26 @@ const CursoManagement: React.FC = () => {
 
   const openEditModal = (curso: Curso) => {
     setSelectedCurso(curso);
+    
+    // Intentar obtener idDocente de múltiples fuentes
+    let docenteId: number | undefined = undefined;
+    
+    // Opción 1: Si viene directamente en curso.idDocente
+    if (curso.idDocente !== undefined) {
+      docenteId = curso.idDocente;
+    } 
+    // Opción 2: Si viene dentro del objeto docente
+    else if (typeof curso.docente === 'object' && curso.docente && 'idDocente' in curso.docente) {
+      docenteId = curso.docente.idDocente as number;
+    }
+    
     setFormData({
       nombre: curso.nombre,
-      codigo: (curso.codigo as string) || '',
+      codigoCurso: (curso.codigoCurso as string) || '',
       descripcion: (curso.descripcion as string) || '',
       creditos: (curso.creditos as number) || 1,
-      idDocente: typeof curso.docente === 'object' && curso.docente && 'idDocente' in curso.docente 
-        ? curso.docente.idDocente as number 
-        : undefined
+      activo: curso.activo !== undefined ? curso.activo : true,
+      idDocente: docenteId
     });
     setShowEditModal(true);
   };
@@ -168,9 +180,10 @@ const CursoManagement: React.FC = () => {
   const resetForm = () => {
     setFormData({
       nombre: '',
-      codigo: '',
+      codigoCurso: '',
       descripcion: '',
       creditos: 1,
+      activo: true,
       idDocente: undefined
     });
     setSelectedCurso(null);
@@ -184,16 +197,43 @@ const CursoManagement: React.FC = () => {
   };
 
   const getDocenteNombre = (curso: Curso): string => {
+    // Opción 1: Si el docente viene como objeto completo
     if (typeof curso.docente === 'object' && curso.docente && 'nombres' in curso.docente && 'apellidos' in curso.docente) {
       return `${curso.docente.nombres} ${curso.docente.apellidos}`;
     }
+    
+    // Opción 2: Si solo viene idDocente, buscarlo en el array de docentes
+    if (curso.idDocente !== undefined && curso.idDocente !== null) {
+      const docente = docentes.find(d => d.idDocente === curso.idDocente);
+      if (docente) {
+        return `${docente.nombres} ${docente.apellidos}`;
+      }
+    }
+    
     return 'Sin asignar';
+  };
+
+  const getDocenteEspecialidad = (curso: Curso): string | null => {
+    // Opción 1: Si el docente viene como objeto completo con especialidad
+    if (typeof curso.docente === 'object' && curso.docente && 'especialidad' in curso.docente) {
+      return curso.docente.especialidad as string;
+    }
+    
+    // Opción 2: Si solo viene idDocente, buscarlo en el array de docentes
+    if (curso.idDocente !== undefined && curso.idDocente !== null) {
+      const docente = docentes.find(d => d.idDocente === curso.idDocente);
+      if (docente && docente.especialidad) {
+        return docente.especialidad;
+      }
+    }
+    
+    return null;
   };
 
   const filteredCursos = cursos.filter(curso => {
     const matchesSearch = 
       curso.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (curso.codigo as string)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (curso.codigoCurso as string)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (curso.descripcion as string)?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesDocente = !filterDocente || getDocenteNombre(curso).toLowerCase().includes(filterDocente.toLowerCase());
@@ -268,7 +308,7 @@ const CursoManagement: React.FC = () => {
               <div className="curso-header">
                 <div className="curso-title">
                   <h3>{curso.nombre}</h3>
-                  <span className="curso-codigo">{(curso.codigo as string) || 'Sin código'}</span>
+                  <span className="curso-codigo">{(curso.codigoCurso as string) || 'Sin código'}</span>
                 </div>
                 <div className="curso-creditos">
                   <span className="creditos-badge">{(curso.creditos as number) || 0} créditos</span>
@@ -285,9 +325,9 @@ const CursoManagement: React.FC = () => {
                     <span className="docente-label">👨‍🏫 Docente:</span>
                     <span className="docente-nombre">{getDocenteNombre(curso)}</span>
                   </div>
-                  {typeof curso.docente === 'object' && curso.docente && 'especialidad' in curso.docente && (
+                  {getDocenteEspecialidad(curso) && (
                     <div className="especialidad">
-                      <span>📚 {curso.docente.especialidad as string}</span>
+                      <span>📚 {getDocenteEspecialidad(curso)}</span>
                     </div>
                   )}
                 </div>
@@ -359,8 +399,8 @@ const CursoManagement: React.FC = () => {
                   <label>Código del Curso *</label>
                   <input
                     type="text"
-                    value={formData.codigo}
-                    onChange={(e) => setFormData({...formData, codigo: e.target.value})}
+                    value={formData.codigoCurso}
+                    onChange={(e) => setFormData({...formData, codigoCurso: e.target.value})}
                     required
                     disabled={loading}
                     placeholder="Ej: MAT101"
@@ -449,8 +489,8 @@ const CursoManagement: React.FC = () => {
                   <label>Código del Curso *</label>
                   <input
                     type="text"
-                    value={formData.codigo}
-                    onChange={(e) => setFormData({...formData, codigo: e.target.value})}
+                    value={formData.codigoCurso}
+                    onChange={(e) => setFormData({...formData, codigoCurso: e.target.value})}
                     required
                     disabled={loading}
                   />
@@ -525,7 +565,7 @@ const CursoManagement: React.FC = () => {
               <p>¿Estás seguro de que deseas eliminar este curso?</p>
               <div className="delete-info">
                 <strong>{selectedCurso.nombre}</strong>
-                <p>{(selectedCurso.codigo as string)} - {(selectedCurso.creditos as number)} créditos</p>
+                <p>{(selectedCurso.codigoCurso as string)} - {(selectedCurso.creditos as number)} créditos</p>
                 <p>Docente: {getDocenteNombre(selectedCurso)}</p>
               </div>
               <p className="warning">Esta acción eliminará también todas las notas asociadas a este curso.</p>

@@ -44,24 +44,10 @@ export const DashboardAdmin: React.FC = () => {
   const loadDashboardStats = async () => {
     try {
       setLoading(true);
-      console.log("🔍 Iniciando carga de datos del dashboard...");
-      console.log("📡 Backend URL configurada:", "/api");
-
-      console.log("📋 Cargando estudiantes...");
       const estudiantes = await EstudianteService.listar();
-      console.log("✅ Estudiantes cargados:", estudiantes.length);
-
-      console.log("👨‍🏫 Cargando docentes...");
       const docentes = await DocenteService.listar();
-      console.log("✅ Docentes cargados:", docentes.length);
-
-      console.log("📚 Cargando cursos...");
       const cursos = await CursoService.listar();
-      console.log("✅ Cursos cargados:", cursos.length);
-
-      console.log("📊 Cargando notas...");
       const notas = await NotaService.listar();
-      console.log("✅ Notas cargadas:", notas.length);
 
       const promedio =
         notas.length > 0
@@ -102,7 +88,7 @@ export const DashboardAdmin: React.FC = () => {
 
   const getWelcomeMessage = () => {
     const name =
-      state.perfilDocente?.nombres || state.usuario?.username || "Usuario";
+      state.perfilDocente?.nombres || state.perfilEstudiante?.nombres || "Admin";
     const role = getRoleDisplay();
     return `¡Hola, ${name}! Panel de ${role}`;
   };
@@ -113,7 +99,7 @@ export const DashboardAdmin: React.FC = () => {
         <div className="header-content">
           <div className="user-info">
             <img
-              src="/src/assets/imgs/docente.png"
+              src={state.perfilDocente?.foto || '/src/assets/imgs/docente.png'}
               alt="Avatar"
               className="user-avatar"
             />
