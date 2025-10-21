@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { NotaService } from '../../api/NotaService';
-import { EstudianteService } from '../../api/EstudianteService';
-import { CursoService } from '../../api/CursoService';
-import type { Nota, NotaForm, NotaBackend } from '../../interfaces/Nota';
-import type { Estudiante } from '../../interfaces/Estudiante';
-import type { Curso } from '../../interfaces/Curso';
-import './NotaManagement.css';
+import React, { useState, useEffect } from "react";
+import { NotaService } from "../../api/NotaService";
+import { EstudianteService } from "../../api/EstudianteService";
+import { CursoService } from "../../api/CursoService";
+import type { Nota, NotaForm, NotaBackend } from "../../interfaces/Nota";
+import type { Estudiante } from "../../interfaces/Estudiante";
+import type { Curso } from "../../interfaces/Curso";
+import "./NotaManagement.css";
 
 const NotaManagement: React.FC = () => {
   const [notas, setNotas] = useState<Nota[]>([]);
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterCurso, setFilterCurso] = useState('');
-  const [filterEstado, setFilterEstado] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterCurso, setFilterCurso] = useState("");
+  const [filterEstado, setFilterEstado] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -22,7 +22,9 @@ const NotaManagement: React.FC = () => {
   const [formData, setFormData] = useState<NotaForm>({
     idEstudiante: 0,
     idCurso: 0,
-    nota: 0
+    nota: 0,
+    tipoEvaluacion: "",
+    observaciones: "",
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -37,44 +39,46 @@ const NotaManagement: React.FC = () => {
       const [notasData, estudiantesData, cursosData] = await Promise.all([
         NotaService.listar() as Promise<NotaBackend[]>,
         EstudianteService.listar(),
-        CursoService.listar()
+        CursoService.listar(),
       ]);
-      
+
       // Combinar datos para crear la estructura que espera el frontend
-      const notasConDatos: Nota[] = notasData.map((notaBackend: NotaBackend) => {
-        const estudiante = estudiantesData.find((est: Estudiante) => 
-          est.idEstudiante === notaBackend.idEstudiante
-        );
-        const curso = cursosData.find((cur: Curso) => 
-          cur.idCurso === notaBackend.idCurso
-        );
-        
-        return {
-          idNota: notaBackend.idNota,
-          nota: notaBackend.nota,
-          estudiante: estudiante || {
-            idEstudiante: notaBackend.idEstudiante,
-            nombres: 'Estudiante no encontrado',
-            apellidos: '',
-            codigoEstudiante: 'N/A'
-          },
-          curso: curso || {
-            idCurso: notaBackend.idCurso,
-            nombre: 'Curso no encontrado',
-            codigo: 'N/A'
-          },
-          tipoEvaluacion: notaBackend.tipoEvaluacion,
-          fechaRegistro: notaBackend.fechaRegistro,
-          observaciones: notaBackend.observaciones
-        } as Nota;
-      });
-      
+      const notasConDatos: Nota[] = notasData.map(
+        (notaBackend: NotaBackend) => {
+          const estudiante = estudiantesData.find(
+            (est: Estudiante) => est.idEstudiante === notaBackend.idEstudiante
+          );
+          const curso = cursosData.find(
+            (cur: Curso) => cur.idCurso === notaBackend.idCurso
+          );
+
+          return {
+            idNota: notaBackend.idNota,
+            nota: notaBackend.nota,
+            estudiante: estudiante || {
+              idEstudiante: notaBackend.idEstudiante,
+              nombres: "Estudiante no encontrado",
+              apellidos: "",
+              codigoEstudiante: "N/A",
+            },
+            curso: curso || {
+              idCurso: notaBackend.idCurso,
+              nombre: "Curso no encontrado",
+              codigo: "N/A",
+            },
+            tipoEvaluacion: notaBackend.tipoEvaluacion,
+            fechaRegistro: notaBackend.fechaRegistro,
+            observaciones: notaBackend.observaciones,
+          } as Nota;
+        }
+      );
+
       setNotas(notasConDatos);
       setEstudiantes(estudiantesData);
       setCursos(cursosData);
     } catch (error) {
-      console.error('Error al cargar datos:', error);
-      setError('Error al cargar la información');
+      console.error("Error al cargar datos:", error);
+      setError("Error al cargar la información");
     } finally {
       setLoading(false);
     }
@@ -85,13 +89,13 @@ const NotaManagement: React.FC = () => {
     try {
       setLoading(true);
       await NotaService.crear(formData);
-      setSuccess('Nota creada exitosamente');
+      setSuccess("Nota creada exitosamente");
       setShowCreateModal(false);
       resetForm();
       await loadData();
     } catch (error) {
-      console.error('Error al crear nota:', error);
-      setError('Error al crear la nota');
+      console.error("Error al crear nota:", error);
+      setError("Error al crear la nota");
     } finally {
       setLoading(false);
     }
@@ -100,21 +104,24 @@ const NotaManagement: React.FC = () => {
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedNota?.idNota) return;
-    
+
     try {
       setLoading(true);
       const updatedNota = {
         ...selectedNota,
-        nota: formData.nota
+        nota: formData.nota,
+        tipoEvaluacion: formData.tipoEvaluacion,
+        observaciones: formData.observaciones,
       };
+
       await NotaService.actualizar(updatedNota);
-      setSuccess('Nota actualizada exitosamente');
+      setSuccess("Nota actualizada exitosamente");
       setShowEditModal(false);
       resetForm();
       await loadData();
     } catch (error) {
-      console.error('Error al actualizar nota:', error);
-      setError('Error al actualizar la nota');
+      console.error("Error al actualizar nota:", error);
+      setError("Error al actualizar la nota");
     } finally {
       setLoading(false);
     }
@@ -122,17 +129,17 @@ const NotaManagement: React.FC = () => {
 
   const handleDelete = async () => {
     if (!selectedNota?.idNota) return;
-    
+
     try {
       setLoading(true);
       await NotaService.eliminar(selectedNota.idNota);
-      setSuccess('Nota eliminada exitosamente');
+      setSuccess("Nota eliminada exitosamente");
       setShowDeleteModal(false);
       setSelectedNota(null);
       await loadData();
     } catch (error) {
-      console.error('Error al eliminar nota:', error);
-      setError('Error al eliminar la nota');
+      console.error("Error al eliminar nota:", error);
+      setError("Error al eliminar la nota");
     } finally {
       setLoading(false);
     }
@@ -148,7 +155,9 @@ const NotaManagement: React.FC = () => {
     setFormData({
       idEstudiante: nota.estudiante.idEstudiante || 0,
       idCurso: nota.curso.idCurso || 0,
-      nota: nota.nota
+      nota: nota.nota,
+      tipoEvaluacion: nota.tipoEvaluacion || "",
+      observaciones: nota.observaciones || "",
     });
     setShowEditModal(true);
   };
@@ -162,7 +171,9 @@ const NotaManagement: React.FC = () => {
     setFormData({
       idEstudiante: 0,
       idCurso: 0,
-      nota: 0
+      nota: 0,
+      tipoEvaluacion: "",
+      observaciones: "",
     });
     setSelectedNota(null);
   };
@@ -174,31 +185,38 @@ const NotaManagement: React.FC = () => {
     resetForm();
   };
 
-  const getEstadoNota = (nota: number): 'aprobado' | 'desaprobado' => {
-    return nota >= 13 ? 'aprobado' : 'desaprobado';
+  const getEstadoNota = (nota: number): "aprobado" | "desaprobado" => {
+    return nota >= 13 ? "aprobado" : "desaprobado";
   };
 
-  const filteredNotas = notas.filter(nota => {
-    const nombreCompleto = `${nota.estudiante.nombres} ${nota.estudiante.apellidos}`.toLowerCase();
+  const filteredNotas = notas.filter((nota) => {
+    const nombreCompleto =
+      `${nota.estudiante.nombres} ${nota.estudiante.apellidos}`.toLowerCase();
     const nombreCurso = nota.curso.nombre.toLowerCase();
-    const codigoEstudiante = (nota.estudiante.codigoEstudiante as string)?.toLowerCase() || '';
-    
-    const matchesSearch = 
+    const codigoEstudiante =
+      (nota.estudiante.codigoEstudiante as string)?.toLowerCase() || "";
+
+    const matchesSearch =
       nombreCompleto.includes(searchTerm.toLowerCase()) ||
       nombreCurso.includes(searchTerm.toLowerCase()) ||
       codigoEstudiante.includes(searchTerm.toLowerCase());
-    
-    const matchesCurso = !filterCurso || nombreCurso.includes(filterCurso.toLowerCase());
-    const matchesEstado = !filterEstado || getEstadoNota(nota.nota) === filterEstado;
-    
+
+    const matchesCurso =
+      !filterCurso || nombreCurso.includes(filterCurso.toLowerCase());
+    const matchesEstado =
+      !filterEstado || getEstadoNota(nota.nota) === filterEstado;
+
     return matchesSearch && matchesCurso && matchesEstado;
   });
 
   const estadisticas = {
     total: notas.length,
-    aprobados: notas.filter(n => n.nota >= 13).length,
-    desaprobados: notas.filter(n => n.nota < 13).length,
-    promedio: notas.length > 0 ? notas.reduce((sum, n) => sum + n.nota, 0) / notas.length : 0
+    aprobados: notas.filter((n) => n.nota >= 13).length,
+    desaprobados: notas.filter((n) => n.nota < 13).length,
+    promedio:
+      notas.length > 0
+        ? notas.reduce((sum, n) => sum + n.nota, 0) / notas.length
+        : 0,
   };
 
   // Auto-hide messages
@@ -248,8 +266,10 @@ const NotaManagement: React.FC = () => {
             className="filter-select"
           >
             <option value="">Todos los cursos</option>
-            {cursos.map(curso => (
-              <option key={curso.idCurso} value={curso.nombre}>{curso.nombre}</option>
+            {cursos.map((curso) => (
+              <option key={curso.idCurso} value={curso.nombre}>
+                {curso.nombre}
+              </option>
             ))}
           </select>
           <select
@@ -284,9 +304,8 @@ const NotaManagement: React.FC = () => {
           <h3>No se encontraron notas</h3>
           <p>
             {searchTerm || filterCurso || filterEstado
-              ? 'No hay notas que coincidan con los filtros aplicados.' 
-              : 'Aún no hay notas registradas en el sistema.'
-            }
+              ? "No hay notas que coincidan con los filtros aplicados."
+              : "Aún no hay notas registradas en el sistema."}
           </p>
         </div>
       ) : (
@@ -305,7 +324,10 @@ const NotaManagement: React.FC = () => {
             </thead>
             <tbody>
               {filteredNotas.map((nota) => (
-                <tr key={nota.idNota} className={`nota-row ${getEstadoNota(nota.nota)}`}>
+                <tr
+                  key={nota.idNota}
+                  className={`nota-row ${getEstadoNota(nota.nota)}`}
+                >
                   <td>
                     <div className="estudiante-info">
                       <img
@@ -322,18 +344,22 @@ const NotaManagement: React.FC = () => {
                   </td>
                   <td>
                     <span className="codigo-badge">
-                      {(nota.estudiante.codigoEstudiante as string) || 'N/A'}
+                      {(nota.estudiante.codigoEstudiante as string) || "N/A"}
                     </span>
                   </td>
                   <td>
                     <div className="curso-info">
                       <strong>{nota.curso.nombre}</strong>
-                      <small>{(nota.curso.codigo as string) || ''}</small>
+                      <small>{(nota.curso.codigo as string) || ""}</small>
                     </div>
                   </td>
                   <td>
-                    <span className={`tipo-evaluacion-badge ${getTipoEvaluacionClass(nota.tipoEvaluacion || '')}`}>
-                      {nota.tipoEvaluacion || 'N/A'}
+                    <span
+                      className={`tipo-evaluacion-badge ${getTipoEvaluacionClass(
+                        nota.tipoEvaluacion || ""
+                      )}`}
+                    >
+                      {nota.tipoEvaluacion || "N/A"}
                     </span>
                   </td>
                   <td>
@@ -342,8 +368,12 @@ const NotaManagement: React.FC = () => {
                     </span>
                   </td>
                   <td>
-                    <span className={`estado-badge ${getEstadoNota(nota.nota)}`}>
-                      {getEstadoNota(nota.nota) === 'aprobado' ? '✅ Aprobado' : '❌ Desaprobado'}
+                    <span
+                      className={`estado-badge ${getEstadoNota(nota.nota)}`}
+                    >
+                      {getEstadoNota(nota.nota) === "aprobado"
+                        ? "✅ Aprobado"
+                        : "❌ Desaprobado"}
                     </span>
                   </td>
                   <td>
@@ -376,13 +406,15 @@ const NotaManagement: React.FC = () => {
       {/* Modal para crear nota */}
       {showCreateModal && (
         <div className="modal-overlay" onClick={closeModals}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header create-header">
               <h3>
                 <i className="bi bi-journal-plus"></i>
                 Registrar Nueva Nota
               </h3>
-              <button onClick={closeModals} className="modal-close">×</button>
+              <button onClick={closeModals} className="modal-close">
+                ×
+              </button>
             </div>
             <form onSubmit={handleCreate} className="modal-form">
               <div className="form-row">
@@ -390,14 +422,23 @@ const NotaManagement: React.FC = () => {
                   <label>Estudiante *</label>
                   <select
                     value={formData.idEstudiante}
-                    onChange={(e) => setFormData({...formData, idEstudiante: parseInt(e.target.value)})}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        idEstudiante: parseInt(e.target.value),
+                      })
+                    }
                     required
                     disabled={loading}
                   >
                     <option value={0}>Seleccionar estudiante</option>
-                    {estudiantes.map(estudiante => (
-                      <option key={estudiante.idEstudiante} value={estudiante.idEstudiante}>
-                        {estudiante.nombres} {estudiante.apellidos} - {estudiante.codigoEstudiante as string}
+                    {estudiantes.map((estudiante) => (
+                      <option
+                        key={estudiante.idEstudiante}
+                        value={estudiante.idEstudiante}
+                      >
+                        {estudiante.nombres} {estudiante.apellidos} -{" "}
+                        {estudiante.codigoEstudiante as string}
                       </option>
                     ))}
                   </select>
@@ -406,44 +447,101 @@ const NotaManagement: React.FC = () => {
                   <label>Curso *</label>
                   <select
                     value={formData.idCurso}
-                    onChange={(e) => setFormData({...formData, idCurso: parseInt(e.target.value)})}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        idCurso: parseInt(e.target.value),
+                      })
+                    }
                     required
                     disabled={loading}
                   >
                     <option value={0}>Seleccionar curso</option>
-                    {cursos.map(curso => (
+                    {cursos.map((curso) => (
                       <option key={curso.idCurso} value={curso.idCurso}>
-                        {curso.nombre} - {(curso.codigo as string) || 'Sin código'}
+                        {curso.nombre} -{" "}
+                        {(curso.codigo as string) || "Sin código"}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
 
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Calificación * (0-20)</label>
+                  <input
+                    type="number"
+                    value={formData.nota}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        nota: parseFloat(e.target.value) || 0,
+                      })
+                    }
+                    required
+                    min="0"
+                    max="20"
+                    step="0.1"
+                    disabled={loading}
+                    placeholder="Ej: 15.5"
+                  />
+                  <small className="form-hint">
+                    Calificación de 0 a 20. Nota mínima aprobatoria: 13
+                  </small>
+                </div>
+                <div className="form-group">
+                  <label>Tipo de Evaluación</label>
+                  <select
+                    value={formData.tipoEvaluacion}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        tipoEvaluacion: e.target.value,
+                      })
+                    }
+                    required
+                    disabled={loading}
+                  >
+                    <option value={0}>Seleccionar evaluación</option>
+                    <option value="EXAMEN">Examen</option>
+                    <option value="FINAL">Final</option>
+                    <option value="PARCIAL">Parcial</option>
+                    <option value="PRACTICA">Práctica</option>
+                    <option value="TAREA">Tarea</option>
+                  </select>
+                </div>
+              </div>
+
               <div className="form-group">
-                <label>Calificación * (0-20)</label>
-                <input
-                  type="number"
-                  value={formData.nota}
-                  onChange={(e) => setFormData({...formData, nota: parseFloat(e.target.value) || 0})}
-                  required
-                  min="0"
-                  max="20"
-                  step="0.1"
+                <label>Observaciones</label>
+                <textarea
+                  value={formData.observaciones || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      observaciones: e.target.value,
+                    })
+                  }
                   disabled={loading}
-                  placeholder="Ej: 15.5"
+                  placeholder="Ej: Buen desempeño"
                 />
-                <small className="form-hint">
-                  Calificación de 0 a 20. Nota mínima aprobatoria: 13
-                </small>
               </div>
 
               <div className="modal-actions">
-                <button type="button" onClick={closeModals} className="btn-secondary">
+                <button
+                  type="button"
+                  onClick={closeModals}
+                  className="btn-secondary"
+                >
                   Cancelar
                 </button>
-                <button type="submit" className="btn-primary" disabled={loading}>
-                  {loading ? 'Registrando...' : 'Registrar Nota'}
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={loading}
+                >
+                  {loading ? "Registrando..." : "Registrar Nota"}
                 </button>
               </div>
             </form>
@@ -454,47 +552,104 @@ const NotaManagement: React.FC = () => {
       {/* Modal para editar nota */}
       {showEditModal && selectedNota && (
         <div className="modal-overlay" onClick={closeModals}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header edit-header">
               <h3>
                 <i className="bi bi-pencil-square"></i>
                 Editar Nota
               </h3>
-              <button onClick={closeModals} className="modal-close">×</button>
+              <button onClick={closeModals} className="modal-close">
+                ×
+              </button>
             </div>
             <form onSubmit={handleEdit} className="modal-form">
               <div className="readonly-info">
                 <div className="info-item">
-                  <strong>Estudiante:</strong> {selectedNota.estudiante.nombres} {selectedNota.estudiante.apellidos}
+                  <strong>Estudiante:</strong> {selectedNota.estudiante.nombres}{" "}
+                  {selectedNota.estudiante.apellidos}
                 </div>
                 <div className="info-item">
                   <strong>Curso:</strong> {selectedNota.curso.nombre}
                 </div>
               </div>
 
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Nueva Calificación * (0-20)</label>
+                  <input
+                    type="number"
+                    value={formData.nota}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        nota: parseFloat(e.target.value) || 0,
+                      })
+                    }
+                    required
+                    min="0"
+                    max="20"
+                    step="0.1"
+                    disabled={loading}
+                  />
+                  <small className="form-hint">
+                    Calificación actual: {selectedNota.nota} | Estado:{" "}
+                    {getEstadoNota(selectedNota.nota) === "aprobado"
+                      ? "Aprobado"
+                      : "Desaprobado"}
+                  </small>
+                </div>
+                <div className="form-group">
+                  <label>Tipo de Evaluación</label>
+                  <select
+                    value={formData.tipoEvaluacion}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        tipoEvaluacion: e.target.value,
+                      })
+                    }
+                    required
+                    disabled={loading}
+                  >
+                    <option value={0}>Seleccionar evaluación</option>
+                    <option value="EXAMEN">Examen</option>
+                    <option value="FINAL">Final</option>
+                    <option value="PARCIAL">Parcial</option>
+                    <option value="PRACTICA">Práctica</option>
+                    <option value="TAREA">Tarea</option>
+                  </select>
+                </div>
+              </div>
+
               <div className="form-group">
-                <label>Nueva Calificación * (0-20)</label>
-                <input
-                  type="number"
-                  value={formData.nota}
-                  onChange={(e) => setFormData({...formData, nota: parseFloat(e.target.value) || 0})}
-                  required
-                  min="0"
-                  max="20"
-                  step="0.1"
+                <label>Observaciones</label>
+                <textarea
+                  value={formData.observaciones || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      observaciones: e.target.value,
+                    })
+                  }
                   disabled={loading}
+                  placeholder="Ej: Buen desempeño"
                 />
-                <small className="form-hint">
-                  Calificación actual: {selectedNota.nota} | Estado: {getEstadoNota(selectedNota.nota) === 'aprobado' ? 'Aprobado' : 'Desaprobado'}
-                </small>
               </div>
 
               <div className="modal-actions">
-                <button type="button" onClick={closeModals} className="btn-secondary">
+                <button
+                  type="button"
+                  onClick={closeModals}
+                  className="btn-secondary"
+                >
                   Cancelar
                 </button>
-                <button type="submit" className="btn-primary" disabled={loading}>
-                  {loading ? 'Actualizando...' : 'Actualizar Nota'}
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={loading}
+                >
+                  {loading ? "Actualizando..." : "Actualizar Nota"}
                 </button>
               </div>
             </form>
@@ -505,20 +660,29 @@ const NotaManagement: React.FC = () => {
       {/* Modal para eliminar nota */}
       {showDeleteModal && selectedNota && (
         <div className="modal-overlay" onClick={closeModals}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header delete-header">
               <h3>
                 <i className="bi bi-trash-fill"></i>
                 Eliminar Nota
               </h3>
-              <button onClick={closeModals} className="modal-close">×</button>
+              <button onClick={closeModals} className="modal-close">
+                ×
+              </button>
             </div>
             <div className="modal-body">
               <p>¿Estás seguro de que deseas eliminar esta nota?</p>
               <div className="delete-info">
-                <strong>Estudiante:</strong> {selectedNota.estudiante.nombres} {selectedNota.estudiante.apellidos}<br/>
-                <strong>Curso:</strong> {selectedNota.curso.nombre}<br/>
-                <strong>Calificación:</strong> {selectedNota.nota} ({getEstadoNota(selectedNota.nota) === 'aprobado' ? 'Aprobado' : 'Desaprobado'})
+                <strong>Estudiante:</strong> {selectedNota.estudiante.nombres}{" "}
+                {selectedNota.estudiante.apellidos}
+                <br />
+                <strong>Curso:</strong> {selectedNota.curso.nombre}
+                <br />
+                <strong>Calificación:</strong> {selectedNota.nota} (
+                {getEstadoNota(selectedNota.nota) === "aprobado"
+                  ? "Aprobado"
+                  : "Desaprobado"}
+                )
               </div>
               <p className="warning">Esta acción no se puede deshacer.</p>
             </div>
@@ -526,8 +690,12 @@ const NotaManagement: React.FC = () => {
               <button onClick={closeModals} className="btn-secondary">
                 Cancelar
               </button>
-              <button onClick={handleDelete} className="btn-danger" disabled={loading}>
-                {loading ? 'Eliminando...' : 'Eliminar Nota'}
+              <button
+                onClick={handleDelete}
+                className="btn-danger"
+                disabled={loading}
+              >
+                {loading ? "Eliminando..." : "Eliminar Nota"}
               </button>
             </div>
           </div>
@@ -540,16 +708,16 @@ const NotaManagement: React.FC = () => {
 // Función helper para estilos de tipo de evaluación
 const getTipoEvaluacionClass = (tipoEvaluacion: string): string => {
   switch (tipoEvaluacion) {
-    case 'PARCIAL':
-      return 'tipo-parcial';
-    case 'FINAL':
-      return 'tipo-final';
-    case 'TAREA':
-      return 'tipo-tarea';
-    case 'PRACTICA':
-      return 'tipo-practica';
+    case "PARCIAL":
+      return "tipo-parcial";
+    case "FINAL":
+      return "tipo-final";
+    case "TAREA":
+      return "tipo-tarea";
+    case "PRACTICA":
+      return "tipo-practica";
     default:
-      return 'tipo-default';
+      return "tipo-default";
   }
 };
 

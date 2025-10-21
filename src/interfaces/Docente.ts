@@ -16,25 +16,3 @@ export interface Docente {
   rolUsuario?: string;
   usuarioActivo?: boolean;
 }
-
-// export interface CrearDocenteRequest {
-//   nombres: string;
-//   apellidos: string;
-//   telefono?: string;
-//   direccion?: string;
-//   distrito?: string;
-//   foto?: string;
-//   especialidad?: string;
-//   fechaContratacion?: string;
-//   idUsuario?: number;
-// }
-
-// export interface ActualizarDocenteRequest {
-//   nombres?: string;
-//   apellidos?: string;
-//   telefono?: string;
-//   distrito?: string;
-//   foto?: string;
-//   especialidad?: string;
-//   fechaContratacion?: string;
-// }
