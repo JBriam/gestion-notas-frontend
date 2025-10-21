@@ -28,4 +28,6 @@ export interface NotaForm {
   idEstudiante: number;
   idCurso: number;
   nota: number;
+  tipoEvaluacion?: string;
+  observaciones?: string;
 }
