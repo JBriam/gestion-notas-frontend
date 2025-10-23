@@ -32,27 +32,46 @@ export const loginSchema: ValidationSchema = {
 };
 
 export const registerSchema: ValidationSchema = {
-  username: {
+  nombres: {
     required: true,
     rules: [
-      rules.required('El usuario es obligatorio'),
-      rules.minLength(3, 'El usuario debe tener al menos 3 caracteres'),
-      rules.maxLength(50, 'El usuario no puede tener más de 50 caracteres'),
-      rules.username('Solo se permiten letras, números, puntos, guiones y guiones bajos')
+      rules.required('Los nombres son obligatorios'),
+      rules.minLength(2, 'Los nombres deben tener al menos 2 caracteres'),
+      rules.maxLength(50, 'Los nombres no pueden tener más de 50 caracteres'),
+      rules.alphabetic('Los nombres solo pueden contener letras y espacios')
+    ]
+  },
+  apellidos: {
+    required: true,
+    rules: [
+      rules.required('Los apellidos son obligatorios'),
+      rules.minLength(2, 'Los apellidos deben tener al menos 2 caracteres'),
+      rules.maxLength(50, 'Los apellidos no pueden tener más de 50 caracteres'),
+      rules.alphabetic('Los apellidos solo pueden contener letras y espacios')
     ]
   },
   email: {
     required: true,
     rules: [
       rules.required('El email es obligatorio'),
-      rules.email('Ingresa un email válido')
+      rules.email('Ingresa un email válido'),
+      rules.maxLength(100, 'El email no puede tener más de 100 caracteres')
+    ]
+  },
+  telefono: {
+    required: false,
+    rules: [
+      rules.phone('Ingresa un teléfono válido (ej: 999-999-999)'),
+      rules.minLength(7, 'El teléfono debe tener al menos 7 dígitos'),
+      rules.maxLength(15, 'El teléfono no puede tener más de 15 dígitos')
     ]
   },
   password: {
     required: true,
     rules: [
       rules.required('La contraseña es obligatoria'),
-      rules.password.medium('La contraseña debe tener al menos 8 caracteres, una mayúscula y un número')
+      rules.minLength(6, 'La contraseña debe tener al menos 6 caracteres'),
+      rules.maxLength(100, 'La contraseña no puede tener más de 100 caracteres')
     ]
   },
   confirmPassword: {
@@ -60,6 +79,12 @@ export const registerSchema: ValidationSchema = {
     rules: [
       rules.required('Confirma tu contraseña'),
       rules.confirmPassword('password', 'Las contraseñas no coinciden')
+    ]
+  },
+  rol: {
+    required: true,
+    rules: [
+      rules.required('Selecciona un tipo de usuario')
     ]
   }
 };
