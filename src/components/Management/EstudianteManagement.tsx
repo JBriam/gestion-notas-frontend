@@ -42,10 +42,46 @@ const EstudianteManagement: React.FC = () => {
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [fotoPreview, setFotoPreview] = useState<string>("");
+  const [fotoFile, setFotoFile] = useState<File | null>(null);
 
   useEffect(() => {
     loadEstudiantes();
   }, []);
+
+  // Manejar la carga de la foto
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    // Validar formato de imagen
+    const validFormats = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!validFormats.includes(file.type)) {
+      setError('Por favor selecciona una imagen válida (JPG, PNG o GIF)');
+      return;
+    }
+
+    // Validar tamaño (10MB máximo)
+    if (file.size > 10 * 1024 * 1024) {
+      setError('La imagen debe ser menor a 10MB');
+      return;
+    }
+
+    // Revocar URL previa si existe (para evitar fugas de memoria)
+    if (fotoPreview) {
+      try {
+        URL.revokeObjectURL(fotoPreview);
+      } catch {}
+    }
+
+    // Guardamos el File en estado y generamos preview con URL.createObjectURL
+    setFotoFile(file);
+    const url = URL.createObjectURL(file);
+    setFotoPreview(url);
+    // Limpiar cualquier base64 previo
+    setFormData(prev => ({ ...prev, foto: "" }));
+    setError(null);
+  };
 
   const loadEstudiantes = async () => {
     try {
@@ -63,15 +99,67 @@ const EstudianteManagement: React.FC = () => {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Validar campos obligatorios
+      if (!formData.email || !formData.password || !formData.nombres || !formData.apellidos) {
+        setError("Los campos email, contraseña, nombres y apellidos son obligatorios");
+        return;
+      }
+
+      // Validar contraseña
+      if (formData.password && formData.password.length < 6) {
+        setError("La contraseña debe tener al menos 6 caracteres");
+        return;
+      }
+
+      // Validar que las contraseñas coincidan
+      if (formData.password !== formData.confirmPassword) {
+        setError("Las contraseñas no coinciden");
+        return;
+      }
+
       setLoading(true);
-      await EstudianteService.crear(formData);
+
+      // Crear FormData con todos los campos
+      const fd = new FormData();
+      
+      // Campos obligatorios
+      fd.append('email', formData.email);
+      fd.append('password', formData.password);
+      fd.append('nombres', formData.nombres);
+      fd.append('apellidos', formData.apellidos);
+
+      // Campos opcionales (solo si tienen valor)
+      if (formData.telefono) fd.append('telefono', formData.telefono);
+      if (formData.direccion) fd.append('direccion', formData.direccion);
+      if (formData.distrito) fd.append('distrito', formData.distrito);
+      if (formData.fechaNacimiento) fd.append('fechaNacimiento', formData.fechaNacimiento);
+      if (formData.codigoEstudiante) fd.append('codigoEstudiante', formData.codigoEstudiante);
+      
+      // Agregar foto si existe
+      if (fotoFile) {
+        fd.append('foto', fotoFile);
+      }
+
+      const created = await EstudianteService.crear(fd);
+      
       setSuccess("Estudiante creado exitosamente");
+      
+      // Si el backend devuelve la ruta de la foto, actualizar preview
+      if (created && created.foto) {
+        // revocar objectURL anterior
+        if (fotoPreview && fotoPreview.startsWith('blob:')) {
+          try { URL.revokeObjectURL(fotoPreview); } catch {}
+        }
+        setFotoPreview(created.foto as string);
+        setFormData(prev => ({ ...prev, foto: created.foto as string }));
+      }
+      
       setShowCreateModal(false);
       resetForm();
       await loadEstudiantes();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al crear estudiante:", error);
-      setError("Error al crear el estudiante");
+      setError(error.response?.data?.message || "Error al crear el estudiante");
     } finally {
       setLoading(false);
     }
@@ -82,19 +170,66 @@ const EstudianteManagement: React.FC = () => {
     if (!selectedEstudiante?.idEstudiante) return;
 
     try {
+      // Validar campos obligatorios
+      if (!formData.email || !formData.nombres || !formData.apellidos) {
+        setError("Los campos email, nombres y apellidos son obligatorios");
+        return;
+      }
+
       setLoading(true);
-      const updatedEstudiante = {
-        ...selectedEstudiante,
-        ...formData,
-      };
-      await EstudianteService.actualizar(updatedEstudiante);
+
+      // Crear FormData con todos los campos
+      const fd = new FormData();
+      
+      // ID del estudiante
+      fd.append('idEstudiante', String(selectedEstudiante.idEstudiante));
+      
+      // Campos obligatorios
+      fd.append('email', formData.email);
+      fd.append('nombres', formData.nombres);
+      fd.append('apellidos', formData.apellidos);
+
+      // Campos opcionales (solo si tienen valor)
+      if (formData.telefono) fd.append('telefono', formData.telefono);
+      if (formData.direccion) fd.append('direccion', formData.direccion);
+      if (formData.distrito) fd.append('distrito', formData.distrito);
+      if (formData.fechaNacimiento) fd.append('fechaNacimiento', formData.fechaNacimiento);
+      if (formData.codigoEstudiante) fd.append('codigoEstudiante', formData.codigoEstudiante);
+      
+      // Contraseña solo si se proporciona una nueva
+      if (formData.password) {
+        if (formData.password.length < 6) {
+          setError("La contraseña debe tener al menos 6 caracteres");
+          return;
+        }
+        if (formData.password !== formData.confirmPassword) {
+          setError("Las contraseñas no coinciden");
+          return;
+        }
+        fd.append('password', formData.password);
+      }
+
+      // Agregar foto si existe una nueva
+      if (fotoFile) {
+        fd.append('foto', fotoFile);
+      }
+
+      const updated = await EstudianteService.actualizar(fd);
+      
       setSuccess("Estudiante actualizado exitosamente");
+      if (updated && updated.foto) {
+        if (fotoPreview && fotoPreview.startsWith('blob:')) {
+          try { URL.revokeObjectURL(fotoPreview); } catch {}
+        }
+        setFotoPreview(updated.foto as string);
+        setFormData(prev => ({ ...prev, foto: updated.foto as string }));
+      }
       setShowEditModal(false);
       resetForm();
       await loadEstudiantes();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al actualizar estudiante:", error);
-      setError("Error al actualizar el estudiante");
+      setError(error.response?.data?.message || "Error al actualizar el estudiante");
     } finally {
       setLoading(false);
     }
@@ -119,7 +254,21 @@ const EstudianteManagement: React.FC = () => {
   };
 
   const openCreateModal = () => {
-    resetForm();
+    setFormData({
+      nombres: "",
+      apellidos: "",
+      telefono: "",
+      direccion: "",
+      distrito: "",
+      foto: "",
+      fechaNacimiento: "",
+      codigoEstudiante: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    });
+    setFotoPreview("");
+    setSelectedEstudiante(null);
     setShowCreateModal(true);
   };
 
@@ -136,6 +285,7 @@ const EstudianteManagement: React.FC = () => {
       codigoEstudiante: estudiante.codigoEstudiante as string,
       email: estudiante.email as string,
     });
+    setFotoPreview(estudiante.foto as string || "");
     setShowEditModal(true);
   };
 
@@ -158,6 +308,14 @@ const EstudianteManagement: React.FC = () => {
       password: "",
       confirmPassword: "",
     });
+    // Revocar object URL si estaba seteada
+    if (fotoPreview) {
+      try {
+        URL.revokeObjectURL(fotoPreview);
+      } catch {}
+    }
+    setFotoPreview("");
+    setFotoFile(null);
     setSelectedEstudiante(null);
   };
 
@@ -320,7 +478,7 @@ const EstudianteManagement: React.FC = () => {
       {/* Modal para crear estudiante */}
       {showCreateModal && (
         <div className="modal-overlay" onClick={closeModals}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxHeight: '90vh', overflowY: 'auto' }}>
             <div className="modal-header create-header">
               <h3>
                 <i className="bi bi-person-plus-fill"></i>
@@ -463,6 +621,25 @@ const EstudianteManagement: React.FC = () => {
                 />
               </div>
 
+              <div className="form-group">
+                <label>Foto de perfil</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  disabled={loading}
+                  className="form-control"
+                />
+                <div className="mt-2 text-center">
+                  <img
+                    src={fotoPreview || "/src/assets/imgs/student.gif"}
+                    alt="Vista previa"
+                    style={{ width: "120px", height: "120px", objectFit: "cover", borderRadius: "8px" }}
+                    className="img-thumbnail"
+                  />
+                  {fotoFile && <div className="file-name">{fotoFile.name}</div>}
+                </div>
+              </div>
               <div className="modal-actions">
                 <button
                   type="button"
@@ -487,7 +664,7 @@ const EstudianteManagement: React.FC = () => {
       {/* Modal para editar estudiante */}
       {showEditModal && selectedEstudiante && (
         <div className="modal-overlay" onClick={closeModals}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxHeight: '90vh', overflowY: 'auto' }}>
             <div className="modal-header edit-header">
               <h3>
                 <i className="bi bi-pencil-square"></i>
@@ -591,6 +768,26 @@ const EstudianteManagement: React.FC = () => {
                 />
               </div>
 
+              <div className="form-group">
+                <label>Foto de perfil</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  disabled={loading}
+                  className="form-control"
+                />
+                {fotoPreview && (
+                  <div className="mt-2 text-center">
+                    <img
+                      src={fotoPreview}
+                      alt="Vista previa"
+                      style={{ width: "120px", height: "120px", objectFit: "cover", borderRadius: "8px" }}
+                      className="img-thumbnail"
+                    />
+                  </div>
+                )}
+              </div>
               <div className="modal-actions">
                 <button
                   type="button"

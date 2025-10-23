@@ -14,6 +14,7 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
     password: "",
     telefono: "",
     rol: "ESTUDIANTE", // Por defecto estudiante
+    foto: "",
   });
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string>("");
@@ -31,7 +32,35 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
     if (error) setError("");
   };
 
-  // ...existing code...
+  // Manejar la carga de la foto
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      setError('Por favor selecciona una imagen válida');
+      return;
+    }
+
+    // Validar tamaño (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
+      setError('La imagen debe ser menor a 2MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      setFormData(prev => ({ ...prev, foto: result }));
+      setError('');
+    };
+    reader.onerror = () => {
+      setError('Error al cargar la imagen');
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -64,8 +93,10 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
           password: "",
           telefono: "",
           rol: "ESTUDIANTE",
+          foto: "",
         });
         setConfirmPassword("");
+        // Cambiar automáticamente al login después de 2 segundos
         setTimeout(() => {
           onSwitchToLogin();
         }, 2000);
@@ -91,6 +122,7 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
           <h2>Registro</h2>
           <p>Crea tu cuenta para acceder al sistema</p>
         </div>
+
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-row">
             <div className="form-group">
@@ -118,6 +150,7 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
               />
             </div>
           </div>
+
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="rol">Tipo de Usuario</label>
@@ -132,6 +165,7 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
                 <option value="DOCENTE">Docente</option>
               </select>
             </div>
+
             <div className="form-group">
               <label htmlFor="telefono">Teléfono</label>
               <input
@@ -145,6 +179,7 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
               />
             </div>
           </div>
+
           <div className="form-group">
             <label htmlFor="email">Email *</label>
             <input
@@ -159,6 +194,34 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
               maxLength={100}
             />
           </div>
+
+          {/* Campo para la foto */}
+          <div className="form-group">
+            <label>Foto de perfil</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              disabled={loading}
+              className="form-control"
+            />
+            {formData.foto && (
+              <div className="mt-2 text-center">
+                <img
+                  src={formData.foto}
+                  alt="Vista previa"
+                  style={{
+                    width: "120px",
+                    height: "120px",
+                    objectFit: "cover",
+                    borderRadius: "8px"
+                  }}
+                  className="img-thumbnail"
+                />
+              </div>
+            )}
+          </div>
+
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="password">Contraseña *</label>
@@ -174,6 +237,7 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
                 minLength={6}
               />
             </div>
+
             <div className="form-group">
               <label htmlFor="confirmPassword">Confirmar Contraseña *</label>
               <input
@@ -181,19 +245,22 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
                 id="confirmPassword"
                 name="confirmPassword"
                 value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 placeholder="Repite tu contraseña"
                 disabled={loading}
               />
             </div>
           </div>
+
           {error && <div className="error-message">{error}</div>}
           {success && <div className="success-message">{success}</div>}
+
           <button type="submit" className="auth-button" disabled={loading}>
             {loading ? "Registrando..." : "Registrarse"}
           </button>
         </form>
+
         <div className="auth-footer">
           <p>
             ¿Ya tienes una cuenta?{" "}
@@ -210,4 +277,4 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
       </div>
     </div>
   );
-}
+};
