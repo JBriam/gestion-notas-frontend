@@ -13,13 +13,12 @@ import * as rules from './rules';
  */
 
 export const loginSchema: ValidationSchema = {
-  username: {
+  email: {
     required: true,
     rules: [
-      rules.required('El usuario es obligatorio'),
-      rules.minLength(3, 'El usuario debe tener al menos 3 caracteres'),
-      rules.maxLength(50, 'El usuario no puede tener más de 50 caracteres'),
-      rules.username('Solo se permiten letras, números, puntos, guiones y guiones bajos')
+      rules.required('El email es obligatorio'),
+      rules.email('Ingresa un email válido'),
+      rules.maxLength(100, 'El email no puede tener más de 100 caracteres')
     ]
   },
   password: {
