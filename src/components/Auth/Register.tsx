@@ -1,24 +1,36 @@
 import React, { useState } from "react";
 import { AuthService } from "../../api/AuthService";
+import { useValidation, schemas } from "../../utils/validation";
 import type { RegisterRequest } from "../../interfaces/Auth";
+
+// Interfaz extendida para incluir confirmPassword en el formulario
+interface RegisterFormData extends RegisterRequest {
+  confirmPassword: string;
+}
 
 interface RegisterProps {
   onSwitchToLogin: () => void;
 }
 
 export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
-  const [formData, setFormData] = useState<RegisterRequest>({
+  const [formData, setFormData] = useState<RegisterFormData>({
     nombres: "",
     apellidos: "",
     email: "",
     password: "",
     telefono: "",
     rol: "ESTUDIANTE", // Por defecto estudiante
+    confirmPassword: "",
   });
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
   const [loading, setLoading] = useState(false);
+
+  // Integrar sistema de validaciones
+  const validation = useValidation(schemas.registerSchema, formData, {
+    mode: 'onBlur',
+    revalidateMode: 'onChange'
+  });
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -31,26 +43,34 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
     if (error) setError("");
   };
 
+  // Helper para combinar handlers
+  const getFieldProps = (fieldName: keyof RegisterFormData) => {
+    const validationProps = validation.getFieldProps(fieldName);
+    return {
+      ...validationProps,
+      onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        handleInputChange(e);
+        validationProps.onChange(e);
+      }
+    };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
-    // Validaciones
-    if (formData.password !== confirmPassword) {
-      setError("Las contraseñas no coinciden");
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres");
+    // Validar formulario antes de enviar
+    if (!validation.validateForm()) {
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await AuthService.register(formData);
+      // Crear objeto sin confirmPassword para enviar al backend
+      const { confirmPassword, ...registerData } = formData;
+      const response = await AuthService.register(registerData);
 
       if (response.success) {
         setSuccess(
@@ -63,8 +83,8 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
           password: "",
           telefono: "",
           rol: "ESTUDIANTE",
+          confirmPassword: "",
         });
-        setConfirmPassword("");
         // Cambiar automáticamente al login después de 2 segundos
         setTimeout(() => {
           onSwitchToLogin();
@@ -78,6 +98,14 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
       setLoading(false);
     }
   };
+
+  // Verificar si el formulario puede ser enviado
+  const canSubmit = validation.isValid && 
+    formData.nombres && 
+    formData.apellidos && 
+    formData.email && 
+    formData.password && 
+    formData.confirmPassword;
 
   return (
     <div className="auth-container">
@@ -101,10 +129,14 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
                 id="nombres"
                 name="nombres"
                 value={formData.nombres}
-                onChange={handleInputChange}
+                {...getFieldProps('nombres')}
                 required
                 disabled={loading}
+                className={validation.errors.nombres ? 'input-error' : ''}
               />
+              {validation.errors.nombres && (
+                <div className="field-error">{validation.errors.nombres}</div>
+              )}
             </div>
             <div className="form-group">
               <label htmlFor="apellidos">Apellidos *</label>
@@ -113,10 +145,14 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
                 id="apellidos"
                 name="apellidos"
                 value={formData.apellidos}
-                onChange={handleInputChange}
+                {...getFieldProps('apellidos')}
                 required
                 disabled={loading}
+                className={validation.errors.apellidos ? 'input-error' : ''}
               />
+              {validation.errors.apellidos && (
+                <div className="field-error">{validation.errors.apellidos}</div>
+              )}
             </div>
           </div>
 
@@ -127,12 +163,16 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
                 id="rol"
                 name="rol"
                 value={formData.rol}
-                onChange={handleInputChange}
+                {...getFieldProps('rol')}
                 disabled={loading}
+                className={validation.errors.rol ? 'input-error' : ''}
               >
                 <option value="ESTUDIANTE">Estudiante</option>
                 <option value="DOCENTE">Docente</option>
               </select>
+              {validation.errors.rol && (
+                <div className="field-error">{validation.errors.rol}</div>
+              )}
             </div>
 
             <div className="form-group">
@@ -142,10 +182,14 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
                 id="telefono"
                 name="telefono"
                 value={formData.telefono}
-                onChange={handleInputChange}
-                required
+                {...getFieldProps('telefono')}
+                placeholder="999-999-999"
                 disabled={loading}
+                className={validation.errors.telefono ? 'input-error' : ''}
               />
+              {validation.errors.telefono && (
+                <div className="field-error">{validation.errors.telefono}</div>
+              )}
             </div>
           </div>
 
@@ -156,12 +200,16 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
               id="email"
               name="email"
               value={formData.email}
-              onChange={handleInputChange}
+              {...getFieldProps('email')}
               required
               placeholder="tu@email.com"
               disabled={loading}
               maxLength={100}
+              className={validation.errors.email ? 'input-error' : ''}
             />
+            {validation.errors.email && (
+              <div className="field-error">{validation.errors.email}</div>
+            )}
           </div>
 
           <div className="form-row">
@@ -172,12 +220,16 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
                 id="password"
                 name="password"
                 value={formData.password}
-                onChange={handleInputChange}
+                {...getFieldProps('password')}
                 required
                 placeholder="Mínimo 6 caracteres"
                 disabled={loading}
                 minLength={6}
+                className={validation.errors.password ? 'input-error' : ''}
               />
+              {validation.errors.password && (
+                <div className="field-error">{validation.errors.password}</div>
+              )}
             </div>
 
             <div className="form-group">
@@ -186,19 +238,23 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
                 type="password"
                 id="confirmPassword"
                 name="confirmPassword"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                value={formData.confirmPassword}
+                {...getFieldProps('confirmPassword')}
                 required
                 placeholder="Repite tu contraseña"
                 disabled={loading}
+                className={validation.errors.confirmPassword ? 'input-error' : ''}
               />
+              {validation.errors.confirmPassword && (
+                <div className="field-error">{validation.errors.confirmPassword}</div>
+              )}
             </div>
           </div>
 
           {error && <div className="error-message">{error}</div>}
           {success && <div className="success-message">{success}</div>}
 
-          <button type="submit" className="auth-button" disabled={loading}>
+          <button type="submit" className="auth-button" disabled={loading || !canSubmit}>
             {loading ? "Registrando..." : "Registrarse"}
           </button>
         </form>
