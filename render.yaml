@@ -6,7 +6,7 @@ services:
     staticPublishPath: ./dist
     envVars:
       - key: VITE_API_URL
-        value: https://tu-backend.onrender.com/api
+        value: https://gestion-notas-backend.onrender.com/api
     routes:
       - type: rewrite
         source: /*
