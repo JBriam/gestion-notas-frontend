@@ -68,7 +68,7 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <img src="/src/assets/logos/Logo_Colegio_sin_fondo.png" alt="Logo Colegio" className="auth-logo" />
+          <img src="/assets/logos/Logo_Colegio_sin_fondo.png" alt="Logo Colegio" className="auth-logo" />
           <h2>Iniciar Sesión</h2>
           <p>Accede a tu cuenta del sistema de gestión de notas</p>
         </div>

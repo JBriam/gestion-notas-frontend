@@ -331,7 +331,7 @@ const NotaManagement: React.FC = () => {
                   <td>
                     <div className="estudiante-info">
                       <img
-                        src="/src/assets/imgs/student.gif"
+                        src="/assets/imgs/student.gif"
                         alt="Estudiante"
                         className="estudiante-avatar-small"
                       />

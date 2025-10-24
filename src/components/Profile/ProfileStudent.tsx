@@ -112,11 +112,11 @@ export const ProfileStudent: React.FC = () => {
         <div className="profile-header">
           <div className="profile-avatar">
             <img
-              src={formData.foto || '/src/assets/imgs/student.gif'}
+              src={formData.foto || '/assets/imgs/student.gif'}
               alt="Foto de perfil"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                target.src = '/src/assets/imgs/student.gif';
+                target.src = '/assets/imgs/student.gif';
               }}
             />
           </div>

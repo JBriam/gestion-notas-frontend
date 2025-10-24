@@ -260,12 +260,12 @@ const DocenteManagement: React.FC = () => {
               <div key={docente.idDocente} className="docente-card">
                 <div className="docente-header">
                   <img
-                    src={docente.foto || "/src/assets/imgs/docente.png"}
+                    src={docente.foto || "/assets/imgs/docente.png"}
                     alt={`${docente.nombres} ${docente.apellidos}`}
                     className="docente-avatar"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.src = "/src/assets/imgs/docente.png";
+                      target.src = "/assets/imgs/docente.png";
                     }}
                   />
                   <div className="docente-info">

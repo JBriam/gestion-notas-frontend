@@ -112,7 +112,7 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
       <div className="auth-card">
         <div className="auth-header">
           <img
-            src="/src/assets/logos/Logo_Colegio_sin_fondo.png"
+            src="/assets/logos/Logo_Colegio_sin_fondo.png"
             alt="Logo Colegio"
             className="auth-logo"
           />
