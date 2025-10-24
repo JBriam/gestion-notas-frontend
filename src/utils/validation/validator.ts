@@ -11,8 +11,7 @@ import type { ValidationSchema, ValidationResult, ValidationOptions } from './ty
 export const validateField = (
   value: any,
   rules: any[],
-  formData?: any,
-  options?: ValidationOptions
+  formData?: any
 ): string => {
   for (const rule of rules) {
     if (rule.validator && !rule.validator(value, formData)) {
@@ -57,7 +56,7 @@ export const validateForm = (
     }
 
     // Validar reglas
-    const error = validateField(value, fieldValidation.rules, cleanData, options);
+    const error = validateField(value, fieldValidation.rules, cleanData);
     if (error) {
       errors[fieldName] = error;
       if (abortEarly) break;
