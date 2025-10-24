@@ -14,7 +14,7 @@ import type { ValidationRule } from './types';
 export const required = (message = 'Este campo es obligatorio'): ValidationRule => ({
   type: 'required',
   message,
-  validator: (value: any) => {
+  validator: (value: unknown) => {
     if (typeof value === 'string') return value.trim().length > 0;
     return value !== null && value !== undefined && value !== '';
   }
@@ -244,8 +244,8 @@ export const password = {
 export const confirmPassword = (passwordField = 'password', message = 'Las contraseñas no coinciden'): ValidationRule => ({
   type: 'confirmPassword',
   message,
-  validator: (value: string, formData?: any) => {
-    if (!value || !formData) return true;
+  validator: (value: unknown, formData?: Record<string, unknown>) => {
+    if (!value || !formData || typeof value !== 'string') return true;
     return value === formData[passwordField];
   }
 });
@@ -257,7 +257,7 @@ export const confirmPassword = (passwordField = 'password', message = 'Las contr
  */
 
 export const custom = (
-  validator: (value: any, formData?: any) => boolean,
+  validator: (value: unknown, formData?: Record<string, unknown>) => boolean,
   message: string
 ): ValidationRule => ({
   type: 'custom',
@@ -265,11 +265,11 @@ export const custom = (
   validator
 });
 
-export const oneOf = (allowedValues: any[], message?: string): ValidationRule => ({
+export const oneOf = (allowedValues: unknown[], message?: string): ValidationRule => ({
   type: 'oneOf',
   message: message || `Debe ser uno de: ${allowedValues.join(', ')}`,
   value: allowedValues,
-  validator: (value: any) => !value || allowedValues.includes(value)
+  validator: (value: unknown) => !value || allowedValues.includes(value)
 });
 
 export const url = (message = 'Ingresa una URL válida'): ValidationRule => ({
@@ -293,12 +293,12 @@ export const url = (message = 'Ingresa una URL válida'): ValidationRule => ({
  */
 
 export const requiredIf = (
-  condition: (formData: any) => boolean,
+  condition: (formData: Record<string, unknown>) => boolean,
   message = 'Este campo es obligatorio'
 ): ValidationRule => ({
   type: 'requiredIf',
   message,
-  validator: (value: any, formData?: any) => {
+  validator: (value: unknown, formData?: Record<string, unknown>) => {
     if (!formData || !condition(formData)) return true;
     if (typeof value === 'string') return value.trim().length > 0;
     return value !== null && value !== undefined && value !== '';
@@ -307,12 +307,12 @@ export const requiredIf = (
 
 export const requiredIfField = (
   fieldName: string,
-  fieldValue: any,
+  fieldValue: unknown,
   message = 'Este campo es obligatorio'
 ): ValidationRule => ({
   type: 'requiredIfField',
   message,
-  validator: (value: any, formData?: any) => {
+  validator: (value: unknown, formData?: Record<string, unknown>) => {
     if (!formData || formData[fieldName] !== fieldValue) return true;
     if (typeof value === 'string') return value.trim().length > 0;
     return value !== null && value !== undefined && value !== '';
