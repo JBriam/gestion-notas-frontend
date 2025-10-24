@@ -21,7 +21,7 @@ interface UseValidationReturn<T> {
   isValidating: boolean;
 
   // Funciones
-  validateField: (fieldName: keyof T, value: any) => string;
+  validateField: (fieldName: keyof T, value: unknown) => string;
   validateForm: () => boolean;
   setFieldTouched: (fieldName: keyof T, isTouched?: boolean) => void;
   setError: (fieldName: keyof T, error: string) => void;
@@ -37,7 +37,7 @@ interface UseValidationReturn<T> {
   };
 }
 
-export function useValidation<T extends Record<string, any>>(
+export function useValidation<T extends Record<string, unknown> = Record<string, unknown>>(
   schema: ValidationSchema,
   formData: T,
   options: UseValidationOptions = {}
@@ -53,11 +53,11 @@ export function useValidation<T extends Record<string, any>>(
   const [isValidating, setIsValidating] = useState(false);
 
   // Validar un campo específico
-  const validateSingleField = useCallback((fieldName: keyof T, value: any): string => {
+  const validateSingleField = useCallback((fieldName: keyof T, value: unknown): string => {
     const fieldValidation = schema[fieldName as string];
     if (!fieldValidation) return '';
     
-    return validateField(value, fieldValidation.rules, formData);
+    return validateField(value, fieldValidation.rules, formData as Record<string, unknown>);
   }, [schema, formData]);
 
   // Validar todo el formulario
@@ -186,7 +186,7 @@ export function useValidation<T extends Record<string, any>>(
 /**
  * Hook simplificado para validación básica
  */
-export function useFormValidation<T extends Record<string, any>>(
+export function useFormValidation<T extends Record<string, unknown> = Record<string, unknown>>(
   schema: ValidationSchema,
   formData: T
 ) {

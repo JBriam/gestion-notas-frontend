@@ -9,8 +9,11 @@ import type { ValidationSchema, ValidationResult, ValidationOptions } from './ty
  * Valida un solo campo con sus reglas
  */
 export const validateField = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value: any,
-  rules: any[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  rules: { validator?: (value: any, formData?: any) => boolean; message: string }[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formData?: any
 ): string => {
   for (const rule of rules) {
@@ -25,7 +28,7 @@ export const validateField = (
  * Valida un objeto completo contra un schema
  */
 export const validateForm = (
-  data: Record<string, any>,
+  data: Record<string, unknown>,
   schema: ValidationSchema,
   options: ValidationOptions = {}
 ): ValidationResult => {
@@ -73,7 +76,7 @@ export const validateForm = (
  * Valida solo los campos que han sido "tocados"
  */
 export const validateTouchedFields = (
-  data: Record<string, any>,
+  data: Record<string, unknown>,
   schema: ValidationSchema,
   touched: Record<string, boolean>,
   options?: ValidationOptions
@@ -94,7 +97,7 @@ export const validateTouchedFields = (
  * Obtiene los errores de validación para mostrar en tiempo real
  */
 export const getFieldErrors = (
-  data: Record<string, any>,
+  data: Record<string, unknown>,
   schema: ValidationSchema,
   touched: Record<string, boolean>
 ): Record<string, string> => {
@@ -106,7 +109,7 @@ export const getFieldErrors = (
  * Verifica si un formulario es válido para envío
  */
 export const isFormValid = (
-  data: Record<string, any>,
+  data: Record<string, unknown>,
   schema: ValidationSchema
 ): boolean => {
   const result = validateForm(data, schema);
@@ -126,7 +129,7 @@ export const getRequiredFields = (schema: ValidationSchema): string[] => {
  * Verifica si todos los campos requeridos tienen valor
  */
 export const hasRequiredFields = (
-  data: Record<string, any>,
+  data: Record<string, unknown>,
   schema: ValidationSchema
 ): boolean => {
   const requiredFields = getRequiredFields(schema);
