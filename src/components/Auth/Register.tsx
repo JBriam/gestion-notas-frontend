@@ -191,6 +191,7 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
                 {...getFieldProps("telefono")}
                 placeholder="987654321"
                 disabled={loading}
+                maxLength={9}
                 className={validation.errors.telefono ? "input-error" : ""}
               />
               {validation.errors.telefono && (
