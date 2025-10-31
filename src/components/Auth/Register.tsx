@@ -189,7 +189,7 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
                 name="telefono"
                 value={formData.telefono}
                 {...getFieldProps("telefono")}
-                placeholder="999-999-999"
+                placeholder="987654321"
                 disabled={loading}
                 className={validation.errors.telefono ? "input-error" : ""}
               />
