@@ -224,6 +224,55 @@
   background: #bdc3c7;
 }
 
+/* Password Input Wrapper */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding-right: 48px; /* Espacio para el botón */
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #667eea;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  z-index: 10;
+}
+
+.password-toggle-btn:hover:not(:disabled) {
+  background: rgba(102, 126, 234, 0.1);
+  color: #764ba2;
+  transform: scale(1.05);
+}
+
+.password-toggle-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.password-toggle-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.password-toggle-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+}
+
 /* Responsive */
 @media (max-width: 480px) {
   .auth-container {
@@ -240,5 +289,15 @@
 
   .auth-header p {
     font-size: 14px;
+  }
+  
+  .password-toggle-btn {
+    right: 8px;
+    padding: 6px;
+  }
+  
+  .password-toggle-btn svg {
+    width: 18px;
+    height: 18px;
   }
 }
