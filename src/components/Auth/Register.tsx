@@ -71,7 +71,7 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
 
     try {
       // Crear objeto sin confirmPassword para enviar al backend
-      // const { confirmPassword, ...registerData } = formData;
+      const { confirmPassword, ...registerData } = formData;
       const response = await AuthService.register(registerData);
 
       if (response.success) {
