@@ -30,8 +30,8 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
 
   // Integrar sistema de validaciones
   const validation = useValidation(schemas.registerSchema, formData, {
-    mode: 'onBlur',
-    revalidateMode: 'onChange'
+    mode: "onBlur",
+    revalidateMode: "onChange",
   });
 
   const handleInputChange = (
@@ -50,10 +50,12 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
     const validationProps = validation.getFieldProps(fieldName);
     return {
       ...validationProps,
-      onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      onChange: (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+      ) => {
         handleInputChange(e);
         validationProps.onChange(e);
-      }
+      },
     };
   };
 
@@ -71,6 +73,7 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
 
     try {
       // Crear objeto sin confirmPassword para enviar al backend
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...registerData } = formData;
       const response = await AuthService.register(registerData);
 
@@ -102,11 +105,12 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
   };
 
   // Verificar si el formulario puede ser enviado
-  const canSubmit = validation.isValid && 
-    formData.nombres && 
-    formData.apellidos && 
-    formData.email && 
-    formData.password && 
+  const canSubmit =
+    validation.isValid &&
+    formData.nombres &&
+    formData.apellidos &&
+    formData.email &&
+    formData.password &&
     formData.confirmPassword;
 
   return (
@@ -131,10 +135,10 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
                 id="nombres"
                 name="nombres"
                 value={formData.nombres}
-                {...getFieldProps('nombres')}
+                {...getFieldProps("nombres")}
                 required
                 disabled={loading}
-                className={validation.errors.nombres ? 'input-error' : ''}
+                className={validation.errors.nombres ? "input-error" : ""}
               />
               {validation.errors.nombres && (
                 <div className="field-error">{validation.errors.nombres}</div>
@@ -147,10 +151,10 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
                 id="apellidos"
                 name="apellidos"
                 value={formData.apellidos}
-                {...getFieldProps('apellidos')}
+                {...getFieldProps("apellidos")}
                 required
                 disabled={loading}
-                className={validation.errors.apellidos ? 'input-error' : ''}
+                className={validation.errors.apellidos ? "input-error" : ""}
               />
               {validation.errors.apellidos && (
                 <div className="field-error">{validation.errors.apellidos}</div>
@@ -165,9 +169,9 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
                 id="rol"
                 name="rol"
                 value={formData.rol}
-                {...getFieldProps('rol')}
+                {...getFieldProps("rol")}
                 disabled={loading}
-                className={validation.errors.rol ? 'input-error' : ''}
+                className={validation.errors.rol ? "input-error" : ""}
               >
                 <option value="ESTUDIANTE">Estudiante</option>
                 <option value="DOCENTE">Docente</option>
@@ -184,10 +188,10 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
                 id="telefono"
                 name="telefono"
                 value={formData.telefono}
-                {...getFieldProps('telefono')}
+                {...getFieldProps("telefono")}
                 placeholder="999-999-999"
                 disabled={loading}
-                className={validation.errors.telefono ? 'input-error' : ''}
+                className={validation.errors.telefono ? "input-error" : ""}
               />
               {validation.errors.telefono && (
                 <div className="field-error">{validation.errors.telefono}</div>
@@ -202,103 +206,154 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
               id="email"
               name="email"
               value={formData.email}
-              {...getFieldProps('email')}
+              {...getFieldProps("email")}
               required
               placeholder="tu@email.com"
               disabled={loading}
               maxLength={100}
-              className={validation.errors.email ? 'input-error' : ''}
+              className={validation.errors.email ? "input-error" : ""}
             />
             {validation.errors.email && (
               <div className="field-error">{validation.errors.email}</div>
             )}
           </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="password">Contraseña *</label>
-              <div className="password-input-wrapper">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  {...getFieldProps('password')}
-                  required
-                  placeholder="Mínimo 6 caracteres"
-                  disabled={loading}
-                  minLength={6}
-                  className={validation.errors.password ? 'input-error' : ''}
-                />
-                <button
-                  type="button"
-                  className="password-toggle-btn"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                  disabled={loading}
-                >
-                  {showPassword ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                      <line x1="1" y1="1" x2="23" y2="23"></line>
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                  )}
-                </button>
-              </div>
-              {validation.errors.password && (
-                <div className="field-error">{validation.errors.password}</div>
-              )}
+          <div className="form-group">
+            <label htmlFor="password">Contraseña *</label>
+            <div className="password-input-wrapper">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                {...getFieldProps("password")}
+                required
+                placeholder="Mínimo 6 caracteres"
+                disabled={loading}
+                minLength={6}
+                className={validation.errors.password ? "input-error" : ""}
+              />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={
+                  showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                }
+                disabled={loading}
+              >
+                {showPassword ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                )}
+              </button>
             </div>
+            {validation.errors.password && (
+              <div className="field-error">{validation.errors.password}</div>
+            )}
+          </div>
 
-            <div className="form-group">
-              <label htmlFor="confirmPassword">Confirmar Contraseña *</label>
-              <div className="password-input-wrapper">
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  {...getFieldProps('confirmPassword')}
-                  required
-                  placeholder="Repite tu contraseña"
-                  disabled={loading}
-                  className={validation.errors.confirmPassword ? 'input-error' : ''}
-                />
-                <button
-                  type="button"
-                  className="password-toggle-btn"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  aria-label={showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                  disabled={loading}
-                >
-                  {showConfirmPassword ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                      <line x1="1" y1="1" x2="23" y2="23"></line>
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                  )}
-                </button>
-              </div>
-              {validation.errors.confirmPassword && (
-                <div className="field-error">{validation.errors.confirmPassword}</div>
-              )}
+          <div className="form-group">
+            <label htmlFor="confirmPassword">Confirmar Contraseña *</label>
+            <div className="password-input-wrapper">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                {...getFieldProps("confirmPassword")}
+                required
+                placeholder="Repite tu contraseña"
+                disabled={loading}
+                className={
+                  validation.errors.confirmPassword ? "input-error" : ""
+                }
+              />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                aria-label={
+                  showConfirmPassword
+                    ? "Ocultar contraseña"
+                    : "Mostrar contraseña"
+                }
+                disabled={loading}
+              >
+                {showConfirmPassword ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                )}
+              </button>
             </div>
+            {validation.errors.confirmPassword && (
+              <div className="field-error">
+                {validation.errors.confirmPassword}
+              </div>
+            )}
           </div>
 
           {error && <div className="error-message">{error}</div>}
           {success && <div className="success-message">{success}</div>}
 
-          <button type="submit" className="auth-button" disabled={loading || !canSubmit}>
+          <button
+            type="submit"
+            className="auth-button"
+            disabled={loading || !canSubmit}
+          >
             {loading ? "Registrando..." : "Registrarse"}
           </button>
         </form>

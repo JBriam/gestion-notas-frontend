@@ -396,10 +396,11 @@
   bottom: 0;
   background: rgba(0, 0, 0, 0.7);
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Cambiar de center a flex-start para permitir scroll */
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  overflow-y: auto; /* Permitir scroll vertical */
 }
 
 .modal-content {
@@ -412,6 +413,7 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: modalSlideIn 0.3s ease;
   opacity: 1 !important;
+  margin: 20px 0; /* Agregar margen vertical para evitar que se pegue a los bordes */
 }
 
 @keyframes modalSlideIn {
@@ -646,8 +648,12 @@
     min-width: 800px;
   }
 
+  .modal-overlay {
+    align-items: flex-start; /* Asegurar scroll en tablets/móviles */
+  }
+
   .modal-content {
-    margin: 10px;
+    margin: 10px 0; /* Mantener margen vertical consistente */
     max-height: calc(100vh - 20px);
   }
 

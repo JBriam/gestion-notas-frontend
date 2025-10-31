@@ -3,10 +3,11 @@
 .auth-container {
   min-height: 100vh;
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Cambiar de center a flex-start para permitir scroll */
   justify-content: center;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 20px;
+  overflow-y: auto; /* Permitir scroll vertical */
 }
 
 .auth-card {
@@ -17,6 +18,9 @@
   width: 100%;
   max-width: 550px;
   animation: slideIn 0.5s ease-out;
+  margin: 20px 0; /* Agregar margen vertical para evitar que se corte */
+  max-height: calc(100vh - 40px); /* Limitar altura máxima */
+  overflow-y: auto; /* Permitir scroll interno si es necesario */
 }
 
 @keyframes slideIn {
@@ -59,6 +63,14 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+/* Estilos para filas de formulario (2 campos lado a lado) */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  width: 100%;
 }
 
 .form-group {
@@ -274,13 +286,24 @@
 }
 
 /* Responsive */
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr; /* Una columna en tablets */
+    gap: 10px;
+  }
+}
+
 @media (max-width: 480px) {
   .auth-container {
     padding: 10px;
+    align-items: flex-start; /* Asegurar scroll en móviles */
   }
 
   .auth-card {
     padding: 30px 20px;
+    margin: 10px 0;
+    max-height: none; /* Remover límite de altura en móviles */
+    border-radius: 16px;
   }
 
   .auth-header h2 {
@@ -289,6 +312,10 @@
 
   .auth-header p {
     font-size: 14px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr; /* Una columna en móviles */
   }
   
   .password-toggle-btn {
