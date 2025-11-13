@@ -67,11 +67,11 @@ export const EstudianteService = {
         if (foto && foto.size > 10 * 1024 * 1024) {
           throw new Error('La imagen debe ser menor a 10MB');
         }
-        response = await api.post('/api/estudiantes/completo', estudiante, {
+        response = await api.post('/estudiantes/completo', estudiante, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
       } else {
-        response = await api.post('/api/estudiantes/completo', estudiante);
+        response = await api.post('/estudiantes/completo', estudiante);
       }
       const created: Estudiante = response.data;
       if (created && created.foto) {
