@@ -50,6 +50,9 @@ const DocenteManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredDocentes, setFilteredDocentes] = useState<Docente[]>([]);
 
+  // Estado para vista previa de imagen
+  const [imagePreview, setImagePreview] = useState<string>("");
+
   useEffect(() => {
     cargarDocentes();
   }, []);
@@ -133,7 +136,62 @@ const DocenteManagement: React.FC = () => {
     }
   };
 
-  const handleEdit = async (e: React.FormEvent) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    
+    if (file) {
+      // Validar que sea una imagen
+      if (!file.type.startsWith('image/')) {
+        setError('Por favor selecciona un archivo de imagen válido');
+        return;
+      }
+
+      // Comprimir y redimensionar la imagen
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          // Crear canvas para redimensionar
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Reducir dimensiones (máx 100x100 px para ~2KB)
+          let width = img.width;
+          let height = img.height;
+          const maxSize = 100;
+          
+          if (width > height) {
+            if (width > maxSize) {
+              height = (height * maxSize) / width;
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = (width * maxSize) / height;
+              height = maxSize;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          // Dibujar imagen redimensionada
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          // Convertir a base64 con compresión (calidad 0.7)
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+          
+          // Actualizar formData y preview
+          setFormData((prev) => ({ ...prev, foto: compressedBase64 }));
+          setImagePreview(compressedBase64);
+        };
+        img.src = event.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedDocente) return;
 
