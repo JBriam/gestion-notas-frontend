@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { EstudianteService } from "../../api/EstudianteService";
 import type { Estudiante } from "../../interfaces/Estudiante";
+import { useValidation } from "../../utils/validation/useValidation";
+import { estudianteSchema } from "../../utils/validation/schemas";
 import "./EstudianteManagement.css";
 
 interface EstudianteForm extends Record<string, unknown> {
@@ -43,6 +45,12 @@ const EstudianteManagement: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  // Hook de validación
+  const validation = useValidation(estudianteSchema, formData, {
+    mode: 'onBlur',
+    revalidateMode: 'onChange'
+  });
+
   useEffect(() => {
     loadEstudiantes();
   }, []);
@@ -62,9 +70,18 @@ const EstudianteManagement: React.FC = () => {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar formulario
+    if (!validation.validateForm()) {
+      setError(`Por favor, corrige los errores: ${Object.keys(validation.errors).join(', ')}`);
+      return;
+    }
+    
     try {
       setLoading(true);
-      await EstudianteService.crear(formData);
+      // Remover confirmPassword antes de enviar
+      const { confirmPassword, ...estudianteData } = formData;
+      await EstudianteService.crear(estudianteData);
       setSuccess("Estudiante creado exitosamente");
       setShowCreateModal(false);
       resetForm();

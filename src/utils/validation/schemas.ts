@@ -120,9 +120,8 @@ export const estudianteSchema: ValidationSchema = {
     ]
   },
   codigoEstudiante: {
-    required: true,
+    required: false,  // Se genera automáticamente en el backend
     rules: [
-      rules.required('El código de estudiante es obligatorio'),
       rules.codigoEstudiante('El código debe tener formato EST seguido de números (ej: EST001)')
     ]
   },
@@ -145,6 +144,20 @@ export const estudianteSchema: ValidationSchema = {
     required: false,
     rules: [
       rules.alphabetic('Solo se permiten letras y espacios')
+    ]
+  },
+  password: {
+    required: true,
+    rules: [
+      rules.required('La contraseña es obligatoria'),
+      rules.minLength(6, 'La contraseña debe tener al menos 6 caracteres')
+    ]
+  },
+  confirmPassword: {
+    required: true,
+    rules: [
+      rules.required('Confirma tu contraseña'),
+      rules.confirmPassword('password', 'Las contraseñas no coinciden')
     ]
   }
 };
