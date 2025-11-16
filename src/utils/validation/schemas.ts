@@ -207,6 +207,20 @@ export const docenteSchema: ValidationSchema = {
     rules: [
       rules.alphabetic('Solo se permiten letras y espacios')
     ]
+  },
+  password: {
+    required: true,
+    rules: [
+      rules.required('La contraseña es obligatoria'),
+      rules.minLength(6, 'La contraseña debe tener al menos 6 caracteres')
+    ]
+  },
+  confirmPassword: {
+    required: true,
+    rules: [
+      rules.required('Confirma tu contraseña'),
+      rules.confirmPassword('password', 'Las contraseñas no coinciden')
+    ]
   }
 };
 

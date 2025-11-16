@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { DocenteService } from "../../api/DocenteService";
 import type { Docente } from "../../interfaces/Docente";
+import { useValidation } from "../../utils/validation/useValidation";
+import { docenteSchema } from "../../utils/validation/schemas";
 import "./DocenteManagement.css";
 
 interface DocenteForm extends Record<string, unknown> {
@@ -49,6 +51,12 @@ const DocenteManagement: React.FC = () => {
   // Estado para búsqueda
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredDocentes, setFilteredDocentes] = useState<Docente[]>([]);
+
+  // Hook de validación
+  const validation = useValidation(docenteSchema, formData, {
+    mode: 'onBlur',
+    revalidateMode: 'onChange'
+  });
 
   useEffect(() => {
     cargarDocentes();
@@ -114,12 +122,21 @@ const DocenteManagement: React.FC = () => {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar formulario
+    if (!validation.validateForm()) {
+      setError(`Por favor, corrige los errores: ${Object.keys(validation.errors).join(', ')}`);
+      return;
+    }
+    
     setLoading(true);
     setError("");
     setSuccess("");
 
     try {
-      await DocenteService.crear(formData);
+      // Remover confirmPassword antes de enviar
+      const { confirmPassword, ...docenteData } = formData;
+      await DocenteService.crear(docenteData);
       setSuccess("Docente creado exitosamente");
       setShowCreateModal(false);
       limpiarFormulario();
