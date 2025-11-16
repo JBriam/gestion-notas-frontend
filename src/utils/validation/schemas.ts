@@ -98,9 +98,8 @@ export const estudianteSchema: ValidationSchema = {
     ]
   },
   codigoEstudiante: {
-    required: true,
+    required: false,  // Se genera automáticamente en el backend
     rules: [
-      rules.required('El código de estudiante es obligatorio'),
       rules.codigoEstudiante('El código debe tener formato EST seguido de números (ej: EST001)')
     ]
   },
@@ -123,6 +122,20 @@ export const estudianteSchema: ValidationSchema = {
     required: false,
     rules: [
       rules.alphabetic('Solo se permiten letras y espacios')
+    ]
+  },
+  password: {
+    required: true,
+    rules: [
+      rules.required('La contraseña es obligatoria'),
+      rules.minLength(6, 'La contraseña debe tener al menos 6 caracteres')
+    ]
+  },
+  confirmPassword: {
+    required: true,
+    rules: [
+      rules.required('Confirma tu contraseña'),
+      rules.confirmPassword('password', 'Las contraseñas no coinciden')
     ]
   }
 };
@@ -176,14 +189,35 @@ export const docenteSchema: ValidationSchema = {
   fechaContratacion: {
     required: false,
     rules: [
-      rules.dateFormat('Formato de fecha inválido'),
-      rules.pastDate('La fecha de contratación debe ser anterior a hoy')
+      rules.dateFormat('Formato de fecha inválido')
     ]
   },
   distrito: {
     required: false,
     rules: [
       rules.alphabetic('Solo se permiten letras y espacios')
+    ]
+  },
+  direccion: {
+    required: false,
+    rules: [
+      rules.minLength(5, 'La dirección debe tener al menos 5 caracteres'),
+      rules.maxLength(200, 'La dirección no puede tener más de 200 caracteres')
+    ]
+  },
+  password: {
+    required: true,
+    rules: [
+      rules.required('La contraseña es obligatoria'),
+      rules.minLength(6, 'La contraseña debe tener al menos 6 caracteres'),
+      rules.maxLength(100, 'La contraseña no puede tener más de 100 caracteres')
+    ]
+  },
+  confirmPassword: {
+    required: true,
+    rules: [
+      rules.required('Confirma tu contraseña'),
+      rules.confirmPassword('password', 'Las contraseñas no coinciden')
     ]
   }
 };

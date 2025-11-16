@@ -117,7 +117,10 @@ export const DocenteService = {
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        throw new Error(error.response?.data?.message || 'Error al crear docente');
+        // Mostrar el error completo del backend
+        const errorMessage = error.response?.data?.message || error.response?.data || 'Error al crear docente';
+        console.error('Error del backend:', error.response?.data);
+        throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
       }
       throw new Error('Error de conexión con el servidor');
     }
@@ -126,11 +129,34 @@ export const DocenteService = {
   // Actualizar docente
   async actualizar(docente: Docente): Promise<Docente> {
     try {
-      const response = await api.put(`/docentes/${docente.idDocente}`, docente);
+      // Enviar solo los campos que el backend acepta (sin idDocente, email, etc.)
+      const docenteDTO = {
+        nombres: docente.nombres,
+        apellidos: docente.apellidos,
+        codigoDocente: docente.codigoDocente,
+        telefono: docente.telefono,
+        direccion: docente.direccion,
+        distrito: docente.distrito,
+        foto: docente.foto,
+        especialidad: docente.especialidad,
+        fechaContratacion: docente.fechaContratacion
+      };
+      
+      console.log('=== DEBUG SERVICE ACTUALIZAR ===');
+      console.log('ID:', docente.idDocente);
+      console.log('DTO a enviar:', docenteDTO);
+      console.log('Foto length:', docente.foto?.length || 0);
+      
+      const response = await api.put(`/docentes/${docente.idDocente}`, docenteDTO);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        throw new Error(error.response?.data?.message || 'Error al actualizar docente');
+        console.error('❌ Error del backend al actualizar:');
+        console.error('Status:', error.response?.status);
+        console.error('Data:', error.response?.data);
+        console.error('Headers:', error.response?.headers);
+        const errorMessage = error.response?.data?.message || error.response?.data || 'Error al actualizar docente';
+        throw new Error(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage));
       }
       throw new Error('Error de conexión con el servidor');
     }

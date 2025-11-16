@@ -46,10 +46,17 @@ export const EstudianteService = {
   // Crear estudiante (para admin/docente)
   async crear(estudiante: Omit<Estudiante, 'idEstudiante'>): Promise<Estudiante> {
     try {
+      console.log('📤 ENVIANDO AL BACKEND:', estudiante);
       const response = await api.post('/estudiantes/completo', estudiante);
+      console.log('✅ RESPUESTA DEL BACKEND:', response.data);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
+        console.error('❌ ERROR DEL BACKEND:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message
+        });
         throw new Error(error.response?.data?.message || 'Error al crear estudiante');
       }
       throw new Error('Error de conexión con el servidor');
@@ -59,10 +66,29 @@ export const EstudianteService = {
   // Actualizar estudiante (para admin/docente)
   async actualizar(estudiante: Estudiante): Promise<Estudiante> {
     try {
-      const response = await api.put(`/estudiantes/${estudiante.idEstudiante}`, estudiante);
+      // Enviar solo los campos que el backend acepta
+      const estudianteDTO = {
+        nombres: estudiante.nombres,
+        apellidos: estudiante.apellidos,
+        codigoEstudiante: estudiante.codigoEstudiante,
+        telefono: estudiante.telefono,
+        direccion: estudiante.direccion,
+        distrito: estudiante.distrito,
+        foto: estudiante.foto,
+        fechaNacimiento: estudiante.fechaNacimiento
+      };
+      
+      console.log('=== DEBUG SERVICE ACTUALIZAR ESTUDIANTE ===');
+      console.log('ID:', estudiante.idEstudiante);
+      console.log('DTO a enviar:', estudianteDTO);
+      
+      const response = await api.put(`/estudiantes/${estudiante.idEstudiante}`, estudianteDTO);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
+        console.error('❌ Error del backend al actualizar estudiante:');
+        console.error('Status:', error.response?.status);
+        console.error('Data:', error.response?.data);
         throw new Error(error.response?.data?.message || 'Error al actualizar estudiante');
       }
       throw new Error('Error de conexión con el servidor');

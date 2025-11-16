@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { EstudianteService } from "../../api/EstudianteService";
 import type { Estudiante } from "../../interfaces/Estudiante";
+import { useValidation } from "../../utils/validation/useValidation";
+import { estudianteSchema } from "../../utils/validation/schemas";
 import "./EstudianteManagement.css";
 
 interface EstudianteForm extends Record<string, unknown> {
@@ -43,6 +45,19 @@ const EstudianteManagement: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  // Estado para vista previa de imagen
+  const [imagePreview, setImagePreview] = useState<string>("");
+
+  // Estados para mostrar/ocultar contraseñas
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Hook de validación
+  const validation = useValidation(estudianteSchema, formData, {
+    mode: 'onBlur',
+    revalidateMode: 'onChange'
+  });
+
   useEffect(() => {
     loadEstudiantes();
   }, []);
@@ -60,11 +75,103 @@ const EstudianteManagement: React.FC = () => {
     }
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    
+    if (file) {
+      // Validar que sea una imagen
+      if (!file.type.startsWith('image/')) {
+        setError('Por favor selecciona un archivo de imagen válido');
+        return;
+      }
+
+      // Comprimir y redimensionar la imagen AGRESIVAMENTE
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          // Crear canvas para redimensionar
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Reducir dimensiones AÚN MÁS (máx 100x100 px para menos caracteres)
+          let width = img.width;
+          let height = img.height;
+          const maxSize = 100; // Reducido de 200 a 100
+          
+          if (width > height) {
+            if (width > maxSize) {
+              height = (height * maxSize) / width;
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = (width * maxSize) / height;
+              height = maxSize;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          // Dibujar imagen redimensionada
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          // Convertir a Base64 con MÁXIMA compresión (0.3 = 30% calidad)
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.3);
+          
+          // Verificar tamaño final
+          const sizeInKB = Math.round((compressedBase64.length * 3) / 4 / 1024);
+          const caracteres = compressedBase64.length;
+          console.log(`✅ Imagen SUPER comprimida:`);
+          console.log(`   - Tamaño: ${sizeInKB}KB (original: ${Math.round(file.size / 1024)}KB)`);
+          console.log(`   - Caracteres: ${caracteres.toLocaleString()} (Base64)`);
+          console.log(`   - Dimensiones: ${Math.round(width)}x${Math.round(height)}px`);
+          
+          setFormData((prev) => ({ ...prev, foto: compressedBase64 }));
+          setImagePreview(compressedBase64);
+          setError('');
+        };
+        img.src = event.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar formulario
+    if (!validation.validateForm()) {
+      console.log("❌ ERRORES DE VALIDACIÓN:", validation.errors);
+      console.log("📋 DATOS DEL FORMULARIO:", formData);
+      setError(`Por favor, corrige los errores: ${Object.keys(validation.errors).join(', ')}`);
+      return;
+    }
+    
     try {
       setLoading(true);
-      await EstudianteService.crear(formData);
+      
+      // Remover confirmPassword antes de enviar
+      const { confirmPassword, codigoEstudiante, ...estudianteDataWithoutConfirm } = formData;
+      
+      // Preparar datos para enviar
+      const dataToSend = {
+        ...estudianteDataWithoutConfirm,
+        password: (formData.password || '').trim(),
+        // Solo incluir codigoEstudiante si tiene valor, sino undefined para que el backend lo genere
+        ...(codigoEstudiante && codigoEstudiante.trim() !== '' ? { codigoEstudiante: codigoEstudiante.trim() } : {}),
+        // Limpiar campos opcionales vacíos
+        telefono: formData.telefono?.trim() || undefined,
+        direccion: formData.direccion?.trim() || undefined,
+        distrito: formData.distrito?.trim() || undefined,
+        foto: formData.foto?.trim() || undefined,
+        fechaNacimiento: formData.fechaNacimiento || undefined,
+      };
+      
+      console.log('🚀 Creando estudiante:', dataToSend);
+      
+      await EstudianteService.crear(dataToSend);
       setSuccess("Estudiante creado exitosamente");
       setShowCreateModal(false);
       resetForm();
@@ -81,12 +188,25 @@ const EstudianteManagement: React.FC = () => {
     e.preventDefault();
     if (!selectedEstudiante?.idEstudiante) return;
 
+    // Validar formulario
+    if (!validation.validateForm()) {
+      setError("Por favor, corrige los errores del formulario");
+      return;
+    }
+
     try {
       setLoading(true);
+      
+      // Remover password y confirmPassword del formData
+      const { password, confirmPassword, ...estudianteData } = formData;
+      
       const updatedEstudiante = {
         ...selectedEstudiante,
-        ...formData,
+        ...estudianteData,
       };
+      
+      console.log('Actualizando estudiante:', updatedEstudiante);
+      
       await EstudianteService.actualizar(updatedEstudiante);
       setSuccess("Estudiante actualizado exitosamente");
       setShowEditModal(false);
@@ -136,6 +256,8 @@ const EstudianteManagement: React.FC = () => {
       codigoEstudiante: estudiante.codigoEstudiante as string,
       email: estudiante.email as string,
     });
+    setImagePreview(estudiante.foto as string || "");
+    validation.reset();
     setShowEditModal(true);
   };
 
@@ -159,6 +281,10 @@ const EstudianteManagement: React.FC = () => {
       confirmPassword: "",
     });
     setSelectedEstudiante(null);
+    setImagePreview("");
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+    validation.reset();
   };
 
   const closeModals = () => {
@@ -333,93 +459,148 @@ const EstudianteManagement: React.FC = () => {
             <form onSubmit={handleCreate} className="modal-form">
               <div className="form-row">
                 <div className="form-group">
-                  <label>Nombres *</label>
+                  <label htmlFor="create-nombres">Nombres *</label>
                   <input
                     type="text"
+                    id="create-nombres"
+                    name="nombres"
                     value={formData.nombres}
-                    onChange={(e) =>
-                      setFormData({ ...formData, nombres: e.target.value })
-                    }
+                    {...validation.getFieldProps("nombres")}
+                    onChange={(e) => {
+                      setFormData({ ...formData, nombres: e.target.value });
+                      validation.getFieldProps("nombres").onChange(e);
+                    }}
                     required
                     disabled={loading}
                   />
+                  {validation.errors.nombres && (
+                    <div className="field-error">{validation.errors.nombres}</div>
+                  )}
                 </div>
                 <div className="form-group">
-                  <label>Apellidos *</label>
+                  <label htmlFor="create-apellidos">Apellidos *</label>
                   <input
                     type="text"
+                    id="create-apellidos"
+                    name="apellidos"
                     value={formData.apellidos}
-                    onChange={(e) =>
-                      setFormData({ ...formData, apellidos: e.target.value })
-                    }
+                    {...validation.getFieldProps("apellidos")}
+                    onChange={(e) => {
+                      setFormData({ ...formData, apellidos: e.target.value });
+                      validation.getFieldProps("apellidos").onChange(e);
+                    }}
                     required
                     disabled={loading}
                   />
+                  {validation.errors.apellidos && (
+                    <div className="field-error">{validation.errors.apellidos}</div>
+                  )}
                 </div>
               </div>
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Email *</label>
+                  <label htmlFor="create-email">Email *</label>
                   <input
                     type="email"
+                    id="create-email"
+                    name="email"
                     value={formData.email}
                     placeholder="Ej: estudiante@ejemplo.com"
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
+                    {...validation.getFieldProps("email")}
+                    onChange={(e) => {
+                      setFormData({ ...formData, email: e.target.value });
+                      validation.getFieldProps("email").onChange(e);
+                    }}
                     required
                     disabled={loading}
                   />
+                  {validation.errors.email && (
+                    <div className="field-error">{validation.errors.email}</div>
+                  )}
                 </div>
                 <div className="form-group">
-                  <label>Teléfono</label>
+                  <label htmlFor="create-telefono">Teléfono</label>
                   <input
                     type="tel"
+                    id="create-telefono"
+                    name="telefono"
                     value={formData.telefono}
                     placeholder="Ej: 987654321"
-                    onChange={(e) =>
-                      setFormData({ ...formData, telefono: e.target.value })
-                    }
+                    {...validation.getFieldProps("telefono")}
+                    onChange={(e) => {
+                      setFormData({ ...formData, telefono: e.target.value });
+                      validation.getFieldProps("telefono").onChange(e);
+                    }}
                     disabled={loading}
                   />
+                  {validation.errors.telefono && (
+                    <div className="field-error">{validation.errors.telefono}</div>
+                  )}
                 </div>
               </div>
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Contraseña *</label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
-                    required
-                    placeholder="Mínimo 6 caracteres"
-                    disabled={loading}
-                    minLength={6}
-                  />
+                  <label htmlFor="password">Contraseña *</label>
+                  <div className="password-input-wrapper">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      {...validation.getFieldProps("password")}
+                      onChange={(e) => {
+                        setFormData({ ...formData, password: e.target.value });
+                        validation.getFieldProps("password").onChange(e);
+                      }}
+                      placeholder="Mínimo 6 caracteres"
+                      disabled={loading}
+                      minLength={6}
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="toggle-password"
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={loading}
+                    >
+                      <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
+                    </button>
+                  </div>
+                  {validation.errors.password && (
+                    <div className="field-error">{validation.errors.password}</div>
+                  )}
                 </div>
                 <div className="form-group">
-                  <label>Confirmar Contraseña *</label>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        confirmPassword: e.target.value,
-                      })
-                    }
-                    required
-                    placeholder="Repite tu contraseña"
-                    disabled={loading}
-                  />
+                  <label htmlFor="confirmPassword">Confirmar Contraseña *</label>
+                  <div className="password-input-wrapper">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      {...validation.getFieldProps("confirmPassword")}
+                      onChange={(e) => {
+                        setFormData({ ...formData, confirmPassword: e.target.value });
+                        validation.getFieldProps("confirmPassword").onChange(e);
+                      }}
+                      placeholder="Repite tu contraseña"
+                      disabled={loading}
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="toggle-password"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      disabled={loading}
+                    >
+                      <i className={`bi ${showConfirmPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
+                    </button>
+                  </div>
+                  {validation.errors.confirmPassword && (
+                    <div className="field-error">{validation.errors.confirmPassword}</div>
+                  )}
                 </div>
               </div>
 
@@ -428,26 +609,38 @@ const EstudianteManagement: React.FC = () => {
                   <label>Distrito</label>
                   <input
                     type="text"
+                    name="distrito"
                     value={formData.distrito}
-                    onChange={(e) =>
-                      setFormData({ ...formData, distrito: e.target.value })
-                    }
+                    {...validation.getFieldProps("distrito")}
+                    onChange={(e) => {
+                      setFormData({ ...formData, distrito: e.target.value });
+                      validation.getFieldProps("distrito").onChange(e);
+                    }}
                     disabled={loading}
                   />
+                  {validation.errors.distrito && (
+                    <div className="field-error">{validation.errors.distrito}</div>
+                  )}
                 </div>
                 <div className="form-group">
                   <label>Fecha de Nacimiento</label>
                   <input
                     type="date"
+                    name="fechaNacimiento"
                     value={formData.fechaNacimiento}
-                    onChange={(e) =>
+                    {...validation.getFieldProps("fechaNacimiento")}
+                    onChange={(e) => {
                       setFormData({
                         ...formData,
                         fechaNacimiento: e.target.value,
-                      })
-                    }
+                      });
+                      validation.getFieldProps("fechaNacimiento").onChange(e);
+                    }}
                     disabled={loading}
                   />
+                  {validation.errors.fechaNacimiento && (
+                    <div className="field-error">{validation.errors.fechaNacimiento}</div>
+                  )}
                 </div>
               </div>
 
@@ -461,6 +654,56 @@ const EstudianteManagement: React.FC = () => {
                   }
                   disabled={loading}
                 />
+              </div>
+
+              <div className="form-group full-width">
+                <label htmlFor="foto">Foto de Perfil (Opcional)</label>
+                
+                {/* Vista previa de la imagen */}
+                {(imagePreview || formData.foto) && (
+                  <div className="image-preview">
+                    <img 
+                      src={imagePreview || formData.foto} 
+                      alt="Vista previa" 
+                      className="preview-img"
+                    />
+                  </div>
+                )}
+
+                {/* Botón para subir imagen */}
+                <div className="upload-section">
+                  <input
+                    type="file"
+                    id="fotoFileCreate"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    style={{ display: 'none' }}
+                    disabled={loading}
+                  />
+                  <label htmlFor="fotoFileCreate" className="btn-upload">
+                    <i className="bi bi-upload"></i> Subir Imagen
+                  </label>
+                  <small className="form-hint">
+                    O ingresa una URL
+                  </small>
+                </div>
+
+                {/* Campo de URL */}
+                <input
+                  type="url"
+                  id="foto"
+                  name="foto"
+                  value={formData.foto.startsWith('data:') ? '' : formData.foto}
+                  onChange={(e) =>
+                    setFormData({ ...formData, foto: e.target.value })
+                  }
+                  placeholder="https://ejemplo.com/foto.jpg"
+                  disabled={loading}
+                  className="url-input"
+                />
+                <small className="form-hint">
+                  La imagen se comprimirá automáticamente a ~2KB
+                </small>
               </div>
 
               <div className="modal-actions">
@@ -503,25 +746,37 @@ const EstudianteManagement: React.FC = () => {
                   <label>Nombres *</label>
                   <input
                     type="text"
+                    name="nombres"
                     value={formData.nombres}
-                    onChange={(e) =>
-                      setFormData({ ...formData, nombres: e.target.value })
-                    }
+                    {...validation.getFieldProps("nombres")}
+                    onChange={(e) => {
+                      setFormData({ ...formData, nombres: e.target.value });
+                      validation.getFieldProps("nombres").onChange(e);
+                    }}
                     required
                     disabled={loading}
                   />
+                  {validation.errors.nombres && (
+                    <div className="field-error">{validation.errors.nombres}</div>
+                  )}
                 </div>
                 <div className="form-group">
                   <label>Apellidos *</label>
                   <input
                     type="text"
+                    name="apellidos"
                     value={formData.apellidos}
-                    onChange={(e) =>
-                      setFormData({ ...formData, apellidos: e.target.value })
-                    }
+                    {...validation.getFieldProps("apellidos")}
+                    onChange={(e) => {
+                      setFormData({ ...formData, apellidos: e.target.value });
+                      validation.getFieldProps("apellidos").onChange(e);
+                    }}
                     required
                     disabled={loading}
                   />
+                  {validation.errors.apellidos && (
+                    <div className="field-error">{validation.errors.apellidos}</div>
+                  )}
                 </div>
               </div>
 
@@ -530,24 +785,36 @@ const EstudianteManagement: React.FC = () => {
                   <label>Email *</label>
                   <input
                     type="email"
+                    name="email"
                     value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
+                    {...validation.getFieldProps("email")}
+                    onChange={(e) => {
+                      setFormData({ ...formData, email: e.target.value });
+                      validation.getFieldProps("email").onChange(e);
+                    }}
                     required
                     disabled={loading}
                   />
+                  {validation.errors.email && (
+                    <div className="field-error">{validation.errors.email}</div>
+                  )}
                 </div>
                 <div className="form-group">
                   <label>Teléfono</label>
                   <input
                     type="tel"
+                    name="telefono"
                     value={formData.telefono}
-                    onChange={(e) =>
-                      setFormData({ ...formData, telefono: e.target.value })
-                    }
+                    {...validation.getFieldProps("telefono")}
+                    onChange={(e) => {
+                      setFormData({ ...formData, telefono: e.target.value });
+                      validation.getFieldProps("telefono").onChange(e);
+                    }}
                     disabled={loading}
                   />
+                  {validation.errors.telefono && (
+                    <div className="field-error">{validation.errors.telefono}</div>
+                  )}
                 </div>
               </div>
 
@@ -556,26 +823,38 @@ const EstudianteManagement: React.FC = () => {
                   <label>Distrito</label>
                   <input
                     type="text"
+                    name="distrito"
                     value={formData.distrito}
-                    onChange={(e) =>
-                      setFormData({ ...formData, distrito: e.target.value })
-                    }
+                    {...validation.getFieldProps("distrito")}
+                    onChange={(e) => {
+                      setFormData({ ...formData, distrito: e.target.value });
+                      validation.getFieldProps("distrito").onChange(e);
+                    }}
                     disabled={loading}
                   />
+                  {validation.errors.distrito && (
+                    <div className="field-error">{validation.errors.distrito}</div>
+                  )}
                 </div>
                 <div className="form-group">
                   <label>Fecha de Nacimiento</label>
                   <input
                     type="date"
+                    name="fechaNacimiento"
                     value={formData.fechaNacimiento}
-                    onChange={(e) =>
+                    {...validation.getFieldProps("fechaNacimiento")}
+                    onChange={(e) => {
                       setFormData({
                         ...formData,
                         fechaNacimiento: e.target.value,
-                      })
-                    }
+                      });
+                      validation.getFieldProps("fechaNacimiento").onChange(e);
+                    }}
                     disabled={loading}
                   />
+                  {validation.errors.fechaNacimiento && (
+                    <div className="field-error">{validation.errors.fechaNacimiento}</div>
+                  )}
                 </div>
               </div>
 
@@ -589,6 +868,56 @@ const EstudianteManagement: React.FC = () => {
                   }
                   disabled={loading}
                 />
+              </div>
+
+              <div className="form-group full-width">
+                <label htmlFor="fotoEdit">Foto de Perfil (Opcional)</label>
+                
+                {/* Vista previa de la imagen */}
+                {(imagePreview || formData.foto) && (
+                  <div className="image-preview">
+                    <img 
+                      src={imagePreview || formData.foto} 
+                      alt="Vista previa" 
+                      className="preview-img"
+                    />
+                  </div>
+                )}
+
+                {/* Botón para subir imagen */}
+                <div className="upload-section">
+                  <input
+                    type="file"
+                    id="fotoFileEdit"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    style={{ display: 'none' }}
+                    disabled={loading}
+                  />
+                  <label htmlFor="fotoFileEdit" className="btn-upload">
+                    <i className="bi bi-upload"></i> Subir Nueva Imagen
+                  </label>
+                  <small className="form-hint">
+                    O ingresa una URL
+                  </small>
+                </div>
+
+                {/* Campo de URL */}
+                <input
+                  type="url"
+                  id="fotoEdit"
+                  name="foto"
+                  value={formData.foto.startsWith('data:') ? '' : formData.foto}
+                  onChange={(e) =>
+                    setFormData({ ...formData, foto: e.target.value })
+                  }
+                  placeholder="https://ejemplo.com/foto.jpg"
+                  disabled={loading}
+                  className="url-input"
+                />
+                <small className="form-hint">
+                  La imagen se comprimirá automáticamente a ~2KB
+                </small>
               </div>
 
               <div className="modal-actions">
