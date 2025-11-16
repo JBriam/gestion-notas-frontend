@@ -89,6 +89,34 @@ export const alphabetic = (message = 'Solo se permiten letras'): ValidationRule 
   validator: (value: string) => !value || /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)
 });
 
+export const validFullName = (message = 'Ingresa un nombre válido (mínimo 3 letras por palabra)'): ValidationRule => ({
+  type: 'validFullName',
+  message,
+  validator: (value: string) => {
+    if (!value) return true;
+    // Eliminar espacios extras y dividir en palabras
+    const words = value.trim().split(/\s+/);
+    // Cada palabra debe tener al menos 3 letras y no tener patrones repetitivos sospechosos
+    return words.every(word => {
+      // Mínimo 3 letras
+      if (word.length < 3) return false;
+      // Solo letras válidas
+      if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+$/.test(word)) return false;
+      // No permitir más de 2 letras consecutivas iguales (ej: "aaa", "sss")
+      if (/(.)\1{2,}/.test(word)) return false;
+      // Debe tener al menos una vocal
+      if (!/[aeiouáéíóúAEIOUÁÉÍÓÚ]/.test(word)) return false;
+      return true;
+    });
+  }
+});
+
+export const noNumbers = (message = 'No se permiten números'): ValidationRule => ({
+  type: 'noNumbers',
+  message,
+  validator: (value: string) => !value || !/\d/.test(value)
+});
+
 export const numeric = (message = 'Solo se permiten números'): ValidationRule => ({
   type: 'numeric',
   message,
@@ -149,7 +177,17 @@ export const dateFormat = (message = 'Formato de fecha inválido'): ValidationRu
   validator: (value: string) => {
     if (!value) return true;
     const date = new Date(value);
-    return !isNaN(date.getTime());
+    return !Number.isNaN(date.getTime());
+  }
+});
+
+export const addressFormat = (message = 'Ingresa una dirección válida'): ValidationRule => ({
+  type: 'addressFormat',
+  message,
+  validator: (value: string) => {
+    if (!value) return true;
+    // Debe tener al menos 5 caracteres y contener letras
+    return value.length >= 5 && /[a-zA-ZáéíóúÁÉÍÓÚñÑ]/.test(value);
   }
 });
 
