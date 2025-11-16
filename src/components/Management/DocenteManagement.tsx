@@ -115,27 +115,6 @@ const DocenteManagement: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      await DocenteService.crear(formData);
-      setSuccess("Docente creado exitosamente");
-      setShowCreateModal(false);
-      limpiarFormulario();
-      await cargarDocentes();
-    } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Error al crear docente"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     
@@ -193,6 +172,27 @@ const DocenteManagement: React.FC = () => {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      await DocenteService.crear(formData);
+      setSuccess("Docente creado exitosamente");
+      setShowCreateModal(false);
+      limpiarFormulario();
+      await cargarDocentes();
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Error al crear docente"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!selectedDocente) return;
 
     setLoading(true);
@@ -200,7 +200,6 @@ const DocenteManagement: React.FC = () => {
     setSuccess("");
 
     try {
-      setLoading(true);
       const updatedDocente = {
         ...selectedDocente,
         ...formData,
