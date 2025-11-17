@@ -137,7 +137,7 @@ export const estudianteSchema: ValidationSchema = {
     rules: [
       rules.dateFormat('Formato de fecha inválido'),
       rules.pastDate('La fecha de nacimiento debe ser anterior a hoy'),
-      rules.minAge(5, 'El estudiante debe tener al menos 5 años'),
+      // rules.minAge(5, 'El estudiante debe tener al menos 5 años'), // TODO: Implementar minAge
       rules.maxAge(80, 'Edad no válida')
     ]
   },
@@ -160,18 +160,20 @@ export const docenteSchema: ValidationSchema = {
     required: true,
     rules: [
       rules.required('Los nombres son obligatorios'),
-      rules.minLength(2, 'Los nombres deben tener al menos 2 caracteres'),
+      rules.minLength(3, 'Los nombres deben tener al menos 3 caracteres'),
       rules.maxLength(100, 'Los nombres no pueden tener más de 100 caracteres'),
-      rules.alphabetic('Solo se permiten letras y espacios')
+      rules.alphabetic('Solo se permiten letras y espacios'),
+      rules.validFullName('Ingresa un nombre válido (mínimo 3 letras, debe tener vocales)')
     ]
   },
   apellidos: {
     required: true,
     rules: [
       rules.required('Los apellidos son obligatorios'),
-      rules.minLength(2, 'Los apellidos deben tener al menos 2 caracteres'),
+      rules.minLength(3, 'Los apellidos deben tener al menos 3 caracteres'),
       rules.maxLength(100, 'Los apellidos no pueden tener más de 100 caracteres'),
-      rules.alphabetic('Solo se permiten letras y espacios')
+      rules.alphabetic('Solo se permiten letras y espacios'),
+      rules.validFullName('Ingresa un apellido válido (mínimo 3 letras, debe tener vocales)')
     ]
   },
   email: {
@@ -186,7 +188,16 @@ export const docenteSchema: ValidationSchema = {
     rules: [
       rules.required('La especialidad es obligatoria'),
       rules.minLength(2, 'La especialidad debe tener al menos 2 caracteres'),
-      rules.maxLength(100, 'La especialidad no puede tener más de 100 caracteres')
+      rules.maxLength(100, 'La especialidad no puede tener más de 100 caracteres'),
+      rules.alphabetic('Solo se permiten letras y espacios'),
+      rules.noNumbers('La especialidad no puede contener números')
+    ]
+  },
+  direccion: {
+    required: false,
+    rules: [
+      rules.minLength(5, 'La dirección debe tener al menos 5 caracteres'),
+      rules.addressFormat('Ingresa una dirección válida')
     ]
   },
   telefono: {
@@ -206,6 +217,21 @@ export const docenteSchema: ValidationSchema = {
     required: false,
     rules: [
       rules.alphabetic('Solo se permiten letras y espacios')
+    ]
+  },
+  password: {
+    required: true,
+    rules: [
+      rules.required('La contraseña es obligatoria'),
+      rules.minLength(6, 'La contraseña debe tener al menos 6 caracteres'),
+      rules.maxLength(100, 'La contraseña no puede tener más de 100 caracteres')
+    ]
+  },
+  confirmPassword: {
+    required: true,
+    rules: [
+      rules.required('Confirma tu contraseña'),
+      rules.confirmPassword('password', 'Las contraseñas no coinciden')
     ]
   }
 };

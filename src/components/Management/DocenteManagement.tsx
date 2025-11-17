@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { DocenteService } from "../../api/DocenteService";
 import type { Docente } from "../../interfaces/Docente";
+import { useValidation } from "../../utils/validation/useValidation";
+import { docenteSchema } from "../../utils/validation/schemas";
 import "./DocenteManagement.css";
 
 interface DocenteForm extends Record<string, unknown> {
@@ -53,6 +55,23 @@ const DocenteManagement: React.FC = () => {
   // Estado para preview de imagen
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageUrl, setImageUrl] = useState<string>("");
+
+  // Hook de validación
+  const { 
+    errors: validationErrors, 
+    validateField, 
+    validateForm, 
+    clearAllErrors, 
+    setError: setValidationError, 
+    clearError: clearValidationError 
+  } = useValidation(
+    docenteSchema, 
+    formData,
+    { mode: 'onChange' }
+  );
+
+  // Debug: ver errores en tiempo real
+  console.log('Errores de validación:', validationErrors);
 
   useEffect(() => {
     cargarDocentes();
@@ -114,6 +133,16 @@ const DocenteManagement: React.FC = () => {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    // Validar campo inmediatamente
+    const fieldError = validateField(name, value);
+    console.log('Validando:', name, 'valor:', value, 'error:', fieldError);
+    
+    if (fieldError) {
+      setValidationError(name, fieldError);
+    } else {
+      clearValidationError(name);
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -188,6 +217,14 @@ const DocenteManagement: React.FC = () => {
     setSuccess("");
 
     try {
+      // Validar formulario completo
+      const isValid = validateForm();
+      if (!isValid) {
+        setError("Por favor corrige los errores en el formulario");
+        setLoading(false);
+        return;
+      }
+
       // Validar que las contraseñas coincidan
       if (formData.password !== formData.confirmPassword) {
         setError("Las contraseñas no coinciden");
@@ -199,6 +236,7 @@ const DocenteManagement: React.FC = () => {
       setSuccess("Docente creado exitosamente");
       setShowCreateModal(false);
       limpiarFormulario();
+      clearAllErrors();
       setImagePreview(null);
       setImageUrl("");
       await cargarDocentes();
@@ -439,7 +477,11 @@ const DocenteManagement: React.FC = () => {
                     onChange={handleInputChange}
                     required
                     disabled={loading}
+                    className={validationErrors.nombres ? 'input-error' : ''}
                   />
+                  {validationErrors.nombres && (
+                    <span className="error-text">{validationErrors.nombres}</span>
+                  )}
                 </div>
                 <div className="form-group">
                   <label htmlFor="apellidos">Apellidos *</label>
@@ -451,7 +493,11 @@ const DocenteManagement: React.FC = () => {
                     onChange={handleInputChange}
                     required
                     disabled={loading}
+                    className={validationErrors.apellidos ? 'input-error' : ''}
                   />
+                  {validationErrors.apellidos && (
+                    <span className="error-text">{validationErrors.apellidos}</span>
+                  )}
                 </div>
               </div>
 
@@ -467,7 +513,11 @@ const DocenteManagement: React.FC = () => {
                     onChange={handleInputChange}
                     required
                     disabled={loading}
+                    className={validationErrors.email ? 'input-error' : ''}
                   />
+                  {validationErrors.email && (
+                    <span className="error-text">{validationErrors.email}</span>
+                  )}
                 </div>
                 <div className="form-group">
                   <label htmlFor="telefono">Teléfono</label>
@@ -478,7 +528,11 @@ const DocenteManagement: React.FC = () => {
                     value={formData.telefono}
                     onChange={handleInputChange}
                     disabled={loading}
+                    className={validationErrors.telefono ? 'input-error' : ''}
                   />
+                  {validationErrors.telefono && (
+                    <span className="error-text">{validationErrors.telefono}</span>
+                  )}
                 </div>
               </div>
 
@@ -495,7 +549,11 @@ const DocenteManagement: React.FC = () => {
                     placeholder="Mínimo 6 caracteres"
                     disabled={loading}
                     minLength={6}
+                    className={validationErrors.password ? 'input-error' : ''}
                   />
+                  {validationErrors.password && (
+                    <span className="error-text">{validationErrors.password}</span>
+                  )}
                 </div>
                 <div className="form-group">
                   <label>Confirmar Contraseña *</label>
@@ -508,7 +566,11 @@ const DocenteManagement: React.FC = () => {
                     required
                     placeholder="Repite tu contraseña"
                     disabled={loading}
+                    className={validationErrors.confirmPassword ? 'input-error' : ''}
                   />
+                  {validationErrors.confirmPassword && (
+                    <span className="error-text">{validationErrors.confirmPassword}</span>
+                  )}
                 </div>
               </div>
 
@@ -522,7 +584,11 @@ const DocenteManagement: React.FC = () => {
                     value={formData.especialidad}
                     onChange={handleInputChange}
                     disabled={loading}
+                    className={validationErrors.especialidad ? 'input-error' : ''}
                   />
+                  {validationErrors.especialidad && (
+                    <span className="error-text">{validationErrors.especialidad}</span>
+                  )}
                 </div>
                 <div className="form-group">
                   <label htmlFor="fechaContratacion">
@@ -535,7 +601,11 @@ const DocenteManagement: React.FC = () => {
                     value={formData.fechaContratacion}
                     onChange={handleInputChange}
                     disabled={loading}
+                    className={validationErrors.fechaContratacion ? 'input-error' : ''}
                   />
+                  {validationErrors.fechaContratacion && (
+                    <span className="error-text">{validationErrors.fechaContratacion}</span>
+                  )}
                 </div>
               </div>
 
@@ -549,7 +619,11 @@ const DocenteManagement: React.FC = () => {
                     value={formData.distrito}
                     onChange={handleInputChange}
                     disabled={loading}
+                    className={validationErrors.distrito ? 'input-error' : ''}
                   />
+                  {validationErrors.distrito && (
+                    <span className="error-text">{validationErrors.distrito}</span>
+                  )}
                 </div>
                 <div className="form-group">
                   <label htmlFor="direccion">Dirección</label>
@@ -560,7 +634,11 @@ const DocenteManagement: React.FC = () => {
                     value={formData.direccion}
                     onChange={handleInputChange}
                     disabled={loading}
+                    className={validationErrors.direccion ? 'input-error' : ''}
                   />
+                  {validationErrors.direccion && (
+                    <span className="error-text">{validationErrors.direccion}</span>
+                  )}
                 </div>
               </div>
 
