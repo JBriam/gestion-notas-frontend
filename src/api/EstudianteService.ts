@@ -62,11 +62,6 @@ export const EstudianteService = {
     try {
       let response;
       if (estudiante instanceof FormData) {
-        // Validar tamaño de archivo si hay foto
-        const foto = estudiante.get('foto') as File;
-        if (foto && foto.size > 10 * 1024 * 1024) {
-          throw new Error('La imagen debe ser menor a 10MB');
-        }
         response = await api.post('/estudiantes/completo', estudiante, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
@@ -96,7 +91,6 @@ export const EstudianteService = {
     try {
       let response;
       if (estudiante instanceof FormData) {
-        // FormData debe incluir el campo idEstudiante
         const id = estudiante.get('idEstudiante');
         response = await api.put(`/estudiantes/${id}`, estudiante, {
           headers: { 'Content-Type': 'multipart/form-data' },
