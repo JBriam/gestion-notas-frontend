@@ -61,9 +61,7 @@ export const registerSchema: ValidationSchema = {
   telefono: {
     required: false,
     rules: [
-      rules.phone('Ingresa un teléfono válido (ej: 999-999-999)'),
-      rules.minLength(7, 'El teléfono debe tener al menos 7 dígitos'),
-      rules.maxLength(15, 'El teléfono no puede tener más de 15 dígitos')
+      rules.phonePeruvian('Ingresa un teléfono válido de 9 dígitos que empiece con 9 (ej: 987654321)')
     ]
   },
   password: {

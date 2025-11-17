@@ -336,14 +336,14 @@ const EstudianteManagement: React.FC = () => {
                   className="btn-edit"
                   disabled={loading}
                 >
-                  ✏️ Editar
+                  Editar
                 </button>
                 <button
                   onClick={() => openDeleteModal(estudiante)}
                   className="btn-delete"
                   disabled={loading}
                 >
-                  🗑️ Eliminar
+                  Eliminar
                 </button>
               </div>
             </div>

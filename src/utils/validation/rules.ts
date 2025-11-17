@@ -68,6 +68,19 @@ export const phone = (message = 'Ingresa un teléfono válido'): ValidationRule 
   validator: (value: string) => !value || /^[+]?[\d\s\-()]{7,15}$/.test(value)
 });
 
+export const phonePeruvian = (message = 'Ingresa un teléfono válido de 9 dígitos (ej: 987654321)'): ValidationRule => ({
+  type: 'phonePeruvian',
+  message,
+  pattern: /^9\d{8}$/,
+  validator: (value: string) => {
+    if (!value) return true;
+    // Remover espacios, guiones y paréntesis para validar solo dígitos
+    const cleanPhone = value.replace(/[\s\-()]/g, '');
+    // Debe tener exactamente 9 dígitos y empezar con 9
+    return /^9\d{8}$/.test(cleanPhone);
+  }
+});
+
 export const username = (message = 'Solo letras, números, puntos, guiones y guiones bajos'): ValidationRule => ({
   type: 'username',
   message,
