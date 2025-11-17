@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { EstudianteService } from "../../api/EstudianteService";
 import type { Estudiante } from "../../interfaces/Estudiante";
+import { useValidation } from "../../utils/validation/useValidation";
+import { estudianteSchema } from "../../utils/validation/schemas";
 import "./EstudianteManagement.css";
 
 interface EstudianteForm extends Record<string, unknown> {
@@ -43,9 +45,32 @@ const EstudianteManagement: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  const {
+    errors: validationErrors,
+    validateField,
+    validateForm,
+    clearAllErrors,
+    setError: setValidationError,
+    clearError: clearValidationError,
+  } = useValidation(estudianteSchema, formData, { mode: "onChange" });
+
   useEffect(() => {
     loadEstudiantes();
   }, []);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    const fieldError = validateField(name, value);
+    if (fieldError) {
+      setValidationError(name, fieldError);
+    } else {
+      clearValidationError(name);
+    }
+  };
 
   const loadEstudiantes = async () => {
     try {
@@ -62,11 +87,20 @@ const EstudianteManagement: React.FC = () => {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const isValid = validateForm();
+    if (!isValid) {
+      setError("Por favor corrige los errores en el formulario");
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
       await EstudianteService.crear(formData);
       setSuccess("Estudiante creado exitosamente");
       setShowCreateModal(false);
+      clearAllErrors();
       resetForm();
       await loadEstudiantes();
     } catch (error) {
@@ -336,25 +370,31 @@ const EstudianteManagement: React.FC = () => {
                   <label>Nombres *</label>
                   <input
                     type="text"
+                    name="nombres"
                     value={formData.nombres}
-                    onChange={(e) =>
-                      setFormData({ ...formData, nombres: e.target.value })
-                    }
+                    onChange={handleInputChange}
                     required
                     disabled={loading}
+                    className={validationErrors.nombres ? "input-error" : ""}
                   />
+                  {validationErrors.nombres && (
+                    <span className="error-text">{validationErrors.nombres}</span>
+                  )}
                 </div>
                 <div className="form-group">
                   <label>Apellidos *</label>
                   <input
                     type="text"
+                    name="apellidos"
                     value={formData.apellidos}
-                    onChange={(e) =>
-                      setFormData({ ...formData, apellidos: e.target.value })
-                    }
+                    onChange={handleInputChange}
                     required
                     disabled={loading}
+                    className={validationErrors.apellidos ? "input-error" : ""}
                   />
+                  {validationErrors.apellidos && (
+                    <span className="error-text">{validationErrors.apellidos}</span>
+                  )}
                 </div>
               </div>
 
@@ -363,26 +403,32 @@ const EstudianteManagement: React.FC = () => {
                   <label>Email *</label>
                   <input
                     type="email"
+                    name="email"
                     value={formData.email}
                     placeholder="Ej: estudiante@ejemplo.com"
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
+                    onChange={handleInputChange}
                     required
                     disabled={loading}
+                    className={validationErrors.email ? "input-error" : ""}
                   />
+                  {validationErrors.email && (
+                    <span className="error-text">{validationErrors.email}</span>
+                  )}
                 </div>
                 <div className="form-group">
                   <label>Teléfono</label>
                   <input
                     type="tel"
+                    name="telefono"
                     value={formData.telefono}
                     placeholder="Ej: 987654321"
-                    onChange={(e) =>
-                      setFormData({ ...formData, telefono: e.target.value })
-                    }
+                    onChange={handleInputChange}
                     disabled={loading}
+                    className={validationErrors.telefono ? "input-error" : ""}
                   />
+                  {validationErrors.telefono && (
+                    <span className="error-text">{validationErrors.telefono}</span>
+                  )}
                 </div>
               </div>
 
@@ -394,14 +440,16 @@ const EstudianteManagement: React.FC = () => {
                     id="password"
                     name="password"
                     value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
+                    onChange={handleInputChange}
                     required
                     placeholder="Mínimo 6 caracteres"
                     disabled={loading}
                     minLength={6}
+                    className={validationErrors.password ? "input-error" : ""}
                   />
+                  {validationErrors.password && (
+                    <span className="error-text">{validationErrors.password}</span>
+                  )}
                 </div>
                 <div className="form-group">
                   <label>Confirmar Contraseña *</label>
@@ -410,16 +458,15 @@ const EstudianteManagement: React.FC = () => {
                     id="confirmPassword"
                     name="confirmPassword"
                     value={formData.confirmPassword}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        confirmPassword: e.target.value,
-                      })
-                    }
+                    onChange={handleInputChange}
                     required
-                    placeholder="Repite tu contraseña"
+                    placeholder="Repite la contraseña"
                     disabled={loading}
+                    className={validationErrors.confirmPassword ? "input-error" : ""}
                   />
+                  {validationErrors.confirmPassword && (
+                    <span className="error-text">{validationErrors.confirmPassword}</span>
+                  )}
                 </div>
               </div>
 
@@ -428,26 +475,29 @@ const EstudianteManagement: React.FC = () => {
                   <label>Distrito</label>
                   <input
                     type="text"
+                    name="distrito"
                     value={formData.distrito}
-                    onChange={(e) =>
-                      setFormData({ ...formData, distrito: e.target.value })
-                    }
+                    onChange={handleInputChange}
                     disabled={loading}
+                    className={validationErrors.distrito ? "input-error" : ""}
                   />
+                  {validationErrors.distrito && (
+                    <span className="error-text">{validationErrors.distrito}</span>
+                  )}
                 </div>
                 <div className="form-group">
                   <label>Fecha de Nacimiento</label>
                   <input
                     type="date"
+                    name="fechaNacimiento"
                     value={formData.fechaNacimiento}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        fechaNacimiento: e.target.value,
-                      })
-                    }
+                    onChange={handleInputChange}
                     disabled={loading}
+                    className={validationErrors.fechaNacimiento ? "input-error" : ""}
                   />
+                  {validationErrors.fechaNacimiento && (
+                    <span className="error-text">{validationErrors.fechaNacimiento}</span>
+                  )}
                 </div>
               </div>
 
@@ -455,12 +505,15 @@ const EstudianteManagement: React.FC = () => {
                 <label>Dirección</label>
                 <input
                   type="text"
+                  name="direccion"
                   value={formData.direccion}
-                  onChange={(e) =>
-                    setFormData({ ...formData, direccion: e.target.value })
-                  }
+                  onChange={handleInputChange}
                   disabled={loading}
+                  className={validationErrors.direccion ? "input-error" : ""}
                 />
+                {validationErrors.direccion && (
+                  <span className="error-text">{validationErrors.direccion}</span>
+                )}
               </div>
 
               <div className="modal-actions">
