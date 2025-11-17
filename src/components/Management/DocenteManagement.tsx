@@ -71,7 +71,7 @@ const DocenteManagement: React.FC = () => {
   );
 
   // Debug: ver errores en tiempo real
-  console.log('Errores de validación:', validationErrors);
+  // console.log('Errores de validación:', validationErrors);
 
   useEffect(() => {
     cargarDocentes();
@@ -136,7 +136,7 @@ const DocenteManagement: React.FC = () => {
     
     // Validar campo inmediatamente
     const fieldError = validateField(name, value);
-    console.log('Validando:', name, 'valor:', value, 'error:', fieldError);
+    // console.log('Validando:', name, 'valor:', value, 'error:', fieldError);
     
     if (fieldError) {
       setValidationError(name, fieldError);
