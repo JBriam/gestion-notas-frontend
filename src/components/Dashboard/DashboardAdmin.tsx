@@ -99,7 +99,7 @@ export const DashboardAdmin: React.FC = () => {
         <div className="header-content">
           <div className="user-info">
             <img
-              src={state.perfilDocente?.foto || '/src/assets/imgs/docente.png'}
+              src={state.perfilDocente?.foto || '/assets/imgs/docente.png'}
               alt="Avatar"
               className="user-avatar"
             />

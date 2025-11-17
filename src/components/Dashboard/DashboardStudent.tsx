@@ -50,12 +50,12 @@ export const DashboardStudent: React.FC = () => {
         <div className="header-content">
           <div className="user-info">
             <img
-              src={state.perfilEstudiante?.foto || '/src/assets/imgs/student.gif'}
+              src={state.perfilEstudiante?.foto || '/assets/imgs/student.gif'}
               alt="Avatar"
               className="user-avatar"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                target.src = '/src/assets/imgs/student.gif';
+                target.src = '/assets/imgs/student.gif';
               }}
             />
             <div>

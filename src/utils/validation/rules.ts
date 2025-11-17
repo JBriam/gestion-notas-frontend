@@ -14,7 +14,7 @@ import type { ValidationRule } from './types';
 export const required = (message = 'Este campo es obligatorio'): ValidationRule => ({
   type: 'required',
   message,
-  validator: (value: any) => {
+  validator: (value: unknown) => {
     if (typeof value === 'string') return value.trim().length > 0;
     return value !== null && value !== undefined && value !== '';
   }
@@ -89,6 +89,34 @@ export const alphabetic = (message = 'Solo se permiten letras'): ValidationRule 
   validator: (value: string) => !value || /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)
 });
 
+export const validFullName = (message = 'Ingresa un nombre válido (mínimo 3 letras por palabra)'): ValidationRule => ({
+  type: 'validFullName',
+  message,
+  validator: (value: string) => {
+    if (!value) return true;
+    
+    const words = value.trim().split(/\s+/);
+    
+    return words.every(word => {
+      if (word.length < 3) return false;
+      
+      if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ]+$/.test(word)) return false;
+      
+      if (/(.)\1{2,}/.test(word)) return false;
+      
+      if (!/[aeiouáéíóúAEIOUÁÉÍÓÚ]/.test(word)) return false;
+      
+      return true;
+    });
+  }
+});
+
+export const noNumbers = (message = 'No se permiten números'): ValidationRule => ({
+  type: 'noNumbers',
+  message,
+  validator: (value: string) => !value || !/\d/.test(value)
+});
+
 export const numeric = (message = 'Solo se permiten números'): ValidationRule => ({
   type: 'numeric',
   message,
@@ -149,7 +177,7 @@ export const dateFormat = (message = 'Formato de fecha inválido'): ValidationRu
   validator: (value: string) => {
     if (!value) return true;
     const date = new Date(value);
-    return !isNaN(date.getTime());
+    return !Number.isNaN(date.getTime());
   }
 });
 
@@ -188,6 +216,16 @@ export const pastDate = (message = 'La fecha debe ser anterior a hoy'): Validati
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return date < today;
+  }
+});
+
+export const addressFormat = (message = 'Ingresa una dirección válida (mínimo 5 caracteres)'): ValidationRule => ({
+  type: 'addressFormat',
+  message,
+  validator: (value: string) => {
+    if (!value) return true;
+    if (value.length < 5) return false;
+    return /[a-zA-ZáéíóúÁÉÍÓÚñÑ]/.test(value);
   }
 });
 
@@ -244,8 +282,8 @@ export const password = {
 export const confirmPassword = (passwordField = 'password', message = 'Las contraseñas no coinciden'): ValidationRule => ({
   type: 'confirmPassword',
   message,
-  validator: (value: string, formData?: any) => {
-    if (!value || !formData) return true;
+  validator: (value: unknown, formData?: Record<string, unknown>) => {
+    if (!value || !formData || typeof value !== 'string') return true;
     return value === formData[passwordField];
   }
 });
@@ -257,7 +295,7 @@ export const confirmPassword = (passwordField = 'password', message = 'Las contr
  */
 
 export const custom = (
-  validator: (value: any, formData?: any) => boolean,
+  validator: (value: unknown, formData?: Record<string, unknown>) => boolean,
   message: string
 ): ValidationRule => ({
   type: 'custom',
@@ -265,11 +303,11 @@ export const custom = (
   validator
 });
 
-export const oneOf = (allowedValues: any[], message?: string): ValidationRule => ({
+export const oneOf = (allowedValues: unknown[], message?: string): ValidationRule => ({
   type: 'oneOf',
   message: message || `Debe ser uno de: ${allowedValues.join(', ')}`,
   value: allowedValues,
-  validator: (value: any) => !value || allowedValues.includes(value)
+  validator: (value: unknown) => !value || allowedValues.includes(value)
 });
 
 export const url = (message = 'Ingresa una URL válida'): ValidationRule => ({
@@ -293,12 +331,12 @@ export const url = (message = 'Ingresa una URL válida'): ValidationRule => ({
  */
 
 export const requiredIf = (
-  condition: (formData: any) => boolean,
+  condition: (formData: Record<string, unknown>) => boolean,
   message = 'Este campo es obligatorio'
 ): ValidationRule => ({
   type: 'requiredIf',
   message,
-  validator: (value: any, formData?: any) => {
+  validator: (value: unknown, formData?: Record<string, unknown>) => {
     if (!formData || !condition(formData)) return true;
     if (typeof value === 'string') return value.trim().length > 0;
     return value !== null && value !== undefined && value !== '';
@@ -307,12 +345,12 @@ export const requiredIf = (
 
 export const requiredIfField = (
   fieldName: string,
-  fieldValue: any,
+  fieldValue: unknown,
   message = 'Este campo es obligatorio'
 ): ValidationRule => ({
   type: 'requiredIfField',
   message,
-  validator: (value: any, formData?: any) => {
+  validator: (value: unknown, formData?: Record<string, unknown>) => {
     if (!formData || formData[fieldName] !== fieldValue) return true;
     if (typeof value === 'string') return value.trim().length > 0;
     return value !== null && value !== undefined && value !== '';

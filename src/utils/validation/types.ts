@@ -5,8 +5,9 @@
 export interface ValidationRule {
   type: string;
   message: string;
-  value?: any;
+  value?: unknown;
   pattern?: RegExp;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   validator?: (value: any, formData?: any) => boolean;
 }
 

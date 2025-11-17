@@ -13,13 +13,12 @@ import * as rules from './rules';
  */
 
 export const loginSchema: ValidationSchema = {
-  username: {
+  email: {
     required: true,
     rules: [
-      rules.required('El usuario es obligatorio'),
-      rules.minLength(3, 'El usuario debe tener al menos 3 caracteres'),
-      rules.maxLength(50, 'El usuario no puede tener más de 50 caracteres'),
-      rules.username('Solo se permiten letras, números, puntos, guiones y guiones bajos')
+      rules.required('El email es obligatorio'),
+      rules.email('Ingresa un email válido'),
+      rules.maxLength(100, 'El email no puede tener más de 100 caracteres')
     ]
   },
   password: {
@@ -101,18 +100,20 @@ export const estudianteSchema: ValidationSchema = {
     required: true,
     rules: [
       rules.required('Los nombres son obligatorios'),
-      rules.minLength(2, 'Los nombres deben tener al menos 2 caracteres'),
+      rules.minLength(3, 'Los nombres deben tener al menos 3 caracteres'),
       rules.maxLength(100, 'Los nombres no pueden tener más de 100 caracteres'),
-      rules.alphabetic('Solo se permiten letras y espacios')
+      rules.alphabetic('Solo se permiten letras y espacios'),
+      rules.validFullName('Ingresa un nombre válido (mínimo 3 letras por palabra)')
     ]
   },
   apellidos: {
     required: true,
     rules: [
       rules.required('Los apellidos son obligatorios'),
-      rules.minLength(2, 'Los apellidos deben tener al menos 2 caracteres'),
+      rules.minLength(3, 'Los apellidos deben tener al menos 3 caracteres'),
       rules.maxLength(100, 'Los apellidos no pueden tener más de 100 caracteres'),
-      rules.alphabetic('Solo se permiten letras y espacios')
+      rules.alphabetic('Solo se permiten letras y espacios'),
+      rules.validFullName('Ingresa un apellido válido (mínimo 3 letras por palabra)')
     ]
   },
   email: {
@@ -123,9 +124,8 @@ export const estudianteSchema: ValidationSchema = {
     ]
   },
   codigoEstudiante: {
-    required: true,
+    required: false,
     rules: [
-      rules.required('El código de estudiante es obligatorio'),
       rules.codigoEstudiante('El código debe tener formato EST seguido de números (ej: EST001)')
     ]
   },
@@ -140,14 +140,36 @@ export const estudianteSchema: ValidationSchema = {
     rules: [
       rules.dateFormat('Formato de fecha inválido'),
       rules.pastDate('La fecha de nacimiento debe ser anterior a hoy'),
-      rules.minAge(5, 'El estudiante debe tener al menos 5 años'),
       rules.maxAge(80, 'Edad no válida')
+    ]
+  },
+  direccion: {
+    required: false,
+    rules: [
+      rules.minLength(5, 'La dirección debe tener al menos 5 caracteres'),
+      rules.addressFormat('Ingresa una dirección válida')
     ]
   },
   distrito: {
     required: false,
     rules: [
-      rules.alphabetic('Solo se permiten letras y espacios')
+      rules.alphabetic('Solo se permiten letras y espacios'),
+      rules.noNumbers('El distrito no puede contener números')
+    ]
+  },
+  password: {
+    required: true,
+    rules: [
+      rules.required('La contraseña es obligatoria'),
+      rules.minLength(6, 'La contraseña debe tener al menos 6 caracteres'),
+      rules.maxLength(100, 'La contraseña no puede tener más de 100 caracteres')
+    ]
+  },
+  confirmPassword: {
+    required: true,
+    rules: [
+      rules.required('Confirma tu contraseña'),
+      rules.confirmPassword('password', 'Las contraseñas no coinciden')
     ]
   }
 };

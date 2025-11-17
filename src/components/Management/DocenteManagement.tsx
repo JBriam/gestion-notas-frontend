@@ -50,6 +50,10 @@ const DocenteManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredDocentes, setFilteredDocentes] = useState<Docente[]>([]);
 
+  // Estado para preview de imagen
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>("");
+
   useEffect(() => {
     cargarDocentes();
   }, []);
@@ -112,6 +116,71 @@ const DocenteManagement: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        setError('Por favor selecciona un archivo de imagen válido');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return;
+
+          let width = img.width;
+          let height = img.height;
+          const maxSize = 100;
+
+          if (width > height) {
+            if (width > maxSize) {
+              height = (height * maxSize) / width;
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = (width * maxSize) / height;
+              height = maxSize;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+          setFormData((prev) => ({ ...prev, foto: compressedBase64 }));
+          setImagePreview(compressedBase64);
+        };
+        img.src = event.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageUrl = () => {
+    if (imageUrl.trim()) {
+      setFormData((prev) => ({ ...prev, foto: imageUrl }));
+      setImagePreview(imageUrl);
+      setImageUrl("");
+    }
+  };
+
+  const removeImage = () => {
+    setFormData((prev) => ({ ...prev, foto: "" }));
+    setImagePreview(null);
+    setImageUrl("");
+    // Resetear el input file para permitir seleccionar la misma imagen
+    const fileInput = document.getElementById('foto') as HTMLInputElement;
+    const fileInputEdit = document.getElementById('foto-edit') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
+    if (fileInputEdit) fileInputEdit.value = '';
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -119,10 +188,19 @@ const DocenteManagement: React.FC = () => {
     setSuccess("");
 
     try {
+      // Validar que las contraseñas coincidan
+      if (formData.password !== formData.confirmPassword) {
+        setError("Las contraseñas no coinciden");
+        setLoading(false);
+        return;
+      }
+
       await DocenteService.crear(formData);
       setSuccess("Docente creado exitosamente");
       setShowCreateModal(false);
       limpiarFormulario();
+      setImagePreview(null);
+      setImageUrl("");
       await cargarDocentes();
     } catch (error) {
       setError(
@@ -212,6 +290,8 @@ const DocenteManagement: React.FC = () => {
     setShowDeleteModal(false);
     setSelectedDocente(null);
     limpiarFormulario();
+    setImagePreview(null);
+    setImageUrl("");
     setError("");
     setSuccess("");
   };
@@ -260,12 +340,12 @@ const DocenteManagement: React.FC = () => {
               <div key={docente.idDocente} className="docente-card">
                 <div className="docente-header">
                   <img
-                    src={docente.foto || "/src/assets/imgs/docente.png"}
+                    src={docente.foto || "/assets/imgs/docente.png"}
                     alt={`${docente.nombres} ${docente.apellidos}`}
                     className="docente-avatar"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.src = "/src/assets/imgs/docente.png";
+                      target.src = "/assets/imgs/docente.png";
                     }}
                   />
                   <div className="docente-info">
@@ -335,8 +415,8 @@ const DocenteManagement: React.FC = () => {
 
       {/* Modal Crear Docente */}
       {showCreateModal && (
-        <div className="modal-overlay" onClick={closeModals}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay">
+          <div className="modal-content">
             <div className="modal-header create-header">
               <h3>
                 <i className="bi bi-person-plus-fill"></i>
@@ -484,6 +564,75 @@ const DocenteManagement: React.FC = () => {
                 </div>
               </div>
 
+              <div className="form-row">
+                <div className="form-group" style={{ width: '100%' }}>
+                  <label htmlFor="foto">Foto del Docente</label>
+                  <input
+                    type="file"
+                    id="foto"
+                    name="foto"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={loading}
+                    style={{ padding: '8px', marginBottom: '10px' }}
+                  />
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                      type="text"
+                      placeholder="O ingresa URL de la imagen"
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      disabled={loading}
+                      style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleImageUrl}
+                      disabled={loading || !imageUrl.trim()}
+                      style={{ padding: '8px 16px', borderRadius: '4px', border: 'none', background: '#28a745', color: 'white', cursor: 'pointer' }}
+                    >
+                      Cargar URL
+                    </button>
+                  </div>
+                  {imagePreview && (
+                    <div style={{ marginTop: '10px', textAlign: 'center', position: 'relative', display: 'inline-block' }}>
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        style={{
+                          maxWidth: '100px',
+                          maxHeight: '100px',
+                          border: '2px solid #ddd',
+                          borderRadius: '8px',
+                          objectFit: 'cover'
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        style={{
+                          position: 'absolute',
+                          top: '-8px',
+                          right: '-8px',
+                          background: '#dc3545',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '24px',
+                          height: '24px',
+                          cursor: 'pointer',
+                          fontSize: '14px',
+                          lineHeight: '1',
+                          padding: '0'
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className="modal-actions">
                 <button
                   type="button"
@@ -508,8 +657,8 @@ const DocenteManagement: React.FC = () => {
 
       {/* Modal Editar Docente */}
       {showEditModal && selectedDocente && (
-        <div className="modal-overlay" onClick={closeModals}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay">
+          <div className="modal-content">
             <div className="modal-header edit-header">
               <h3>
                 <i className="bi bi-pencil-square"></i>
@@ -627,6 +776,75 @@ const DocenteManagement: React.FC = () => {
                 </div>
               </div>
 
+              <div className="form-row">
+                <div className="form-group" style={{ width: '100%' }}>
+                  <label htmlFor="foto-edit">Foto del Docente</label>
+                  <input
+                    type="file"
+                    id="foto-edit"
+                    name="foto"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={loading}
+                    style={{ padding: '8px', marginBottom: '10px' }}
+                  />
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                      type="text"
+                      placeholder="O ingresa URL de la imagen"
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      disabled={loading}
+                      style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleImageUrl}
+                      disabled={loading || !imageUrl.trim()}
+                      style={{ padding: '8px 16px', borderRadius: '4px', border: 'none', background: '#28a745', color: 'white', cursor: 'pointer' }}
+                    >
+                      Cargar URL
+                    </button>
+                  </div>
+                  {(imagePreview || formData.foto) && (
+                    <div style={{ marginTop: '10px', textAlign: 'center', position: 'relative', display: 'inline-block' }}>
+                      <img
+                        src={imagePreview || formData.foto}
+                        alt="Preview"
+                        style={{
+                          maxWidth: '100px',
+                          maxHeight: '100px',
+                          border: '2px solid #ddd',
+                          borderRadius: '8px',
+                          objectFit: 'cover'
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        style={{
+                          position: 'absolute',
+                          top: '-8px',
+                          right: '-8px',
+                          background: '#dc3545',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '24px',
+                          height: '24px',
+                          cursor: 'pointer',
+                          fontSize: '14px',
+                          lineHeight: '1',
+                          padding: '0'
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className="modal-actions">
                 <button
                   type="button"
@@ -651,8 +869,8 @@ const DocenteManagement: React.FC = () => {
 
       {/* Modal Eliminar Docente */}
       {showDeleteModal && selectedDocente && (
-        <div className="modal-overlay" onClick={closeModals}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay">
+          <div className="modal-content">
             <div className="modal-header delete-header">
               <h3>
                 <i className="bi bi-trash-fill"></i>
