@@ -194,16 +194,6 @@ export const dateFormat = (message = 'Formato de fecha inválido'): ValidationRu
   }
 });
 
-export const addressFormat = (message = 'Ingresa una dirección válida'): ValidationRule => ({
-  type: 'addressFormat',
-  message,
-  validator: (value: string) => {
-    if (!value) return true;
-    // Debe tener al menos 5 caracteres y contener letras
-    return value.length >= 5 && /[a-zA-ZáéíóúÁÉÍÓÚñÑ]/.test(value);
-  }
-});
-
 export const minAge = (age: number, message?: string): ValidationRule => ({
   type: 'minAge',
   message: message || `Debe ser mayor de ${age} años`,
