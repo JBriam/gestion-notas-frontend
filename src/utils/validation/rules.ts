@@ -242,6 +242,16 @@ export const pastDate = (message = 'La fecha debe ser anterior a hoy'): Validati
   }
 });
 
+export const addressFormat = (message = 'Ingresa una dirección válida (mínimo 5 caracteres)'): ValidationRule => ({
+  type: 'addressFormat',
+  message,
+  validator: (value: string) => {
+    if (!value) return true;
+    if (value.length < 5) return false;
+    return /[a-zA-ZáéíóúÁÉÍÓÚñÑ]/.test(value);
+  }
+});
+
 export const futureDate = (message = 'La fecha debe ser posterior a hoy'): ValidationRule => ({
   type: 'futureDate',
   message,
