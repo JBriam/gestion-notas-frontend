@@ -113,9 +113,7 @@ export const DocenteService = {
   // Crear docente
   async crear(docente: Omit<Docente, 'idDocente'>): Promise<Docente> {
     try {
-      // Eliminar confirmPassword antes de enviar
-      const { confirmPassword, ...docenteData } = docente as any;
-      const response = await api.post('/docentes/completo', docenteData);
+      const response = await api.post('/docentes/completo', docente);
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
