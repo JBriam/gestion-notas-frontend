@@ -301,7 +301,8 @@
   max-height: 90vh;
   overflow-y: auto;
   opacity: 1 !important;
-  margin: 20px 0; /* Agregar margen vertical para evitar que se pegue a los bordes */
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-header {
@@ -310,6 +311,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .modal-header h3 {
@@ -342,10 +344,14 @@
 
 .modal-form {
   padding: 20px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .modal-body {
   padding: 20px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .form-row {
@@ -396,6 +402,8 @@
   display: flex;
   gap: 12px;
   justify-content: flex-end;
+  flex-shrink: 0;
+  background: white;
 }
 
 .btn-secondary {
