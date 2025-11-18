@@ -61,20 +61,22 @@ const EstudianteManagement: React.FC = () => {
   }, []);
 
   const handleInputChange = (
-      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-    ) => {
-      const { name, value } = e.target;
-      setFormData((prev) => ({ ...prev, [name]: value }));
-      
-      // Validar campo inmediatamente
-      const fieldError = validateField(name, value);
-      
-      if (fieldError) {
-        setValidationError(name, fieldError);
-      } else {
-        clearValidationError(name);
-      }
-    };
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Validar campo inmediatamente
+    const fieldError = validateField(name, value);
+
+    if (fieldError) {
+      setValidationError(name, fieldError);
+    } else {
+      clearValidationError(name);
+    }
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -128,7 +130,9 @@ const EstudianteManagement: React.FC = () => {
     setImagePreview(null);
     setFotoFile(null);
     const fileInput = document.getElementById("foto") as HTMLInputElement;
-    const fileInputEdit = document.getElementById("foto-edit") as HTMLInputElement;
+    const fileInputEdit = document.getElementById(
+      "foto-edit"
+    ) as HTMLInputElement;
     if (fileInput) fileInput.value = "";
     if (fileInputEdit) fileInputEdit.value = "";
   };
@@ -148,17 +152,24 @@ const EstudianteManagement: React.FC = () => {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const isValid = validateForm();
     if (!isValid) {
       setError("Por favor corrige los errores en el formulario");
       setLoading(false);
       return;
     }
-    
+
     try {
-      if (!formData.email || !formData.password || !formData.nombres || !formData.apellidos) {
-        setError("Los campos email, contraseña, nombres y apellidos son obligatorios");
+      if (
+        !formData.email ||
+        !formData.password ||
+        !formData.nombres ||
+        !formData.apellidos
+      ) {
+        setError(
+          "Los campos email, contraseña, nombres y apellidos son obligatorios"
+        );
         return;
       }
 
@@ -184,8 +195,10 @@ const EstudianteManagement: React.FC = () => {
       if (formData.telefono) fd.append("telefono", formData.telefono);
       if (formData.direccion) fd.append("direccion", formData.direccion);
       if (formData.distrito) fd.append("distrito", formData.distrito);
-      if (formData.fechaNacimiento) fd.append("fechaNacimiento", formData.fechaNacimiento);
-      if (formData.codigoEstudiante) fd.append("codigoEstudiante", formData.codigoEstudiante);
+      if (formData.fechaNacimiento)
+        fd.append("fechaNacimiento", formData.fechaNacimiento);
+      if (formData.codigoEstudiante)
+        fd.append("codigoEstudiante", formData.codigoEstudiante);
 
       if (fotoFile) {
         fd.append("foto", fotoFile);
@@ -206,7 +219,9 @@ const EstudianteManagement: React.FC = () => {
       await loadEstudiantes();
     } catch (error) {
       console.error("Error al crear estudiante:", error);
-      setError(error instanceof Error ? error.message : "Error al crear el estudiante");
+      setError(
+        error instanceof Error ? error.message : "Error al crear el estudiante"
+      );
     } finally {
       setLoading(false);
     }
@@ -234,8 +249,10 @@ const EstudianteManagement: React.FC = () => {
       if (formData.telefono) fd.append("telefono", formData.telefono);
       if (formData.direccion) fd.append("direccion", formData.direccion);
       if (formData.distrito) fd.append("distrito", formData.distrito);
-      if (formData.fechaNacimiento) fd.append("fechaNacimiento", formData.fechaNacimiento);
-      if (formData.codigoEstudiante) fd.append("codigoEstudiante", formData.codigoEstudiante);
+      if (formData.fechaNacimiento)
+        fd.append("fechaNacimiento", formData.fechaNacimiento);
+      if (formData.codigoEstudiante)
+        fd.append("codigoEstudiante", formData.codigoEstudiante);
 
       if (formData.password) {
         if (formData.password.length < 6) {
@@ -265,7 +282,11 @@ const EstudianteManagement: React.FC = () => {
       await loadEstudiantes();
     } catch (error) {
       console.error("Error al actualizar estudiante:", error);
-      setError(error instanceof Error ? error.message : "Error al actualizar estudiante");
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Error al actualizar estudiante"
+      );
     } finally {
       setLoading(false);
     }
@@ -501,7 +522,11 @@ const EstudianteManagement: React.FC = () => {
       {/* Modal para crear estudiante */}
       {showCreateModal && (
         <div className="modal-overlay" onClick={closeModals}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxHeight: "90vh", overflowY: "auto" }}
+          >
             <div className="modal-header create-header">
               <h3>
                 <i className="bi bi-person-plus-fill"></i>
@@ -525,7 +550,9 @@ const EstudianteManagement: React.FC = () => {
                     className={validationErrors.nombres ? "input-error" : ""}
                   />
                   {validationErrors.nombres && (
-                    <span className="error-text">{validationErrors.nombres}</span>
+                    <span className="error-text">
+                      {validationErrors.nombres}
+                    </span>
                   )}
                 </div>
                 <div className="form-group">
@@ -540,7 +567,9 @@ const EstudianteManagement: React.FC = () => {
                     className={validationErrors.apellidos ? "input-error" : ""}
                   />
                   {validationErrors.apellidos && (
-                    <span className="error-text">{validationErrors.apellidos}</span>
+                    <span className="error-text">
+                      {validationErrors.apellidos}
+                    </span>
                   )}
                 </div>
               </div>
@@ -574,7 +603,9 @@ const EstudianteManagement: React.FC = () => {
                     className={validationErrors.telefono ? "input-error" : ""}
                   />
                   {validationErrors.telefono && (
-                    <span className="error-text">{validationErrors.telefono}</span>
+                    <span className="error-text">
+                      {validationErrors.telefono}
+                    </span>
                   )}
                 </div>
               </div>
@@ -595,7 +626,9 @@ const EstudianteManagement: React.FC = () => {
                     className={validationErrors.password ? "input-error" : ""}
                   />
                   {validationErrors.password && (
-                    <span className="error-text">{validationErrors.password}</span>
+                    <span className="error-text">
+                      {validationErrors.password}
+                    </span>
                   )}
                 </div>
                 <div className="form-group">
@@ -609,10 +642,14 @@ const EstudianteManagement: React.FC = () => {
                     required
                     placeholder="Repite la contraseña"
                     disabled={loading}
-                    className={validationErrors.confirmPassword ? "input-error" : ""}
+                    className={
+                      validationErrors.confirmPassword ? "input-error" : ""
+                    }
                   />
                   {validationErrors.confirmPassword && (
-                    <span className="error-text">{validationErrors.confirmPassword}</span>
+                    <span className="error-text">
+                      {validationErrors.confirmPassword}
+                    </span>
                   )}
                 </div>
               </div>
@@ -629,7 +666,9 @@ const EstudianteManagement: React.FC = () => {
                     className={validationErrors.distrito ? "input-error" : ""}
                   />
                   {validationErrors.distrito && (
-                    <span className="error-text">{validationErrors.distrito}</span>
+                    <span className="error-text">
+                      {validationErrors.distrito}
+                    </span>
                   )}
                 </div>
                 <div className="form-group">
@@ -640,26 +679,33 @@ const EstudianteManagement: React.FC = () => {
                     value={formData.fechaNacimiento}
                     onChange={handleInputChange}
                     disabled={loading}
-                    className={validationErrors.fechaNacimiento ? "input-error" : ""}
+                    className={
+                      validationErrors.fechaNacimiento ? "input-error" : ""
+                    }
                   />
                   {validationErrors.fechaNacimiento && (
-                    <span className="error-text">{validationErrors.fechaNacimiento}</span>
+                    <span className="error-text">
+                      {validationErrors.fechaNacimiento}
+                    </span>
                   )}
                 </div>
               </div>
 
               <div className="form-group">
                 <label>Dirección</label>
-                <input
-                  type="text"
+                <textarea
+                  id="direccion"
                   name="direccion"
                   value={formData.direccion}
                   onChange={handleInputChange}
                   disabled={loading}
+                  style={{ resize: "none" }}
                   className={validationErrors.direccion ? "input-error" : ""}
                 />
                 {validationErrors.direccion && (
-                  <span className="error-text">{validationErrors.direccion}</span>
+                  <span className="error-text">
+                    {validationErrors.direccion}
+                  </span>
                 )}
               </div>
 
@@ -667,53 +713,60 @@ const EstudianteManagement: React.FC = () => {
                 <label>Foto del Estudiante</label>
                 <div className="image-upload-section">
                   <div className="image-input-group">
-                  <input
-                    type="file"
-                    id="foto"
-                    name="foto"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    disabled={loading}
-                    style={{ padding: '8px', marginBottom: '10px' }}
-                  />
+                    <input
+                      type="file"
+                      id="foto"
+                      name="foto"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={loading}
+                      style={{ padding: "8px", marginBottom: "10px" }}
+                    />
                   </div>
                   {imagePreview && (
-                    <div style={{ marginTop: '10px', textAlign: 'center', position: 'relative', display: 'inline-block' }}>
+                    <div
+                      style={{
+                        marginTop: "10px",
+                        textAlign: "center",
+                        position: "relative",
+                        display: "inline-block",
+                      }}
+                    >
                       <img
                         src={imagePreview}
                         alt="Preview"
                         style={{
-                          maxWidth: '100px',
-                          maxHeight: '100px',
-                          border: '2px solid #ddd',
-                          borderRadius: '8px',
-                          objectFit: 'cover'
+                          maxWidth: "100px",
+                          maxHeight: "100px",
+                          border: "2px solid #ddd",
+                          borderRadius: "8px",
+                          objectFit: "cover",
                         }}
                       />
                       <button
                         type="button"
                         onClick={removeImage}
                         style={{
-                          position: 'absolute',
-                          top: '-8px',
-                          right: '-8px',
-                          background: '#dc3545',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '50%',
-                          width: '24px',
-                          height: '24px',
-                          cursor: 'pointer',
-                          fontSize: '14px',
-                          lineHeight: '1',
-                          padding: '0'
+                          position: "absolute",
+                          top: "-8px",
+                          right: "-8px",
+                          background: "#dc3545",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "50%",
+                          width: "24px",
+                          height: "24px",
+                          cursor: "pointer",
+                          fontSize: "14px",
+                          lineHeight: "1",
+                          padding: "0",
                         }}
                       >
                         ×
                       </button>
                     </div>
                   )}
-                  </div>
+                </div>
               </div>
 
               <div className="modal-actions">
@@ -740,7 +793,11 @@ const EstudianteManagement: React.FC = () => {
       {/* Modal para editar estudiante */}
       {showEditModal && selectedEstudiante && (
         <div className="modal-overlay" onClick={closeModals}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxHeight: "90vh", overflowY: "auto" }}
+          >
             <div className="modal-header edit-header">
               <h3>
                 <i className="bi bi-pencil-square"></i>
@@ -834,14 +891,20 @@ const EstudianteManagement: React.FC = () => {
 
               <div className="form-group">
                 <label>Dirección</label>
-                <input
-                  type="text"
+                <textarea
+                  id="direccion"
+                  name="direccion"
                   value={formData.direccion}
-                  onChange={(e) =>
-                    setFormData({ ...formData, direccion: e.target.value })
-                  }
+                  onChange={handleInputChange}
                   disabled={loading}
+                  style={{ resize: "none" }}
+                  className={validationErrors.direccion ? "input-error" : ""}
                 />
+                {validationErrors.direccion && (
+                  <span className="error-text">
+                    {validationErrors.direccion}
+                  </span>
+                )}
               </div>
 
               <div className="form-group">
@@ -855,39 +918,46 @@ const EstudianteManagement: React.FC = () => {
                       accept="image/*"
                       onChange={handleImageUpload}
                       disabled={loading}
-                      style={{ padding: '8px', marginBottom: '10px' }}
+                      style={{ padding: "8px", marginBottom: "10px" }}
                     />
                   </div>
                   {(imagePreview || formData.foto) && (
-                    <div style={{ marginTop: '10px', textAlign: 'center', position: 'relative', display: 'inline-block' }}>
+                    <div
+                      style={{
+                        marginTop: "10px",
+                        textAlign: "center",
+                        position: "relative",
+                        display: "inline-block",
+                      }}
+                    >
                       <img
                         src={imagePreview || formData.foto}
                         alt="Preview"
                         style={{
-                          maxWidth: '100px',
-                          maxHeight: '100px',
-                          border: '2px solid #ddd',
-                          borderRadius: '8px',
-                          objectFit: 'cover'
+                          maxWidth: "100px",
+                          maxHeight: "100px",
+                          border: "2px solid #ddd",
+                          borderRadius: "8px",
+                          objectFit: "cover",
                         }}
                       />
                       <button
                         type="button"
                         onClick={removeImage}
                         style={{
-                          position: 'absolute',
-                          top: '-8px',
-                          right: '-8px',
-                          background: '#dc3545',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '50%',
-                          width: '24px',
-                          height: '24px',
-                          cursor: 'pointer',
-                          fontSize: '14px',
-                          lineHeight: '1',
-                          padding: '0'
+                          position: "absolute",
+                          top: "-8px",
+                          right: "-8px",
+                          background: "#dc3545",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "50%",
+                          width: "24px",
+                          height: "24px",
+                          cursor: "pointer",
+                          fontSize: "14px",
+                          lineHeight: "1",
+                          padding: "0",
                         }}
                       >
                         ×
