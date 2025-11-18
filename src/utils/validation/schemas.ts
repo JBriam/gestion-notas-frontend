@@ -13,13 +13,12 @@ import * as rules from './rules';
  */
 
 export const loginSchema: ValidationSchema = {
-  username: {
+  email: {
     required: true,
     rules: [
-      rules.required('El usuario es obligatorio'),
-      rules.minLength(3, 'El usuario debe tener al menos 3 caracteres'),
-      rules.maxLength(50, 'El usuario no puede tener más de 50 caracteres'),
-      rules.username('Solo se permiten letras, números, puntos, guiones y guiones bajos')
+      rules.required('El email es obligatorio'),
+      rules.email('Ingresa un email válido'),
+      rules.maxLength(100, 'El email no puede tener más de 100 caracteres')
     ]
   },
   password: {
@@ -33,27 +32,44 @@ export const loginSchema: ValidationSchema = {
 };
 
 export const registerSchema: ValidationSchema = {
-  username: {
+  nombres: {
     required: true,
     rules: [
-      rules.required('El usuario es obligatorio'),
-      rules.minLength(3, 'El usuario debe tener al menos 3 caracteres'),
-      rules.maxLength(50, 'El usuario no puede tener más de 50 caracteres'),
-      rules.username('Solo se permiten letras, números, puntos, guiones y guiones bajos')
+      rules.required('Los nombres son obligatorios'),
+      rules.minLength(2, 'Los nombres deben tener al menos 2 caracteres'),
+      rules.maxLength(50, 'Los nombres no pueden tener más de 50 caracteres'),
+      rules.alphabetic('Los nombres solo pueden contener letras y espacios')
+    ]
+  },
+  apellidos: {
+    required: true,
+    rules: [
+      rules.required('Los apellidos son obligatorios'),
+      rules.minLength(2, 'Los apellidos deben tener al menos 2 caracteres'),
+      rules.maxLength(50, 'Los apellidos no pueden tener más de 50 caracteres'),
+      rules.alphabetic('Los apellidos solo pueden contener letras y espacios')
     ]
   },
   email: {
     required: true,
     rules: [
       rules.required('El email es obligatorio'),
-      rules.email('Ingresa un email válido')
+      rules.email('Ingresa un email válido'),
+      rules.maxLength(100, 'El email no puede tener más de 100 caracteres')
+    ]
+  },
+  telefono: {
+    required: false,
+    rules: [
+      rules.phonePeruvian('Ingresa un teléfono válido de 9 dígitos que empiece con 9 (ej: 987654321)')
     ]
   },
   password: {
     required: true,
     rules: [
       rules.required('La contraseña es obligatoria'),
-      rules.password.medium('La contraseña debe tener al menos 8 caracteres, una mayúscula y un número')
+      rules.minLength(6, 'La contraseña debe tener al menos 6 caracteres'),
+      rules.maxLength(100, 'La contraseña no puede tener más de 100 caracteres')
     ]
   },
   confirmPassword: {
@@ -61,6 +77,12 @@ export const registerSchema: ValidationSchema = {
     rules: [
       rules.required('Confirma tu contraseña'),
       rules.confirmPassword('password', 'Las contraseñas no coinciden')
+    ]
+  },
+  rol: {
+    required: true,
+    rules: [
+      rules.required('Selecciona un tipo de usuario')
     ]
   }
 };
@@ -76,18 +98,20 @@ export const estudianteSchema: ValidationSchema = {
     required: true,
     rules: [
       rules.required('Los nombres son obligatorios'),
-      rules.minLength(2, 'Los nombres deben tener al menos 2 caracteres'),
+      rules.minLength(3, 'Los nombres deben tener al menos 3 caracteres'),
       rules.maxLength(100, 'Los nombres no pueden tener más de 100 caracteres'),
-      rules.alphabetic('Solo se permiten letras y espacios')
+      rules.alphabetic('Solo se permiten letras y espacios'),
+      rules.validFullName('Ingresa un nombre válido (mínimo 3 letras por palabra)')
     ]
   },
   apellidos: {
     required: true,
     rules: [
       rules.required('Los apellidos son obligatorios'),
-      rules.minLength(2, 'Los apellidos deben tener al menos 2 caracteres'),
+      rules.minLength(3, 'Los apellidos deben tener al menos 3 caracteres'),
       rules.maxLength(100, 'Los apellidos no pueden tener más de 100 caracteres'),
-      rules.alphabetic('Solo se permiten letras y espacios')
+      rules.alphabetic('Solo se permiten letras y espacios'),
+      rules.validFullName('Ingresa un apellido válido (mínimo 3 letras por palabra)')
     ]
   },
   email: {
@@ -98,9 +122,8 @@ export const estudianteSchema: ValidationSchema = {
     ]
   },
   codigoEstudiante: {
-    required: true,
+    required: false,
     rules: [
-      rules.required('El código de estudiante es obligatorio'),
       rules.codigoEstudiante('El código debe tener formato EST seguido de números (ej: EST001)')
     ]
   },
@@ -115,14 +138,37 @@ export const estudianteSchema: ValidationSchema = {
     rules: [
       rules.dateFormat('Formato de fecha inválido'),
       rules.pastDate('La fecha de nacimiento debe ser anterior a hoy'),
-      rules.minAge(5, 'El estudiante debe tener al menos 5 años'),
+      // rules.minAge(5, 'El estudiante debe tener al menos 5 años'), // TODO: Implementar minAge
       rules.maxAge(80, 'Edad no válida')
+    ]
+  },
+  direccion: {
+    required: false,
+    rules: [
+      rules.minLength(5, 'La dirección debe tener al menos 5 caracteres'),
+      rules.addressFormat('Ingresa una dirección válida')
     ]
   },
   distrito: {
     required: false,
     rules: [
-      rules.alphabetic('Solo se permiten letras y espacios')
+      rules.alphabetic('Solo se permiten letras y espacios'),
+      rules.noNumbers('El distrito no puede contener números')
+    ]
+  },
+  password: {
+    required: true,
+    rules: [
+      rules.required('La contraseña es obligatoria'),
+      rules.minLength(6, 'La contraseña debe tener al menos 6 caracteres'),
+      rules.maxLength(100, 'La contraseña no puede tener más de 100 caracteres')
+    ]
+  },
+  confirmPassword: {
+    required: true,
+    rules: [
+      rules.required('Confirma tu contraseña'),
+      rules.confirmPassword('password', 'Las contraseñas no coinciden')
     ]
   }
 };
@@ -138,18 +184,20 @@ export const docenteSchema: ValidationSchema = {
     required: true,
     rules: [
       rules.required('Los nombres son obligatorios'),
-      rules.minLength(2, 'Los nombres deben tener al menos 2 caracteres'),
+      rules.minLength(3, 'Los nombres deben tener al menos 3 caracteres'),
       rules.maxLength(100, 'Los nombres no pueden tener más de 100 caracteres'),
-      rules.alphabetic('Solo se permiten letras y espacios')
+      rules.alphabetic('Solo se permiten letras y espacios'),
+      rules.validFullName('Ingresa un nombre válido (mínimo 3 letras, debe tener vocales)')
     ]
   },
   apellidos: {
     required: true,
     rules: [
       rules.required('Los apellidos son obligatorios'),
-      rules.minLength(2, 'Los apellidos deben tener al menos 2 caracteres'),
+      rules.minLength(3, 'Los apellidos deben tener al menos 3 caracteres'),
       rules.maxLength(100, 'Los apellidos no pueden tener más de 100 caracteres'),
-      rules.alphabetic('Solo se permiten letras y espacios')
+      rules.alphabetic('Solo se permiten letras y espacios'),
+      rules.validFullName('Ingresa un apellido válido (mínimo 3 letras, debe tener vocales)')
     ]
   },
   email: {
@@ -164,7 +212,16 @@ export const docenteSchema: ValidationSchema = {
     rules: [
       rules.required('La especialidad es obligatoria'),
       rules.minLength(2, 'La especialidad debe tener al menos 2 caracteres'),
-      rules.maxLength(100, 'La especialidad no puede tener más de 100 caracteres')
+      rules.maxLength(100, 'La especialidad no puede tener más de 100 caracteres'),
+      rules.alphabetic('Solo se permiten letras y espacios'),
+      rules.noNumbers('La especialidad no puede contener números')
+    ]
+  },
+  direccion: {
+    required: false,
+    rules: [
+      rules.minLength(5, 'La dirección debe tener al menos 5 caracteres'),
+      rules.addressFormat('Ingresa una dirección válida')
     ]
   },
   telefono: {
@@ -184,6 +241,21 @@ export const docenteSchema: ValidationSchema = {
     required: false,
     rules: [
       rules.alphabetic('Solo se permiten letras y espacios')
+    ]
+  },
+  password: {
+    required: true,
+    rules: [
+      rules.required('La contraseña es obligatoria'),
+      rules.minLength(6, 'La contraseña debe tener al menos 6 caracteres'),
+      rules.maxLength(100, 'La contraseña no puede tener más de 100 caracteres')
+    ]
+  },
+  confirmPassword: {
+    required: true,
+    rules: [
+      rules.required('Confirma tu contraseña'),
+      rules.confirmPassword('password', 'Las contraseñas no coinciden')
     ]
   }
 };

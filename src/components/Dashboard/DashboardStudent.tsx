@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../hooks/useAuth';
-import { ProfileStudent } from '../Profile/ProfileStudent';
-import { EstudianteDataService, type CursoConNotas } from '../../api/EstudianteDataService';
-import './DashboardStudent.css';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../hooks/useAuth";
+import { ProfileStudent } from "../Profile/ProfileStudent";
+import {
+  EstudianteDataService,
+  type CursoConNotas,
+} from "../../api/EstudianteDataService";
+import "./DashboardStudent.css";
 
 export const DashboardStudent: React.FC = () => {
   const { state, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<'notas' | 'perfil'>('notas');
+  const [activeTab, setActiveTab] = useState<"notas" | "perfil">("notas");
   const [cursosConNotas, setCursosConNotas] = useState<CursoConNotas[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -18,10 +21,12 @@ export const DashboardStudent: React.FC = () => {
 
       setLoading(true);
       try {
-        const cursosData = await EstudianteDataService.obtenerNotasPorCurso(state.perfilEstudiante.idEstudiante);
+        const cursosData = await EstudianteDataService.obtenerNotasPorCurso(
+          state.perfilEstudiante.idEstudiante
+        );
         setCursosConNotas(cursosData);
       } catch (error) {
-        console.error('[DashboardStudent] Error al cargar notas:', error);
+        console.error("[DashboardStudent] Error al cargar notas:", error);
         // En caso de error, mostrar arreglo vacío
         setCursosConNotas([]);
       } finally {
@@ -39,7 +44,7 @@ export const DashboardStudent: React.FC = () => {
   };
 
   const handleLogout = () => {
-    if (window.confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+    if (window.confirm("¿Estás seguro de que deseas cerrar sesión?")) {
       logout();
     }
   };
@@ -50,12 +55,12 @@ export const DashboardStudent: React.FC = () => {
         <div className="header-content">
           <div className="user-info">
             <img
-              src={state.perfilEstudiante?.foto || '/src/assets/imgs/student.gif'}
+              src={state.perfilEstudiante?.foto || "/assets/imgs/student.gif"}
               alt="Avatar"
               className="user-avatar"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                target.src = '/src/assets/imgs/student.gif';
+                target.src = "/assets/imgs/student.gif";
               }}
             />
             <div>
@@ -71,27 +76,57 @@ export const DashboardStudent: React.FC = () => {
 
       <nav className="dashboard-nav">
         <button
-          className={`nav-button ${activeTab === 'notas' ? 'active' : ''}`}
-          onClick={() => setActiveTab('notas')}
+          className={`nav-button ${activeTab === "notas" ? "active" : ""}`}
+          onClick={() => setActiveTab("notas")}
         >
-          📊 Mis Notas
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            className="size-6"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
+            />
+          </svg>
+          Mis Notas
         </button>
         <button
-          className={`nav-button ${activeTab === 'perfil' ? 'active' : ''}`}
-          onClick={() => setActiveTab('perfil')}
+          className={`nav-button ${activeTab === "perfil" ? "active" : ""}`}
+          onClick={() => setActiveTab("perfil")}
         >
-          👤 Mi Perfil
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            className="size-6"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+            />
+          </svg>
+          Mi Perfil
         </button>
       </nav>
 
       <main className="dashboard-main">
-        {activeTab === 'notas' && (
+        {activeTab === "notas" && (
           <div className="notas-section">
             <div className="section-header">
               <h2>Mis Calificaciones</h2>
               <div className="promedio-card">
                 <span className="promedio-label">Promedio General:</span>
-                <span className="promedio-valor">{calcularPromedioGeneral()}</span>
+                <span className="promedio-valor">
+                  {calcularPromedioGeneral()}
+                </span>
               </div>
             </div>
 
@@ -111,30 +146,42 @@ export const DashboardStudent: React.FC = () => {
                   <div key={cursoData.curso.idCurso} className="curso-card">
                     <div className="curso-header">
                       <h3>{cursoData.curso.nombre}</h3>
-                      <span className={`promedio-curso ${getNoteClass(cursoData.promedio)}`}>
+                      <span
+                        className={`promedio-curso ${getNoteClass(
+                          cursoData.promedio
+                        )}`}
+                      >
                         Promedio: {cursoData.promedio.toFixed(2)}
                       </span>
                     </div>
                     <div className="evaluaciones-container">
                       <p className="evaluaciones-titulo">
-                        📊 Evaluaciones ({cursoData.totalEvaluaciones})
+                        Evaluaciones ({cursoData.totalEvaluaciones})
                       </p>
                       <div className="evaluaciones-grid">
                         {cursoData.notas.map((nota) => (
                           <div key={nota.idNota} className="evaluacion-item">
                             <div className="evaluacion-header">
-                              <span className="tipo-evaluacion">{nota.tipoEvaluacion}</span>
-                              <span className={`nota-valor ${getNoteClass(nota.valor)}`}>
+                              <span className="tipo-evaluacion">
+                                {nota.tipoEvaluacion}
+                              </span>
+                              <span
+                                className={`nota-valor ${getNoteClass(
+                                  nota.valor
+                                )}`}
+                              >
                                 {nota.valor}
                               </span>
                             </div>
                             <div className="evaluacion-details">
                               <p className="fecha">
-                                📅 {new Date(nota.fecha + 'T00:00:00').toLocaleDateString('es-PE')}
+                                {new Date(
+                                  nota.fecha + "T00:00:00"
+                                ).toLocaleDateString("es-PE")}
                               </p>
                               {nota.observaciones && (
                                 <p className="observaciones">
-                                  💬 {nota.observaciones}
+                                  {nota.observaciones}
                                 </p>
                               )}
                             </div>
@@ -149,7 +196,7 @@ export const DashboardStudent: React.FC = () => {
           </div>
         )}
 
-        {activeTab === 'perfil' && <ProfileStudent />}
+        {activeTab === "perfil" && <ProfileStudent />}
       </main>
     </div>
   );
@@ -157,8 +204,8 @@ export const DashboardStudent: React.FC = () => {
 
 // Función auxiliar para determinar la clase CSS según la nota
 const getNoteClass = (valor: number): string => {
-  if (valor >= 18) return 'excelente';
-  if (valor >= 14) return 'bueno';
-  if (valor >= 11) return 'regular';
-  return 'deficiente';
+  if (valor >= 18) return "excelente";
+  if (valor >= 14) return "bueno";
+  if (valor >= 11) return "regular";
+  return "deficiente";
 };

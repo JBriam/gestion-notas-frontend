@@ -1,11 +1,11 @@
 // Interfaces que corresponden a los DTOs del backend
 
-export interface LoginRequest {
+export interface LoginRequest extends Record<string, unknown> {
   email: string;
   password: string;
 }
 
-export interface RegisterRequest {
+export interface RegisterRequest extends Record<string, unknown> {
   nombres: string;
   apellidos: string;
   telefono?: string;

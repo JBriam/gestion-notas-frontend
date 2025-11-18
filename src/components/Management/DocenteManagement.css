@@ -285,10 +285,11 @@
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Cambiar de center a flex-start para permitir scroll */
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  overflow-y: auto; /* Permitir scroll vertical */
 }
 
 .modal-content {
@@ -300,6 +301,8 @@
   max-height: 90vh;
   overflow-y: auto;
   opacity: 1 !important;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-header {
@@ -308,6 +311,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .modal-header h3 {
@@ -340,10 +344,14 @@
 
 .modal-form {
   padding: 20px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .modal-body {
   padding: 20px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .form-row {
@@ -388,12 +396,30 @@
   opacity: 0.7;
 }
 
+.form-group .input-error {
+  border-color: #dc3545;
+}
+
+.form-group .input-error:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.form-group .error-text {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
 .modal-actions {
   padding: 20px;
   border-top: 1px solid #e9ecef;
   display: flex;
   gap: 12px;
   justify-content: flex-end;
+  flex-shrink: 0;
+  background: white;
 }
 
 .btn-secondary {
@@ -484,8 +510,12 @@
     grid-template-columns: 1fr;
   }
 
+  .modal-overlay {
+    align-items: flex-start; /* Asegurar scroll en tablets/móviles */
+  }
+
   .modal-content {
-    margin: 10px;
+    margin: 10px 0; /* Mantener margen vertical consistente */
     max-height: calc(100vh - 20px);
   }
 
