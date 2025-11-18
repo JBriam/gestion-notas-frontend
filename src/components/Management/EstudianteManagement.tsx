@@ -45,7 +45,6 @@ const EstudianteManagement: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageUrl, setImageUrl] = useState<string>("");
   const [fotoFile, setFotoFile] = useState<File | null>(null);
 
   const {
@@ -60,6 +59,22 @@ const EstudianteManagement: React.FC = () => {
   useEffect(() => {
     loadEstudiantes();
   }, []);
+
+  const handleInputChange = (
+      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({ ...prev, [name]: value }));
+      
+      // Validar campo inmediatamente
+      const fieldError = validateField(name, value);
+      
+      if (fieldError) {
+        setValidationError(name, fieldError);
+      } else {
+        clearValidationError(name);
+      }
+    };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -108,19 +123,9 @@ const EstudianteManagement: React.FC = () => {
     }
   };
 
-  const handleImageUrl = () => {
-    if (imageUrl.trim()) {
-      setFormData((prev) => ({ ...prev, foto: imageUrl }));
-      setImagePreview(imageUrl);
-      setImageUrl("");
-      setFotoFile(null);
-    }
-  };
-
   const removeImage = () => {
     setFormData((prev) => ({ ...prev, foto: "" }));
     setImagePreview(null);
-    setImageUrl("");
     setFotoFile(null);
     const fileInput = document.getElementById("foto") as HTMLInputElement;
     const fileInputEdit = document.getElementById("foto-edit") as HTMLInputElement;
@@ -199,9 +204,9 @@ const EstudianteManagement: React.FC = () => {
       clearAllErrors();
       resetForm();
       await loadEstudiantes();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error al crear estudiante:", error);
-      setError(error.message || "Error al crear el estudiante");
+      setError(error instanceof Error ? error.message : "Error al crear el estudiante");
     } finally {
       setLoading(false);
     }
@@ -258,9 +263,9 @@ const EstudianteManagement: React.FC = () => {
       setShowEditModal(false);
       resetForm();
       await loadEstudiantes();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error al actualizar estudiante:", error);
-      setError(error.message || "Error al actualizar el estudiante");
+      setError(error instanceof Error ? error.message : "Error al actualizar estudiante");
     } finally {
       setLoading(false);
     }
@@ -304,7 +309,6 @@ const EstudianteManagement: React.FC = () => {
     });
     setImagePreview((estudiante.foto as string) || "");
     setFotoFile(null);
-    setImageUrl("");
     setShowEditModal(true);
   };
 
@@ -328,7 +332,6 @@ const EstudianteManagement: React.FC = () => {
       confirmPassword: "",
     });
     setImagePreview(null);
-    setImageUrl("");
     setFotoFile(null);
     setSelectedEstudiante(null);
   };
@@ -438,6 +441,10 @@ const EstudianteManagement: React.FC = () => {
                   src={estudiante.foto || "/assets/imgs/student.gif"}
                   alt="Estudiante"
                   className="estudiante-avatar"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = "/assets/imgs/student.gif";
+                  }}
                 />
                 <div className="estudiante-info">
                   <h3>
@@ -660,47 +667,55 @@ const EstudianteManagement: React.FC = () => {
                 <label>Foto del Estudiante</label>
                 <div className="image-upload-section">
                   <div className="image-input-group">
-                    <input
-                      type="file"
-                      id="foto"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      disabled={loading}
-                    />
-                    <span className="upload-text">o selecciona desde URL:</span>
-                    <div className="url-input-group">
-                      <input
-                        type="url"
-                        value={imageUrl}
-                        onChange={(e) => setImageUrl(e.target.value)}
-                        placeholder="https://ejemplo.com/imagen.jpg"
-                        disabled={loading}
+                  <input
+                    type="file"
+                    id="foto"
+                    name="foto"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={loading}
+                    style={{ padding: '8px', marginBottom: '10px' }}
+                  />
+                  </div>
+                  {imagePreview && (
+                    <div style={{ marginTop: '10px', textAlign: 'center', position: 'relative', display: 'inline-block' }}>
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        style={{
+                          maxWidth: '100px',
+                          maxHeight: '100px',
+                          border: '2px solid #ddd',
+                          borderRadius: '8px',
+                          objectFit: 'cover'
+                        }}
                       />
                       <button
                         type="button"
-                        onClick={handleImageUrl}
-                        className="btn-secondary"
-                        disabled={!imageUrl.trim() || loading}
-                      >
-                        Cargar
-                      </button>
-                    </div>
-                  </div>
-                  {imagePreview && (
-                    <div className="image-preview">
-                      <img src={imagePreview} alt="Preview" />
-                      <button
-                        type="button"
                         onClick={removeImage}
-                        className="btn-remove-image"
-                        disabled={loading}
+                        style={{
+                          position: 'absolute',
+                          top: '-8px',
+                          right: '-8px',
+                          background: '#dc3545',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '24px',
+                          height: '24px',
+                          cursor: 'pointer',
+                          fontSize: '14px',
+                          lineHeight: '1',
+                          padding: '0'
+                        }}
                       >
-                        ✕ Eliminar imagen
+                        ×
                       </button>
                     </div>
                   )}
-                </div>
+                  </div>
               </div>
+
               <div className="modal-actions">
                 <button
                   type="button"
@@ -836,44 +851,52 @@ const EstudianteManagement: React.FC = () => {
                     <input
                       type="file"
                       id="foto-edit"
+                      name="foto"
                       accept="image/*"
                       onChange={handleImageUpload}
                       disabled={loading}
+                      style={{ padding: '8px', marginBottom: '10px' }}
                     />
-                    <span className="upload-text">o selecciona desde URL:</span>
-                    <div className="url-input-group">
-                      <input
-                        type="url"
-                        value={imageUrl}
-                        onChange={(e) => setImageUrl(e.target.value)}
-                        placeholder="https://ejemplo.com/imagen.jpg"
-                        disabled={loading}
+                  </div>
+                  {(imagePreview || formData.foto) && (
+                    <div style={{ marginTop: '10px', textAlign: 'center', position: 'relative', display: 'inline-block' }}>
+                      <img
+                        src={imagePreview || formData.foto}
+                        alt="Preview"
+                        style={{
+                          maxWidth: '100px',
+                          maxHeight: '100px',
+                          border: '2px solid #ddd',
+                          borderRadius: '8px',
+                          objectFit: 'cover'
+                        }}
                       />
                       <button
                         type="button"
-                        onClick={handleImageUrl}
-                        className="btn-secondary"
-                        disabled={!imageUrl.trim() || loading}
-                      >
-                        Cargar
-                      </button>
-                    </div>
-                  </div>
-                  {imagePreview && (
-                    <div className="image-preview">
-                      <img src={imagePreview} alt="Preview" />
-                      <button
-                        type="button"
                         onClick={removeImage}
-                        className="btn-remove-image"
-                        disabled={loading}
+                        style={{
+                          position: 'absolute',
+                          top: '-8px',
+                          right: '-8px',
+                          background: '#dc3545',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '24px',
+                          height: '24px',
+                          cursor: 'pointer',
+                          fontSize: '14px',
+                          lineHeight: '1',
+                          padding: '0'
+                        }}
                       >
-                        ✕ Eliminar imagen
+                        ×
                       </button>
                     </div>
                   )}
                 </div>
               </div>
+
               <div className="modal-actions">
                 <button
                   type="button"

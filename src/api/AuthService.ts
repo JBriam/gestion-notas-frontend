@@ -1,13 +1,35 @@
-import api from './axiosConfig';
 import axios from 'axios';
+import axiosInstance from './axiosConfig';
 import type { LoginRequest, LoginResponse, RegisterRequest } from '../interfaces/Auth';
 
 export const AuthService = {
   // Login de usuario
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
     try {
-      const response = await api.post('/usuarios/login', credentials);
-      return response.data;
+      const response = await axiosInstance.post('/usuarios/login', credentials);
+      const data: LoginResponse = response.data;
+      
+      // Normalizar URL de foto del estudiante si existe
+      if (data.perfilEstudiante?.foto) {
+        const foto = String(data.perfilEstudiante.foto);
+        if (!foto.startsWith('http') && !foto.startsWith('/')) {
+          data.perfilEstudiante.foto = `${axiosInstance.defaults.baseURL}/uploads/estudiantes/${foto}`;
+        } else if (foto.startsWith('/uploads')) {
+          data.perfilEstudiante.foto = `${axiosInstance.defaults.baseURL}${foto}`;
+        }
+      }
+      
+      // Normalizar URL de foto del docente si existe
+      if (data.perfilDocente?.foto) {
+        const foto = String(data.perfilDocente.foto);
+        if (!foto.startsWith('http') && !foto.startsWith('/')) {
+          data.perfilDocente.foto = `${axiosInstance.defaults.baseURL}/uploads/docentes/${foto}`;
+        } else if (foto.startsWith('/uploads')) {
+          data.perfilDocente.foto = `${axiosInstance.defaults.baseURL}${foto}`;
+        }
+      }
+      
+      return data;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         return {
@@ -22,7 +44,7 @@ export const AuthService = {
   // Registro de usuario
   register: async (userData: RegisterRequest): Promise<{ success: boolean; message: string }> => {
     try {
-      await api.post('/usuarios/registro-completo', userData);
+      await axiosInstance.post('/usuarios/registro-completo', userData);
       return {
         success: true,
         message: 'Usuario registrado exitosamente',

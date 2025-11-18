@@ -58,7 +58,6 @@ export default function FormEstudiante({
     reader.onload = () => {
       const result = reader.result as string;
       setFotoPreview(result);
-      console.log('Foto cargada correctamente');
     };
     reader.onerror = (err) => {
       console.error("Error leyendo el archivo:", err);
@@ -92,7 +91,6 @@ export default function FormEstudiante({
     try {
       if (estudianteEdit && form.idEstudiante) {
         // Para actualización
-        console.log('Actualizando estudiante con ID:', form.idEstudiante);
         if (fotoFile) {
           const formData = new FormData();
           formData.append('idEstudiante', String(form.idEstudiante));
@@ -105,21 +103,12 @@ export default function FormEstudiante({
           formData.append('distrito', form.distrito?.trim() || '');
           formData.append('fechaNacimiento', form.fechaNacimiento || '');
           formData.append('foto', fotoFile);
-          console.log('FormData enviado (con foto):', {
-            idEstudiante: form.idEstudiante,
-            nombres: form.nombres.trim(),
-            apellidos: form.apellidos.trim(),
-            email: form.email.trim(),
-            codigoEstudiante: form.codigoEstudiante.trim(),
-          });
           await EstudianteService.actualizar(formData);
         } else {
-          console.log('Actualizando sin foto:', form);
           await EstudianteService.actualizar(form);
         }
       } else {
         // Para creación - siempre usar FormData
-        console.log('Creando nuevo estudiante');
         const formData = new FormData();
         
         // Campos obligatorios
@@ -154,21 +143,12 @@ export default function FormEstudiante({
         // Foto opcional
         if (fotoFile) {
           formData.append('foto', fotoFile);
-          console.log('Foto agregada al FormData:', fotoFile.name);
         }
         
-        console.log('FormData enviado (creación):', {
-          nombres: form.nombres.trim(),
-          apellidos: form.apellidos.trim(),
-          email: email,
-          codigoEstudiante: form.codigoEstudiante?.trim() || '(auto-generado)',
-          conFoto: !!fotoFile,
-        });
         await EstudianteService.crear(formData);
       }
       
       // Éxito
-      console.log('✅ Estudiante guardado exitosamente');
       alert('✅ Estudiante guardado exitosamente');
       onSaved();
       clearEdit();
