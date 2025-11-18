@@ -12,6 +12,7 @@ export interface RegisterRequest extends Record<string, unknown> {
   email: string;
   password: string;
   rol: 'ADMIN' | 'DOCENTE' | 'ESTUDIANTE';
+  foto?: string;
 }
 
 export interface Usuario {

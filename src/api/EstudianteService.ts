@@ -1,4 +1,4 @@
-import api from './axiosConfig';
+import axiosInstance from './axiosConfig';
 import axios from 'axios';
 import type { EstudianteProfile, ActualizarPerfilEstudianteRequest } from '../interfaces/Auth';
 import type { Estudiante } from "../interfaces/Estudiante";
@@ -7,8 +7,20 @@ export const EstudianteService = {
   // Obtener perfil del estudiante por ID
   async obtenerPerfil(id: number): Promise<EstudianteProfile> {
     try {
-      const response = await api.get(`/estudiantes/${id}`);
-      return response.data;
+      const response = await axiosInstance.get(`/estudiantes/${id}`);
+      const perfil: EstudianteProfile = response.data;
+      
+      // Normalizar URL de la foto
+      if (perfil.foto) {
+        const foto = String(perfil.foto);
+        if (!foto.startsWith('http') && !foto.startsWith('/')) {
+          perfil.foto = `${axiosInstance.defaults.baseURL}/uploads/estudiantes/${foto}`;
+        } else if (foto.startsWith('/uploads')) {
+          perfil.foto = `${axiosInstance.defaults.baseURL}${foto}`;
+        }
+      }
+      
+      return perfil;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(error.response?.data?.message || 'Error al obtener el perfil');
@@ -20,8 +32,20 @@ export const EstudianteService = {
   // Actualizar perfil del estudiante
   async actualizarPerfil(id: number, perfil: ActualizarPerfilEstudianteRequest): Promise<EstudianteProfile> {
     try {
-      const response = await api.put(`/estudiantes/${id}/perfil`, perfil);
-      return response.data;
+      const response = await axiosInstance.put(`/estudiantes/${id}/perfil`, perfil);
+      const perfilActualizado: EstudianteProfile = response.data;
+      
+      // Normalizar URL de la foto
+      if (perfilActualizado.foto) {
+        const foto = String(perfilActualizado.foto);
+        if (!foto.startsWith('http') && !foto.startsWith('/')) {
+          perfilActualizado.foto = `${axiosInstance.defaults.baseURL}/uploads/estudiantes/${foto}`;
+        } else if (foto.startsWith('/uploads')) {
+          perfilActualizado.foto = `${axiosInstance.defaults.baseURL}${foto}`;
+        }
+      }
+      
+      return perfilActualizado;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(error.response?.data?.message || 'Error al actualizar el perfil');
@@ -33,8 +57,21 @@ export const EstudianteService = {
   // Obtener todos los estudiantes (para admin/docente)
   async listar(): Promise<Estudiante[]> {
     try {
-      const response = await api.get('/estudiantes');
-      return response.data;
+      const response = await axiosInstance.get('/estudiantes');
+      // Normalizar ruta de la foto: si el backend devuelve solo el nombre de archivo,
+      // convertirlo en una URL completa apuntando a /uploads/estudiantes/
+      const data: Estudiante[] = response.data.map((e: Estudiante) => {
+        if (e.foto) {
+          const foto = String(e.foto);
+          if (!foto.startsWith('http') && !foto.startsWith('/')) {
+            e.foto = `${axiosInstance.defaults.baseURL}/uploads/estudiantes/${foto}`;
+          } else if (foto.startsWith('/uploads')) {
+            e.foto = `${axiosInstance.defaults.baseURL}${foto}`;
+          }
+        }
+        return e;
+      });
+      return data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(error.response?.data?.message || 'Error al obtener estudiantes');
@@ -44,10 +81,26 @@ export const EstudianteService = {
   },
 
   // Crear estudiante (para admin/docente)
-  async crear(estudiante: Omit<Estudiante, 'idEstudiante'>): Promise<Estudiante> {
+  async crear(estudiante: Omit<Estudiante, 'idEstudiante'> | FormData): Promise<Estudiante> {
     try {
-      const response = await api.post('/estudiantes/completo', estudiante);
-      return response.data;
+      let response;
+      if (estudiante instanceof FormData) {
+        response = await axiosInstance.post('/estudiantes/completo', estudiante, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      } else {
+        response = await axiosInstance.post('/estudiantes/completo', estudiante);
+      }
+      const created: Estudiante = response.data;
+      if (created && created.foto) {
+        const foto = String(created.foto);
+        if (!foto.startsWith('http') && !foto.startsWith('/')) {
+          created.foto = `${axiosInstance.defaults.baseURL}/uploads/estudiantes/${foto}`;
+        } else if (foto.startsWith('/uploads')) {
+          created.foto = `${axiosInstance.defaults.baseURL}${foto}`;
+        }
+      }
+      return created;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(error.response?.data?.message || 'Error al crear estudiante');
@@ -57,10 +110,27 @@ export const EstudianteService = {
   },
 
   // Actualizar estudiante (para admin/docente)
-  async actualizar(estudiante: Estudiante): Promise<Estudiante> {
+  async actualizar(estudiante: Estudiante | FormData): Promise<Estudiante> {
     try {
-      const response = await api.put(`/estudiantes/${estudiante.idEstudiante}`, estudiante);
-      return response.data;
+      let response;
+      if (estudiante instanceof FormData) {
+        const id = estudiante.get('idEstudiante');
+        response = await axiosInstance.put(`/estudiantes/${id}`, estudiante, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      } else {
+        response = await axiosInstance.put(`/estudiantes/${estudiante.idEstudiante}`, estudiante);
+      }
+      const updated: Estudiante = response.data;
+      if (updated && updated.foto) {
+        const foto = String(updated.foto);
+        if (!foto.startsWith('http') && !foto.startsWith('/')) {
+          updated.foto = `${axiosInstance.defaults.baseURL}/uploads/estudiantes/${foto}`;
+        } else if (foto.startsWith('/uploads')) {
+          updated.foto = `${axiosInstance.defaults.baseURL}${foto}`;
+        }
+      }
+      return updated;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(error.response?.data?.message || 'Error al actualizar estudiante');
@@ -72,7 +142,7 @@ export const EstudianteService = {
   // Eliminar estudiante (para admin/docente)
   async eliminar(id: number): Promise<void> {
     try {
-      await api.delete(`/estudiantes/${id}`);
+      await axiosInstance.delete(`/estudiantes/${id}`);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(error.response?.data?.message || 'Error al eliminar estudiante');

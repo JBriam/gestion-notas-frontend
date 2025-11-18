@@ -90,7 +90,6 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
           rol: "ESTUDIANTE",
           confirmPassword: "",
         });
-        // Cambiar automáticamente al login después de 2 segundos
         setTimeout(() => {
           onSwitchToLogin();
         }, 2000);
@@ -125,7 +124,6 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
           <h2>Registro</h2>
           <p>Crea tu cuenta para acceder al sistema</p>
         </div>
-
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-row">
             <div className="form-group">
@@ -161,7 +159,6 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
               )}
             </div>
           </div>
-
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="rol">Tipo de Usuario</label>
@@ -180,7 +177,6 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
                 <div className="field-error">{validation.errors.rol}</div>
               )}
             </div>
-
             <div className="form-group">
               <label htmlFor="telefono">Teléfono</label>
               <input
@@ -199,7 +195,6 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
               )}
             </div>
           </div>
-
           <div className="form-group">
             <label htmlFor="email">Email *</label>
             <input
@@ -346,7 +341,6 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
               </div>
             )}
           </div>
-
           {error && <div className="error-message">{error}</div>}
           {success && <div className="success-message">{success}</div>}
 
@@ -358,7 +352,6 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
             {loading ? "Registrando..." : "Registrarse"}
           </button>
         </form>
-
         <div className="auth-footer">
           <p>
             ¿Ya tienes una cuenta?{" "}
@@ -375,4 +368,4 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
       </div>
     </div>
   );
-};
+}

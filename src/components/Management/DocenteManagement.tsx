@@ -54,7 +54,7 @@ const DocenteManagement: React.FC = () => {
 
   // Estado para preview de imagen
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageUrl, setImageUrl] = useState<string>("");
+  const [fotoFile, setFotoFile] = useState<File | null>(null);
 
   // Hook de validación
   const { 
@@ -71,7 +71,6 @@ const DocenteManagement: React.FC = () => {
   );
 
   // Debug: ver errores en tiempo real
-  // console.log('Errores de validación:', validationErrors);
 
   useEffect(() => {
     cargarDocentes();
@@ -136,7 +135,6 @@ const DocenteManagement: React.FC = () => {
     
     // Validar campo inmediatamente
     const fieldError = validateField(name, value);
-    // console.log('Validando:', name, 'valor:', value, 'error:', fieldError);
     
     if (fieldError) {
       setValidationError(name, fieldError);
@@ -184,6 +182,7 @@ const DocenteManagement: React.FC = () => {
           const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
           setFormData((prev) => ({ ...prev, foto: compressedBase64 }));
           setImagePreview(compressedBase64);
+          setFotoFile(file);
         };
         img.src = event.target?.result as string;
       };
@@ -191,18 +190,10 @@ const DocenteManagement: React.FC = () => {
     }
   };
 
-  const handleImageUrl = () => {
-    if (imageUrl.trim()) {
-      setFormData((prev) => ({ ...prev, foto: imageUrl }));
-      setImagePreview(imageUrl);
-      setImageUrl("");
-    }
-  };
-
   const removeImage = () => {
     setFormData((prev) => ({ ...prev, foto: "" }));
     setImagePreview(null);
-    setImageUrl("");
+    setFotoFile(null);
     // Resetear el input file para permitir seleccionar la misma imagen
     const fileInput = document.getElementById('foto') as HTMLInputElement;
     const fileInputEdit = document.getElementById('foto-edit') as HTMLInputElement;
@@ -232,13 +223,26 @@ const DocenteManagement: React.FC = () => {
         return;
       }
 
-      await DocenteService.crear(formData);
+      // Crear FormData para enviar archivo
+      const formDataToSend = new FormData();
+      Object.keys(formData).forEach(key => {
+        if (key !== 'foto' && key !== 'confirmPassword') {
+          formDataToSend.append(key, formData[key as keyof DocenteForm] as string);
+        }
+      });
+
+      // Añadir archivo si existe
+      if (fotoFile) {
+        formDataToSend.append('foto', fotoFile);
+      }
+
+      await DocenteService.crear(formDataToSend);
       setSuccess("Docente creado exitosamente");
       setShowCreateModal(false);
       limpiarFormulario();
       clearAllErrors();
       setImagePreview(null);
-      setImageUrl("");
+      setFotoFile(null);
       await cargarDocentes();
     } catch (error) {
       setError(
@@ -258,16 +262,30 @@ const DocenteManagement: React.FC = () => {
     setSuccess("");
 
     try {
-      setLoading(true);
-      const updatedDocente = {
-        ...selectedDocente,
-        ...formData,
-      };
-      await DocenteService.actualizar(updatedDocente);
+      // Crear FormData para enviar archivo
+      const formDataToSend = new FormData();
+      formDataToSend.append('idDocente', selectedDocente.idDocente.toString());
+      
+      Object.keys(formData).forEach(key => {
+        if (key !== 'foto' && key !== 'password' && key !== 'confirmPassword') {
+          const value = formData[key as keyof DocenteForm];
+          if (value) {
+            formDataToSend.append(key, value as string);
+          }
+        }
+      });
+
+      // Añadir archivo si existe
+      if (fotoFile) {
+        formDataToSend.append('foto', fotoFile);
+      }
+
+      await DocenteService.actualizar(formDataToSend);
       setSuccess("Docente actualizado exitosamente");
       setShowEditModal(false);
       setSelectedDocente(null);
       limpiarFormulario();
+      setFotoFile(null);
       await cargarDocentes();
     } catch (error) {
       setError(
@@ -329,7 +347,7 @@ const DocenteManagement: React.FC = () => {
     setSelectedDocente(null);
     limpiarFormulario();
     setImagePreview(null);
-    setImageUrl("");
+    setFotoFile(null);
     setError("");
     setSuccess("");
   };
@@ -642,9 +660,10 @@ const DocenteManagement: React.FC = () => {
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-group" style={{ width: '100%' }}>
-                  <label htmlFor="foto">Foto del Docente</label>
+              <div className="form-group">
+                <label>Foto del Docente</label>
+                <div className="image-upload-section">
+                  <div className="image-input-group">
                   <input
                     type="file"
                     id="foto"
@@ -654,23 +673,6 @@ const DocenteManagement: React.FC = () => {
                     disabled={loading}
                     style={{ padding: '8px', marginBottom: '10px' }}
                   />
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <input
-                      type="text"
-                      placeholder="O ingresa URL de la imagen"
-                      value={imageUrl}
-                      onChange={(e) => setImageUrl(e.target.value)}
-                      disabled={loading}
-                      style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleImageUrl}
-                      disabled={loading || !imageUrl.trim()}
-                      style={{ padding: '8px 16px', borderRadius: '4px', border: 'none', background: '#28a745', color: 'white', cursor: 'pointer' }}
-                    >
-                      Cargar URL
-                    </button>
                   </div>
                   {imagePreview && (
                     <div style={{ marginTop: '10px', textAlign: 'center', position: 'relative', display: 'inline-block' }}>
@@ -708,7 +710,7 @@ const DocenteManagement: React.FC = () => {
                       </button>
                     </div>
                   )}
-                </div>
+                  </div>
               </div>
 
               <div className="modal-actions">
@@ -854,9 +856,10 @@ const DocenteManagement: React.FC = () => {
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-group" style={{ width: '100%' }}>
-                  <label htmlFor="foto-edit">Foto del Docente</label>
+              <div className="form-group">
+                <label>Foto del Docente</label>
+                <div className="image-upload-section">
+                  <div className="image-input-group">
                   <input
                     type="file"
                     id="foto-edit"
@@ -866,23 +869,6 @@ const DocenteManagement: React.FC = () => {
                     disabled={loading}
                     style={{ padding: '8px', marginBottom: '10px' }}
                   />
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <input
-                      type="text"
-                      placeholder="O ingresa URL de la imagen"
-                      value={imageUrl}
-                      onChange={(e) => setImageUrl(e.target.value)}
-                      disabled={loading}
-                      style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleImageUrl}
-                      disabled={loading || !imageUrl.trim()}
-                      style={{ padding: '8px 16px', borderRadius: '4px', border: 'none', background: '#28a745', color: 'white', cursor: 'pointer' }}
-                    >
-                      Cargar URL
-                    </button>
                   </div>
                   {(imagePreview || formData.foto) && (
                     <div style={{ marginTop: '10px', textAlign: 'center', position: 'relative', display: 'inline-block' }}>
