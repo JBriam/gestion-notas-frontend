@@ -44,6 +44,9 @@ const EstudianteManagement: React.FC = () => {
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>("");
+  const [fotoFile, setFotoFile] = useState<File | null>(null);
 
   const {
     errors: validationErrors,
@@ -58,18 +61,71 @@ const EstudianteManagement: React.FC = () => {
     loadEstudiantes();
   }, []);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        setError("Por favor selecciona un archivo de imagen válido");
+        return;
+      }
 
-    const fieldError = validateField(name, value);
-    if (fieldError) {
-      setValidationError(name, fieldError);
-    } else {
-      clearValidationError(name);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return;
+
+          let width = img.width;
+          let height = img.height;
+          const maxSize = 100;
+
+          if (width > height) {
+            if (width > maxSize) {
+              height = (height * maxSize) / width;
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = (width * maxSize) / height;
+              height = maxSize;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+          setFormData((prev) => ({ ...prev, foto: compressedBase64 }));
+          setImagePreview(compressedBase64);
+          setFotoFile(file);
+        };
+        img.src = event.target?.result as string;
+      };
+      reader.readAsDataURL(file);
     }
+  };
+
+  const handleImageUrl = () => {
+    if (imageUrl.trim()) {
+      setFormData((prev) => ({ ...prev, foto: imageUrl }));
+      setImagePreview(imageUrl);
+      setImageUrl("");
+      setFotoFile(null);
+    }
+  };
+
+  const removeImage = () => {
+    setFormData((prev) => ({ ...prev, foto: "" }));
+    setImagePreview(null);
+    setImageUrl("");
+    setFotoFile(null);
+    const fileInput = document.getElementById("foto") as HTMLInputElement;
+    const fileInputEdit = document.getElementById("foto-edit") as HTMLInputElement;
+    if (fileInput) fileInput.value = "";
+    if (fileInputEdit) fileInputEdit.value = "";
   };
 
   const loadEstudiantes = async () => {
@@ -96,16 +152,56 @@ const EstudianteManagement: React.FC = () => {
     }
     
     try {
+      if (!formData.email || !formData.password || !formData.nombres || !formData.apellidos) {
+        setError("Los campos email, contraseña, nombres y apellidos son obligatorios");
+        return;
+      }
+
+      if (formData.password && formData.password.length < 6) {
+        setError("La contraseña debe tener al menos 6 caracteres");
+        return;
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        setError("Las contraseñas no coinciden");
+        return;
+      }
+
       setLoading(true);
-      await EstudianteService.crear(formData);
+
+      const fd = new FormData();
+
+      fd.append("email", formData.email);
+      fd.append("password", formData.password);
+      fd.append("nombres", formData.nombres);
+      fd.append("apellidos", formData.apellidos);
+
+      if (formData.telefono) fd.append("telefono", formData.telefono);
+      if (formData.direccion) fd.append("direccion", formData.direccion);
+      if (formData.distrito) fd.append("distrito", formData.distrito);
+      if (formData.fechaNacimiento) fd.append("fechaNacimiento", formData.fechaNacimiento);
+      if (formData.codigoEstudiante) fd.append("codigoEstudiante", formData.codigoEstudiante);
+
+      if (fotoFile) {
+        fd.append("foto", fotoFile);
+      }
+
+      const created = await EstudianteService.crear(fd);
+
       setSuccess("Estudiante creado exitosamente");
+
+      if (created && created.foto) {
+        setImagePreview(created.foto as string);
+        setFormData((prev) => ({ ...prev, foto: created.foto as string }));
+      }
+
       setShowCreateModal(false);
       clearAllErrors();
       resetForm();
       await loadEstudiantes();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al crear estudiante:", error);
-      setError("Error al crear el estudiante");
+      setError(error.message || "Error al crear el estudiante");
     } finally {
       setLoading(false);
     }
@@ -116,19 +212,55 @@ const EstudianteManagement: React.FC = () => {
     if (!selectedEstudiante?.idEstudiante) return;
 
     try {
+      if (!formData.email || !formData.nombres || !formData.apellidos) {
+        setError("Los campos email, nombres y apellidos son obligatorios");
+        return;
+      }
+
       setLoading(true);
-      const updatedEstudiante = {
-        ...selectedEstudiante,
-        ...formData,
-      };
-      await EstudianteService.actualizar(updatedEstudiante);
+
+      const fd = new FormData();
+
+      fd.append("idEstudiante", String(selectedEstudiante.idEstudiante));
+      fd.append("email", formData.email);
+      fd.append("nombres", formData.nombres);
+      fd.append("apellidos", formData.apellidos);
+
+      if (formData.telefono) fd.append("telefono", formData.telefono);
+      if (formData.direccion) fd.append("direccion", formData.direccion);
+      if (formData.distrito) fd.append("distrito", formData.distrito);
+      if (formData.fechaNacimiento) fd.append("fechaNacimiento", formData.fechaNacimiento);
+      if (formData.codigoEstudiante) fd.append("codigoEstudiante", formData.codigoEstudiante);
+
+      if (formData.password) {
+        if (formData.password.length < 6) {
+          setError("La contraseña debe tener al menos 6 caracteres");
+          return;
+        }
+        if (formData.password !== formData.confirmPassword) {
+          setError("Las contraseñas no coinciden");
+          return;
+        }
+        fd.append("password", formData.password);
+      }
+
+      if (fotoFile) {
+        fd.append("foto", fotoFile);
+      }
+
+      const updated = await EstudianteService.actualizar(fd);
+
       setSuccess("Estudiante actualizado exitosamente");
+      if (updated && updated.foto) {
+        setImagePreview(updated.foto as string);
+        setFormData((prev) => ({ ...prev, foto: updated.foto as string }));
+      }
       setShowEditModal(false);
       resetForm();
       await loadEstudiantes();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al actualizar estudiante:", error);
-      setError("Error al actualizar el estudiante");
+      setError(error.message || "Error al actualizar el estudiante");
     } finally {
       setLoading(false);
     }
@@ -170,6 +302,9 @@ const EstudianteManagement: React.FC = () => {
       codigoEstudiante: estudiante.codigoEstudiante as string,
       email: estudiante.email as string,
     });
+    setImagePreview((estudiante.foto as string) || "");
+    setFotoFile(null);
+    setImageUrl("");
     setShowEditModal(true);
   };
 
@@ -192,6 +327,9 @@ const EstudianteManagement: React.FC = () => {
       password: "",
       confirmPassword: "",
     });
+    setImagePreview(null);
+    setImageUrl("");
+    setFotoFile(null);
     setSelectedEstudiante(null);
   };
 
@@ -199,6 +337,8 @@ const EstudianteManagement: React.FC = () => {
     setShowCreateModal(false);
     setShowEditModal(false);
     setShowDeleteModal(false);
+    setError(null);
+    setSuccess(null);
     resetForm();
   };
 
@@ -354,7 +494,7 @@ const EstudianteManagement: React.FC = () => {
       {/* Modal para crear estudiante */}
       {showCreateModal && (
         <div className="modal-overlay" onClick={closeModals}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxHeight: '90vh', overflowY: 'auto' }}>
             <div className="modal-header create-header">
               <h3>
                 <i className="bi bi-person-plus-fill"></i>
@@ -516,6 +656,51 @@ const EstudianteManagement: React.FC = () => {
                 )}
               </div>
 
+              <div className="form-group">
+                <label>Foto del Estudiante</label>
+                <div className="image-upload-section">
+                  <div className="image-input-group">
+                    <input
+                      type="file"
+                      id="foto"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={loading}
+                    />
+                    <span className="upload-text">o selecciona desde URL:</span>
+                    <div className="url-input-group">
+                      <input
+                        type="url"
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                        placeholder="https://ejemplo.com/imagen.jpg"
+                        disabled={loading}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleImageUrl}
+                        className="btn-secondary"
+                        disabled={!imageUrl.trim() || loading}
+                      >
+                        Cargar
+                      </button>
+                    </div>
+                  </div>
+                  {imagePreview && (
+                    <div className="image-preview">
+                      <img src={imagePreview} alt="Preview" />
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="btn-remove-image"
+                        disabled={loading}
+                      >
+                        ✕ Eliminar imagen
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
               <div className="modal-actions">
                 <button
                   type="button"
@@ -540,7 +725,7 @@ const EstudianteManagement: React.FC = () => {
       {/* Modal para editar estudiante */}
       {showEditModal && selectedEstudiante && (
         <div className="modal-overlay" onClick={closeModals}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxHeight: '90vh', overflowY: 'auto' }}>
             <div className="modal-header edit-header">
               <h3>
                 <i className="bi bi-pencil-square"></i>
@@ -644,6 +829,51 @@ const EstudianteManagement: React.FC = () => {
                 />
               </div>
 
+              <div className="form-group">
+                <label>Foto del Estudiante</label>
+                <div className="image-upload-section">
+                  <div className="image-input-group">
+                    <input
+                      type="file"
+                      id="foto-edit"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={loading}
+                    />
+                    <span className="upload-text">o selecciona desde URL:</span>
+                    <div className="url-input-group">
+                      <input
+                        type="url"
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                        placeholder="https://ejemplo.com/imagen.jpg"
+                        disabled={loading}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleImageUrl}
+                        className="btn-secondary"
+                        disabled={!imageUrl.trim() || loading}
+                      >
+                        Cargar
+                      </button>
+                    </div>
+                  </div>
+                  {imagePreview && (
+                    <div className="image-preview">
+                      <img src={imagePreview} alt="Preview" />
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="btn-remove-image"
+                        disabled={loading}
+                      >
+                        ✕ Eliminar imagen
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
               <div className="modal-actions">
                 <button
                   type="button"
