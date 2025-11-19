@@ -19,6 +19,30 @@ interface CursoForm extends Record<string, unknown> {
 }
 
 const CursoManagement: React.FC = () => {
+  const [nombreTouched, setNombreTouched] = useState(false);
+
+  const [formData, setFormData] = useState<CursoForm>({
+    nombre: "",
+    codigoCurso: "",
+    descripcion: "",
+    creditos: 1,
+    activo: true,
+    idDocente: undefined,
+  });
+  // Validación en tiempo real para nombre y créditos
+  useEffect(() => {
+    if (nombreTouched) {
+      if (/^\d+$/.test(formData.nombre) || formData.nombre.trim().length < 3) {
+        setError("El nombre del curso es inválido. Debe tener al menos 3 caracteres y no ser solo números.");
+        return;
+      }
+    }
+    if (formData.creditos > 15) {
+      setError("El número máximo de créditos es 15.");
+      return;
+    }
+    setError(null);
+  }, [formData.nombre, formData.creditos]);
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [docentes, setDocentes] = useState<Docente[]>([]);
   const [estadisticasCursos, setEstadisticasCursos] = useState<
@@ -32,14 +56,6 @@ const CursoManagement: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCurso, setSelectedCurso] = useState<Curso | null>(null);
-  const [formData, setFormData] = useState<CursoForm>({
-    nombre: "",
-    codigoCurso: "",
-    descripcion: "",
-    creditos: 1,
-    activo: true,
-    idDocente: undefined,
-  });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -90,16 +106,30 @@ const CursoManagement: React.FC = () => {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Validación final antes de enviar
+    if (/^\d+$/.test(formData.nombre) || formData.nombre.trim().length < 3) {
+      setError("El nombre del curso es inválido. Debe tener al menos 3 caracteres y no ser solo números.");
+      return;
+    }
+    if (formData.creditos > 15) {
+      setError("El número máximo de créditos es 15.");
+      return;
+    }
+    setLoading(true);
     try {
-      setLoading(true);
       await CursoService.crear(formData);
       setSuccess("Curso creado exitosamente");
       setShowCreateModal(false);
       resetForm();
       await loadData();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al crear curso:", error);
-      setError("Error al crear el curso");
+      // Detectar error de curso duplicado por docente
+      if (error?.response?.data?.message?.includes("ya existe un curso registrado con ese docente")) {
+        setError("Ya existe un curso registrado con ese docente y código");
+      } else {
+        setError("Error al crear el curso");
+      }
     } finally {
       setLoading(false);
     }
@@ -108,9 +138,17 @@ const CursoManagement: React.FC = () => {
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCurso?.idCurso) return;
-
+    // Validación frontend
+    if (/^\d+$/.test(formData.nombre) || formData.nombre.trim().length < 3) {
+      setError("El nombre del curso es inválido. Debe tener al menos 3 caracteres y no ser solo números.");
+      return;
+    }
+    if (formData.creditos > 15) {
+      setError("El número máximo de créditos es 15.");
+      return;
+    }
+    setLoading(true);
     try {
-      setLoading(true);
       const updatedCurso = {
         ...selectedCurso,
         ...formData,
@@ -149,28 +187,24 @@ const CursoManagement: React.FC = () => {
 
   const openCreateModal = () => {
     resetForm();
+    setNombreTouched(false);
     setShowCreateModal(true);
   };
 
   const openEditModal = (curso: Curso) => {
     setSelectedCurso(curso);
-
+    setNombreTouched(false);
     // Intentar obtener idDocente de múltiples fuentes
     let docenteId: number | undefined = undefined;
-
-    // Opción 1: Si viene directamente en curso.idDocente
     if (curso.idDocente !== undefined) {
       docenteId = curso.idDocente;
-    }
-    // Opción 2: Si viene dentro del objeto docente
-    else if (
+    } else if (
       typeof curso.docente === "object" &&
       curso.docente &&
       "idDocente" in curso.docente
     ) {
       docenteId = curso.docente.idDocente as number;
     }
-
     setFormData({
       nombre: curso.nombre,
       codigoCurso: (curso.codigoCurso as string) || "",
@@ -197,6 +231,7 @@ const CursoManagement: React.FC = () => {
       idDocente: undefined,
     });
     setSelectedCurso(null);
+    setNombreTouched(false);
   };
 
   const closeModals = () => {
@@ -310,7 +345,6 @@ const CursoManagement: React.FC = () => {
         </div>
       </div>
 
-      {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
 
       {loading ? (
@@ -410,8 +444,8 @@ const CursoManagement: React.FC = () => {
 
       {/* Modal para crear curso */}
       {showCreateModal && (
-        <div className="modal-overlay" onClick={closeModals}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay">
+          <div className="modal-content">
             <div className="modal-header create-header">
               <h3>
                 <i className="bi bi-journal-plus"></i>
@@ -421,6 +455,11 @@ const CursoManagement: React.FC = () => {
                 ×
               </button>
             </div>
+            {error && (
+              <div style={{ color: 'red', marginBottom: '10px', textAlign: 'center' }}>
+                {error}
+              </div>
+            )}
             <form onSubmit={handleCreate} className="modal-form">
               <div className="form-row">
                 <div className="form-group">
@@ -428,9 +467,10 @@ const CursoManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.nombre}
-                    onChange={(e) =>
-                      setFormData({ ...formData, nombre: e.target.value })
-                    }
+                    onChange={(e) => {
+                      setFormData({ ...formData, nombre: e.target.value });
+                    }}
+                    onBlur={() => setNombreTouched(true)}
                     required
                     disabled={loading}
                     placeholder="Ej: Matemáticas Avanzadas"
@@ -453,31 +493,33 @@ const CursoManagement: React.FC = () => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Créditos *</label>
+                  <label htmlFor="creditos-curso">Créditos *</label>
                   <input
                     type="number"
+                    id="creditos-curso"
                     value={formData.creditos}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        creditos: parseInt(e.target.value) || 1,
+                        creditos: Number.parseInt(e.target.value) || 1,
                       })
                     }
                     required
                     min="1"
-                    max="10"
+                    max="15"
                     disabled={loading}
                   />
                 </div>
                 <div className="form-group">
-                  <label>Docente Asignado</label>
+                  <label htmlFor="docente-curso">Docente Asignado</label>
                   <select
+                    id="docente-curso"
                     value={formData.idDocente || ""}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         idDocente: e.target.value
-                          ? parseInt(e.target.value)
+                          ? Number.parseInt(e.target.value)
                           : undefined,
                       })
                     }
@@ -486,8 +528,7 @@ const CursoManagement: React.FC = () => {
                     <option value="">Sin asignar</option>
                     {docentes.map((docente) => (
                       <option key={docente.idDocente} value={docente.idDocente}>
-                        {docente.nombres} {docente.apellidos} -{" "}
-                        {docente.especialidad}
+                        {docente.nombres} {docente.apellidos} - {docente.especialidad}
                       </option>
                     ))}
                   </select>
@@ -509,16 +550,9 @@ const CursoManagement: React.FC = () => {
 
               <div className="modal-actions">
                 <button
-                  type="button"
-                  onClick={closeModals}
-                  className="btn-secondary"
-                >
-                  Cancelar
-                </button>
-                <button
                   type="submit"
                   className="btn-primary"
-                  disabled={loading}
+                  disabled={loading || !!error}
                 >
                   {loading ? "Creando..." : "Crear Curso"}
                 </button>
@@ -530,8 +564,8 @@ const CursoManagement: React.FC = () => {
 
       {/* Modal para editar curso */}
       {showEditModal && selectedCurso && (
-        <div className="modal-overlay" onClick={closeModals}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay">
+          <div className="modal-content">
             <div className="modal-header edit-header">
               <h3>
                 <i className="bi bi-pencil-square"></i>
@@ -541,6 +575,11 @@ const CursoManagement: React.FC = () => {
                 ×
               </button>
             </div>
+            {error && (
+              <div style={{ color: 'red', marginBottom: '10px', textAlign: 'center' }}>
+                {error}
+              </div>
+            )}
             <form onSubmit={handleEdit} className="modal-form">
               <div className="form-row">
                 <div className="form-group">
@@ -548,9 +587,8 @@ const CursoManagement: React.FC = () => {
                   <input
                     type="text"
                     value={formData.nombre}
-                    onChange={(e) =>
-                      setFormData({ ...formData, nombre: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                    onBlur={() => setNombreTouched(true)}
                     required
                     disabled={loading}
                   />
@@ -625,13 +663,6 @@ const CursoManagement: React.FC = () => {
               </div>
 
               <div className="modal-actions">
-                <button
-                  type="button"
-                  onClick={closeModals}
-                  className="btn-secondary"
-                >
-                  Cancelar
-                </button>
                 <button
                   type="submit"
                   className="btn-primary"
