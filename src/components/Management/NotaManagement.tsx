@@ -36,8 +36,8 @@ const NotaManagement: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [notasData, estudiantesData, cursosData] = await Promise.all([
-        NotaService.listar() as Promise<NotaBackend[]>,
+        const [notasData, estudiantesData, cursosData] = await Promise.all([
+          NotaService.listar(),
         EstudianteService.listar(),
         CursoService.listar(),
       ]);
@@ -86,6 +86,17 @@ const NotaManagement: React.FC = () => {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Validación de nota duplicada
+    const existeDuplicada = notas.some(
+      (nota) =>
+        nota.estudiante.idEstudiante === formData.idEstudiante &&
+        nota.curso.idCurso === formData.idCurso &&
+        nota.tipoEvaluacion === formData.tipoEvaluacion
+    );
+    if (existeDuplicada) {
+      setError("Nota duplicada no permitida para este estudiante, curso y evaluación.");
+      return;
+    }
     try {
       setLoading(true);
       await NotaService.crear(formData);
@@ -104,7 +115,18 @@ const NotaManagement: React.FC = () => {
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedNota?.idNota) return;
-
+    // Validación de nota duplicada (excluyendo la nota actual)
+    const existeDuplicada = notas.some(
+      (nota) =>
+        nota.idNota !== selectedNota.idNota &&
+        nota.estudiante.idEstudiante === formData.idEstudiante &&
+        nota.curso.idCurso === formData.idCurso &&
+        nota.tipoEvaluacion === formData.tipoEvaluacion
+    );
+    if (existeDuplicada) {
+      setError("Nota duplicada no permitida para este estudiante, curso y evaluación.");
+      return;
+    }
     try {
       setLoading(true);
       const updatedNota = {
@@ -193,8 +215,7 @@ const NotaManagement: React.FC = () => {
     const nombreCompleto =
       `${nota.estudiante.nombres} ${nota.estudiante.apellidos}`.toLowerCase();
     const nombreCurso = nota.curso.nombre.toLowerCase();
-    const codigoEstudiante =
-      (nota.estudiante.codigoEstudiante as string)?.toLowerCase() || "";
+      const codigoEstudiante = (nota.estudiante.codigoEstudiante ?? "").toLowerCase();
 
     const matchesSearch =
       nombreCompleto.includes(searchTerm.toLowerCase()) ||
@@ -427,8 +448,8 @@ const NotaManagement: React.FC = () => {
 
       {/* Modal para crear nota */}
       {showCreateModal && (
-        <div className="modal-overlay" onClick={closeModals}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay">
+          <div className="modal-content">
             <div className="modal-header create-header">
               <h3>
                 <i className="bi bi-journal-plus"></i>
@@ -495,12 +516,16 @@ const NotaManagement: React.FC = () => {
                   <input
                     type="number"
                     value={formData.nota}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        nota: parseFloat(e.target.value) || 0,
-                      })
-                    }
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      if (value > 20) {
+                        setError("La nota no puede ser mayor a 20");
+                        setFormData({ ...formData, nota: 20 });
+                      } else {
+                        setError(null);
+                        setFormData({ ...formData, nota: value });
+                      }
+                    }}
                     required
                     min="0"
                     max="20"
@@ -508,6 +533,9 @@ const NotaManagement: React.FC = () => {
                     disabled={loading}
                     placeholder="Ej: 15.5"
                   />
+                  {error && (
+                    <div className="form-error-message" style={{ color: 'red' }}>{error}</div>
+                  )}
                   <small className="form-hint">
                     Calificación de 0 a 20. Nota mínima aprobatoria: 13
                   </small>
@@ -573,8 +601,8 @@ const NotaManagement: React.FC = () => {
 
       {/* Modal para editar nota */}
       {showEditModal && selectedNota && (
-        <div className="modal-overlay" onClick={closeModals}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay">
+          <div className="modal-content">
             <div className="modal-header edit-header">
               <h3>
                 <i className="bi bi-pencil-square"></i>
@@ -601,18 +629,25 @@ const NotaManagement: React.FC = () => {
                   <input
                     type="number"
                     value={formData.nota}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        nota: parseFloat(e.target.value) || 0,
-                      })
-                    }
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      if (value > 20) {
+                        setError("La nota no puede ser mayor a 20");
+                        setFormData({ ...formData, nota: 20 });
+                      } else {
+                        setError(null);
+                        setFormData({ ...formData, nota: value });
+                      }
+                    }}
                     required
                     min="0"
                     max="20"
                     step="0.1"
                     disabled={loading}
                   />
+                  {error && (
+                    <div className="form-error-message" style={{ color: 'red' }}>{error}</div>
+                  )}
                   <small className="form-hint">
                     Calificación actual: {selectedNota.nota} | Estado:{" "}
                     {getEstadoNota(selectedNota.nota) === "aprobado"
