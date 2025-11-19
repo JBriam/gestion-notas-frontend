@@ -619,7 +619,7 @@ const NotaManagement: React.FC = () => {
                   {selectedNota.estudiante.apellidos}
                 </div>
                 <div className="info-item">
-                  <strong>Curso:</strong> {selectedNota.curso.nombre}
+                  <strong>Curso:</strong> {selectedNota.curso.nombre} - {selectedNota.curso.codigoCurso}
                 </div>
               </div>
 
