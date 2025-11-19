@@ -503,7 +503,7 @@ const NotaManagement: React.FC = () => {
                     {cursos.map((curso) => (
                       <option key={curso.idCurso} value={curso.idCurso}>
                         {curso.nombre} -{" "}
-                        {(curso.codigo as string) || "Sin código"}
+                        {(curso.codigoCurso as string) || "Sin código"}
                       </option>
                     ))}
                   </select>
