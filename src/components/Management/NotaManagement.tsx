@@ -87,6 +87,38 @@ const NotaManagement: React.FC = () => {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Validaciones
+      if (!formData.idEstudiante || formData.idEstudiante === 0) {
+        setError("Debes seleccionar un estudiante");
+        return;
+      }
+
+      if (!formData.idCurso || formData.idCurso === 0) {
+        setError("Debes seleccionar un curso");
+        return;
+      }
+
+      if (formData.nota < 0 || formData.nota > 20) {
+        setError("La nota debe estar entre 0 y 20");
+        return;
+      }
+
+      if (!formData.tipoEvaluacion.trim()) {
+        setError("El tipo de evaluación es obligatorio");
+        return;
+      }
+
+      const tiposValidos = ['Examen', 'Tarea', 'Proyecto', 'Participación'];
+      if (!tiposValidos.includes(formData.tipoEvaluacion)) {
+        setError("Tipo de evaluación no válido");
+        return;
+      }
+
+      if (formData.observaciones && formData.observaciones.length > 255) {
+        setError("Las observaciones no pueden tener más de 255 caracteres");
+        return;
+      }
+
       setLoading(true);
       await NotaService.crear(formData);
       setSuccess("Nota creada exitosamente");
@@ -106,6 +138,28 @@ const NotaManagement: React.FC = () => {
     if (!selectedNota?.idNota) return;
 
     try {
+      // Validaciones
+      if (formData.nota < 0 || formData.nota > 20) {
+        setError("La nota debe estar entre 0 y 20");
+        return;
+      }
+
+      if (!formData.tipoEvaluacion.trim()) {
+        setError("El tipo de evaluación es obligatorio");
+        return;
+      }
+
+      const tiposValidos = ['Examen', 'Tarea', 'Proyecto', 'Participación'];
+      if (!tiposValidos.includes(formData.tipoEvaluacion)) {
+        setError("Tipo de evaluación no válido");
+        return;
+      }
+
+      if (formData.observaciones && formData.observaciones.length > 255) {
+        setError("Las observaciones no pueden tener más de 255 caracteres");
+        return;
+      }
+
       setLoading(true);
       const updatedNota = {
         ...selectedNota,

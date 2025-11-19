@@ -85,6 +85,43 @@ const CursoManagement: React.FC = () => {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Validaciones
+      if (!formData.nombre.trim()) {
+        setError("El nombre del curso es obligatorio");
+        return;
+      }
+      if (formData.nombre.length < 3) {
+        setError("El nombre debe tener al menos 3 caracteres");
+        return;
+      }
+      if (formData.nombre.length > 100) {
+        setError("El nombre no puede tener más de 100 caracteres");
+        return;
+      }
+
+      if (!formData.codigoCurso.trim()) {
+        setError("El código del curso es obligatorio");
+        return;
+      }
+      if (formData.codigoCurso.length < 2) {
+        setError("El código debe tener al menos 2 caracteres");
+        return;
+      }
+      if (formData.codigoCurso.length > 20) {
+        setError("El código no puede tener más de 20 caracteres");
+        return;
+      }
+
+      if (formData.creditos < 1 || formData.creditos > 10) {
+        setError("Los créditos deben estar entre 1 y 10");
+        return;
+      }
+
+      if (formData.descripcion && formData.descripcion.length > 500) {
+        setError("La descripción no puede tener más de 500 caracteres");
+        return;
+      }
+
       setLoading(true);
       await CursoService.crear(formData);
       setSuccess('Curso creado exitosamente');
@@ -104,6 +141,43 @@ const CursoManagement: React.FC = () => {
     if (!selectedCurso?.idCurso) return;
     
     try {
+      // Validaciones
+      if (!formData.nombre.trim()) {
+        setError("El nombre del curso es obligatorio");
+        return;
+      }
+      if (formData.nombre.length < 3) {
+        setError("El nombre debe tener al menos 3 caracteres");
+        return;
+      }
+      if (formData.nombre.length > 100) {
+        setError("El nombre no puede tener más de 100 caracteres");
+        return;
+      }
+
+      if (!formData.codigoCurso.trim()) {
+        setError("El código del curso es obligatorio");
+        return;
+      }
+      if (formData.codigoCurso.length < 2) {
+        setError("El código debe tener al menos 2 caracteres");
+        return;
+      }
+      if (formData.codigoCurso.length > 20) {
+        setError("El código no puede tener más de 20 caracteres");
+        return;
+      }
+
+      if (formData.creditos < 1 || formData.creditos > 10) {
+        setError("Los créditos deben estar entre 1 y 10");
+        return;
+      }
+
+      if (formData.descripcion && formData.descripcion.length > 500) {
+        setError("La descripción no puede tener más de 500 caracteres");
+        return;
+      }
+
       setLoading(true);
       const updatedCurso = {
         ...selectedCurso,

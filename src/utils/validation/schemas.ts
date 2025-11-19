@@ -203,12 +203,23 @@ export const cursoSchema: ValidationSchema = {
       rules.maxLength(100, 'El nombre no puede tener más de 100 caracteres')
     ]
   },
+
+  codigo: {
+    required: true,
+    rules: [
+      rules.required('El código del curso es obligatorio'),
+      rules.minLength(2, 'El código debe tener al menos 2 caracteres'),
+      rules.maxLength(20, 'El código no puede tener más de 20 caracteres')
+    ]
+  },
+
   descripcion: {
     required: false,
     rules: [
       rules.maxLength(500, 'La descripción no puede tener más de 500 caracteres')
     ]
   },
+
   creditos: {
     required: true,
     rules: [
@@ -217,8 +228,17 @@ export const cursoSchema: ValidationSchema = {
       rules.minValue(1, 'Debe tener al menos 1 crédito'),
       rules.maxValue(10, 'No puede tener más de 10 créditos')
     ]
+  },
+
+  docenteId: {
+    required: true,
+    rules: [
+      rules.required('El docente es obligatorio')
+    ]
   }
 };
+
+
 
 /**
  * ============================================
