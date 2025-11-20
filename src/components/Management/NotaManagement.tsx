@@ -716,7 +716,7 @@ const NotaManagement: React.FC = () => {
 
       {/* Modal para eliminar nota */}
       {showDeleteModal && selectedNota && (
-        <div className="modal-overlay" onClick={closeModals}>
+        <div className="modal-overlay">
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header delete-header">
               <h3>
