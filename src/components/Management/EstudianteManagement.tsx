@@ -521,7 +521,7 @@ const EstudianteManagement: React.FC = () => {
 
       {/* Modal para crear estudiante */}
       {showCreateModal && (
-        <div className="modal-overlay" onClick={closeModals}>
+        <div className="modal-overlay">
           <div
             className="modal-content"
             onClick={(e) => e.stopPropagation()}
@@ -792,7 +792,7 @@ const EstudianteManagement: React.FC = () => {
 
       {/* Modal para editar estudiante */}
       {showEditModal && selectedEstudiante && (
-        <div className="modal-overlay" onClick={closeModals}>
+        <div className="modal-overlay">
           <div
             className="modal-content"
             onClick={(e) => e.stopPropagation()}
@@ -990,7 +990,7 @@ const EstudianteManagement: React.FC = () => {
 
       {/* Modal para eliminar estudiante */}
       {showDeleteModal && selectedEstudiante && (
-        <div className="modal-overlay" onClick={closeModals}>
+        <div className="modal-overlay">
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header delete-header">
               <h3>

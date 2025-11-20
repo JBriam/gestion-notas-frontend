@@ -122,14 +122,10 @@ const CursoManagement: React.FC = () => {
       setShowCreateModal(false);
       resetForm();
       await loadData();
-    } catch (error: any) {
-      console.error("Error al crear curso:", error);
-      // Detectar error de curso duplicado por docente
-      if (error?.response?.data?.message?.includes("ya existe un curso registrado con ese docente")) {
-        setError("Ya existe un curso registrado con ese docente y código");
-      } else {
-        setError("Error al crear el curso");
-      }
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Error al crear el curso"
+      );
     } finally {
       setLoading(false);
     }
@@ -550,6 +546,14 @@ const CursoManagement: React.FC = () => {
 
               <div className="modal-actions">
                 <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={closeModals}
+                  disabled={loading}
+                >
+                  Cancelar
+                </button>
+                <button
                   type="submit"
                   className="btn-primary"
                   disabled={loading || !!error}
@@ -664,6 +668,14 @@ const CursoManagement: React.FC = () => {
 
               <div className="modal-actions">
                 <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={closeModals}
+                  disabled={loading}
+                >
+                  Cancelar
+                </button>
+                <button
                   type="submit"
                   className="btn-primary"
                   disabled={loading}
@@ -678,7 +690,7 @@ const CursoManagement: React.FC = () => {
 
       {/* Modal para eliminar curso */}
       {showDeleteModal && selectedCurso && (
-        <div className="modal-overlay" onClick={closeModals}>
+        <div className="modal-overlay">
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header delete-header">
               <h3>
