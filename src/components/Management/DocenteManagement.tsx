@@ -203,57 +203,81 @@ const DocenteManagement: React.FC = () => {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      // Validar formulario completo
-      const isValid = validateForm();
-      if (!isValid) {
-        setError("Por favor corrige los errores en el formulario");
-        setLoading(false);
-        return;
-      }
-
-      // Validar que las contraseñas coincidan
-      if (formData.password !== formData.confirmPassword) {
-        setError("Las contraseñas no coinciden");
-        setLoading(false);
-        return;
-      }
-
-      // Crear FormData para enviar archivo
-      const formDataToSend = new FormData();
-      Object.keys(formData).forEach((key) => {
-        if (key !== "foto" && key !== "confirmPassword") {
-          formDataToSend.append(
-            key,
-            formData[key as keyof DocenteForm] as string
-          );
+    
+        const isValid = validateForm();
+        if (!isValid) {
+          setError("Por favor corrige los errores en el formulario");
+          setLoading(false);
+          return;
         }
-      });
-
-      // Añadir archivo si existe
-      if (fotoFile) {
-        formDataToSend.append("foto", fotoFile);
-      }
-
-      await DocenteService.crear(formDataToSend);
-      setSuccess("Docente creado exitosamente");
-      setShowCreateModal(false);
-      limpiarFormulario();
-      clearAllErrors();
-      setImagePreview(null);
-      setFotoFile(null);
-      await cargarDocentes();
-    } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Error al crear docente"
-      );
-    } finally {
-      setLoading(false);
-    }
+    
+        try {
+          if (
+            !formData.email ||
+            !formData.password ||
+            !formData.nombres ||
+            !formData.apellidos ||
+            !formData.especialidad
+          ) {
+            setError(
+              "Los campos email, contraseña, nombres, apellidos y especialidad son obligatorios"
+            );
+            return;
+          }
+    
+          if (formData.password && formData.password.length < 6) {
+            setError("La contraseña debe tener al menos 6 caracteres");
+            return;
+          }
+    
+          if (formData.password !== formData.confirmPassword) {
+            setError("Las contraseñas no coinciden");
+            return;
+          }
+    
+          setLoading(true);
+    
+          const fd = new FormData();
+    
+          fd.append("email", formData.email);
+          fd.append("password", formData.password);
+          fd.append("nombres", formData.nombres);
+          fd.append("apellidos", formData.apellidos);
+          fd.append("especialidad", formData.especialidad);
+    
+          if (formData.telefono) fd.append("telefono", formData.telefono);
+          if (formData.direccion) fd.append("direccion", formData.direccion);
+          if (formData.distrito) fd.append("distrito", formData.distrito);
+          if (formData.fechaContratacion)
+            fd.append("fechaContratacion", formData.fechaContratacion);
+          if (formData.codigoDocente)
+            fd.append("codigoDocente", formData.codigoDocente);
+    
+          if (fotoFile) {
+            fd.append("foto", fotoFile);
+          }
+    
+          const created = await DocenteService.crear(fd);
+    
+          setSuccess("Docente creado exitosamente");
+    
+          if (created && created.foto) {
+            setImagePreview(created.foto as string);
+            setFormData((prev) => ({ ...prev, foto: created.foto as string }));
+          }
+    
+          setShowCreateModal(false);
+          clearAllErrors();
+          resetForm();
+          await cargarDocentes();
+        } catch (error) {
+          console.error("Error al crear docente:", error);
+          setError(
+            error instanceof Error ? error.message : "Error al crear el docente"
+          );
+        } finally {
+          setLoading(false);
+        }
   };
 
   const handleEdit = async (e: React.FormEvent) => {
@@ -341,6 +365,26 @@ const DocenteManagement: React.FC = () => {
   const openDeleteModal = (docente: Docente) => {
     setSelectedDocente(docente);
     setShowDeleteModal(true);
+  };
+
+  const resetForm = () => {
+    setFormData({
+      nombres: "",
+      apellidos: "",
+      codigoDocente: "",
+      telefono: "",
+      foto: "",
+      fechaContratacion: "",
+      especialidad: "",
+      direccion: "",
+      distrito: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    });
+    setImagePreview(null);
+    setFotoFile(null);
+    setSelectedDocente(null);
   };
 
   const closeModals = () => {
