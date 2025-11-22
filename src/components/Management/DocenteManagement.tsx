@@ -216,11 +216,10 @@ const DocenteManagement: React.FC = () => {
             !formData.email ||
             !formData.password ||
             !formData.nombres ||
-            !formData.apellidos ||
-            !formData.especialidad
+            !formData.apellidos
           ) {
             setError(
-              "Los campos email, contraseña, nombres, apellidos y especialidad son obligatorios"
+              "Los campos email, contraseña, nombres y apellidos son obligatorios"
             );
             return;
           }
@@ -243,8 +242,8 @@ const DocenteManagement: React.FC = () => {
           fd.append("password", formData.password);
           fd.append("nombres", formData.nombres);
           fd.append("apellidos", formData.apellidos);
-          fd.append("especialidad", formData.especialidad);
     
+          if (formData.especialidad) fd.append("especialidad", formData.especialidad);
           if (formData.telefono) fd.append("telefono", formData.telefono);
           if (formData.direccion) fd.append("direccion", formData.direccion);
           if (formData.distrito) fd.append("distrito", formData.distrito);
