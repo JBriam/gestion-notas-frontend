@@ -168,7 +168,31 @@ export const DocenteService = {
       return created;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        throw new Error(error.response?.data?.message || 'Error al crear docente');
+        const status = error.response?.status;
+        const message = error.response?.data?.message;
+        const errorData = error.response?.data;
+        
+        console.log('Error al crear docente:', { status, message, errorData });
+        
+        // Detectar errores de correo duplicado - verificar múltiples formatos
+        const errorString = JSON.stringify(errorData || {}).toLowerCase();
+        const messageStr = (message || '').toLowerCase();
+        
+        if (status === 409 || 
+            messageStr.includes('email') || 
+            messageStr.includes('correo') || 
+            messageStr.includes('existe') ||
+            messageStr.includes('duplicado') ||
+            messageStr.includes('duplicate') ||
+            errorString.includes('email') ||
+            errorString.includes('correo') ||
+            errorString.includes('existe') ||
+            errorString.includes('duplicado') ||
+            errorString.includes('duplicate')) {
+          throw new Error('El correo electrónico ya está registrado. Por favor, utilice otro correo.');
+        }
+        
+        throw new Error(message || 'Error al crear docente');
       }
       throw new Error('Error de conexión con el servidor');
     }

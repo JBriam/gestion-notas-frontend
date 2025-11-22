@@ -242,7 +242,7 @@ const DocenteManagement: React.FC = () => {
           fd.append("password", formData.password);
           fd.append("nombres", formData.nombres);
           fd.append("apellidos", formData.apellidos);
-    
+
           if (formData.especialidad) fd.append("especialidad", formData.especialidad);
           if (formData.telefono) fd.append("telefono", formData.telefono);
           if (formData.direccion) fd.append("direccion", formData.direccion);
@@ -281,70 +281,91 @@ const DocenteManagement: React.FC = () => {
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedDocente) return;
-
-    setLoading(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      // Crear FormData para enviar archivo
-      const formDataToSend = new FormData();
-      formDataToSend.append("idDocente", selectedDocente.idDocente.toString());
-
-      Object.keys(formData).forEach((key) => {
-        if (key !== "foto" && key !== "password" && key !== "confirmPassword") {
-          const value = formData[key as keyof DocenteForm];
-          if (value) {
-            formDataToSend.append(key, value as string);
+        if (!selectedDocente?.idDocente) return;
+    
+        try {
+          if (!formData.email || !formData.nombres || !formData.apellidos) {
+            setError("Los campos email, nombres y apellidos son obligatorios");
+            return;
           }
+    
+          setLoading(true);
+    
+          const fd = new FormData();
+    
+          fd.append("idDocente", String(selectedDocente.idDocente));
+          fd.append("email", formData.email);
+          fd.append("nombres", formData.nombres);
+          fd.append("apellidos", formData.apellidos);
+    
+          if (formData.especialidad) fd.append("especialidad", formData.especialidad);
+          if (formData.telefono) fd.append("telefono", formData.telefono);
+          if (formData.direccion) fd.append("direccion", formData.direccion);
+          if (formData.distrito) fd.append("distrito", formData.distrito);
+          if (formData.fechaContratacion)
+            fd.append("fechaContratacion", formData.fechaContratacion);
+          if (formData.codigoDocente)
+            fd.append("codigoDocente", formData.codigoDocente);
+    
+          if (formData.password) {
+            if (formData.password.length < 6) {
+              setError("La contraseña debe tener al menos 6 caracteres");
+              return;
+            }
+            if (formData.password !== formData.confirmPassword) {
+              setError("Las contraseñas no coinciden");
+              return;
+            }
+            fd.append("password", formData.password);
+          }
+    
+          if (fotoFile) {
+            fd.append("foto", fotoFile);
+          }
+    
+          const updated = await DocenteService.actualizar(fd);
+    
+          setSuccess("Docente actualizado exitosamente");
+          if (updated && updated.foto) {
+            setImagePreview(updated.foto as string);
+            setFormData((prev) => ({ ...prev, foto: updated.foto as string }));
+          }
+          setShowEditModal(false);
+          resetForm();
+          await cargarDocentes();
+        } catch (error) {
+          console.error("Error al actualizar docente:", error);
+          setError(
+            error instanceof Error
+              ? error.message
+              : "Error al actualizar estudiante"
+          );
+        } finally {
+          setLoading(false);
         }
-      });
-
-      // Añadir archivo si existe
-      if (fotoFile) {
-        formDataToSend.append("foto", fotoFile);
-      }
-
-      await DocenteService.actualizar(formDataToSend);
-      setSuccess("Docente actualizado exitosamente");
-      setShowEditModal(false);
-      setSelectedDocente(null);
-      limpiarFormulario();
-      setFotoFile(null);
-      await cargarDocentes();
-    } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Error al actualizar docente"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!selectedDocente) return;
-
-    setLoading(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      await DocenteService.eliminar(selectedDocente.idDocente);
-      setSuccess("Docente eliminado exitosamente");
-      setShowDeleteModal(false);
-      setSelectedDocente(null);
-      await cargarDocentes();
-    } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Error al eliminar docente"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+      };
+    
+      const handleDelete = async () => {
+        if (!selectedDocente?.idDocente) return;
+    
+        try {
+          setLoading(true);
+          await DocenteService.eliminar(selectedDocente.idDocente);
+          setSuccess("Docente eliminado exitosamente");
+          setShowDeleteModal(false);
+          setSelectedDocente(null);
+          await cargarDocentes();
+        } catch (error) {
+          console.error("Error al eliminar docente:", error);
+          setError("Error al eliminar el docente");
+        } finally {
+          setLoading(false);
+        }
+      };
 
   const openEditModal = (docente: Docente) => {
+    setError("");
+    setSuccess("");
     setSelectedDocente(docente);
     setFormData({
       nombres: docente.nombres,
@@ -414,7 +435,12 @@ const DocenteManagement: React.FC = () => {
           </div>
           <button
             className="btn-primary"
-            onClick={() => setShowCreateModal(true)}
+            onClick={() => {
+              setError("");
+              setSuccess("");
+              limpiarFormulario();
+              setShowCreateModal(true);
+            }}
             disabled={loading}
           >
             + Agregar Docente
@@ -528,6 +554,12 @@ const DocenteManagement: React.FC = () => {
                 ×
               </button>
             </div>
+
+            {error && (
+              <div className="error-message" style={{ margin: '0 20px 15px 20px' }}>
+                {error}
+              </div>
+            )}
 
             <form onSubmit={handleCreate} className="modal-form">
               <div className="form-row">
@@ -823,6 +855,12 @@ const DocenteManagement: React.FC = () => {
                 ×
               </button>
             </div>
+
+            {error && (
+              <div className="error-message" style={{ margin: '0 20px 15px 20px' }}>
+                {error}
+              </div>
+            )}
 
             <form onSubmit={handleEdit} className="modal-form">
               <div className="form-row">

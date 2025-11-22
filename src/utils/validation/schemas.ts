@@ -130,7 +130,7 @@ export const estudianteSchema: ValidationSchema = {
   telefono: {
     required: false,
     rules: [
-      rules.phone('Ingresa un teléfono válido')
+      rules.phonePeruvian('Ingresa un teléfono válido de 9 dígitos que empiece con 9 (ej: 987654321)')
     ]
   },
   fechaNacimiento: {
@@ -208,9 +208,8 @@ export const docenteSchema: ValidationSchema = {
     ]
   },
   especialidad: {
-    required: true,
+    required: false,
     rules: [
-      rules.required('La especialidad es obligatoria'),
       rules.minLength(2, 'La especialidad debe tener al menos 2 caracteres'),
       rules.maxLength(100, 'La especialidad no puede tener más de 100 caracteres'),
       rules.alphabetic('Solo se permiten letras y espacios'),
@@ -227,7 +226,7 @@ export const docenteSchema: ValidationSchema = {
   telefono: {
     required: false,
     rules: [
-      rules.phone('Ingresa un teléfono válido')
+      rules.phonePeruvian('Ingresa un teléfono válido de 9 dígitos que empiece con 9 (ej: 987654321)')
     ]
   },
   fechaContratacion: {
@@ -354,7 +353,7 @@ export const perfilSchema: ValidationSchema = {
   telefono: {
     required: false,
     rules: [
-      rules.phone('Ingresa un teléfono válido')
+      rules.phonePeruvian('Ingresa un teléfono válido de 9 dígitos que empiece con 9 (ej: 987654321)')
     ]
   },
   distrito: {

@@ -52,12 +52,16 @@ export const AuthService = {
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         const status = error.response.status;
+        const backendMessage = error.response.data?.message;
         let message = 'Error al registrar usuario';
         
-        if (status === 409) {
-          message = 'El usuario o email ya existe';
+        // Detectar errores de correo duplicado
+        if (status === 409 || backendMessage?.toLowerCase().includes('email') || backendMessage?.toLowerCase().includes('correo') || backendMessage?.toLowerCase().includes('existe')) {
+          message = 'El correo electrónico ya está registrado. Por favor, utilice otro correo.';
         } else if (status === 400) {
-          message = 'Datos de registro inválidos';
+          message = backendMessage || 'Datos de registro inválidos';
+        } else if (backendMessage) {
+          message = backendMessage;
         }
         
         return {

@@ -27,8 +27,7 @@ const EstudianteManagement: React.FC = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedEstudiante, setSelectedEstudiante] =
-    useState<Estudiante | null>(null);
+  const [selectedEstudiante, setSelectedEstudiante] = useState<Estudiante | null>(null);
   const [formData, setFormData] = useState<EstudianteForm>({
     nombres: "",
     apellidos: "",
@@ -312,10 +311,14 @@ const EstudianteManagement: React.FC = () => {
 
   const openCreateModal = () => {
     resetForm();
+    setError(null);
+    setSuccess(null);
     setShowCreateModal(true);
   };
 
   const openEditModal = (estudiante: Estudiante) => {
+    setError(null);
+    setSuccess(null);
     setSelectedEstudiante(estudiante);
     setFormData({
       nombres: estudiante.nombres,
@@ -536,6 +539,13 @@ const EstudianteManagement: React.FC = () => {
                 ×
               </button>
             </div>
+            
+            {error && (
+              <div className="error-message" style={{ margin: '0 20px 15px 20px' }}>
+                {error}
+              </div>
+            )}
+            
             <form onSubmit={handleCreate} className="modal-form">
               <div className="form-row">
                 <div className="form-group">
@@ -807,6 +817,13 @@ const EstudianteManagement: React.FC = () => {
                 ×
               </button>
             </div>
+            
+            {error && (
+              <div className="error-message" style={{ margin: '0 20px 15px 20px' }}>
+                {error}
+              </div>
+            )}
+            
             <form onSubmit={handleEdit} className="modal-form">
               <div className="form-row">
                 <div className="form-group">

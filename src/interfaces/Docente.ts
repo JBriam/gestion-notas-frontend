@@ -1,7 +1,7 @@
 // Interfaces para la gestión de docentes
 
 export interface Docente {
-  idDocente: number;
+  idDocente?: number;
   nombres: string;
   apellidos: string;
   telefono?: string;
