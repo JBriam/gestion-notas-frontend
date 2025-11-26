@@ -3,7 +3,7 @@
 .auth-container {
   min-height: 100vh;
   display: flex;
-  align-items: flex-start; /* Cambiar de center a flex-start para permitir scroll */
+  align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 20px;
