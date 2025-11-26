@@ -1,0 +1,200 @@
+{
+    "distritos": [
+        {
+            "id": 1,
+            "nombre": "Lima"
+        },
+        {
+            "id": 2,
+            "nombre": "Ancon"
+        },
+        {
+            "id": 3,
+            "nombre": "Ate"
+        },
+        {
+            "id": 4,
+            "nombre": "Barranco"
+        },
+        {
+            "id": 5,
+            "nombre": "Bellavista"
+        },
+        {
+            "id": 6,
+            "nombre": "Breña"
+        },
+        {
+            "id": 7,
+            "nombre": "Callao"
+        },
+        {
+            "id": 8,
+            "nombre": "Carmen De La Legua Reynoso"
+        },
+        {
+            "id": 9,
+            "nombre": "Carabayllo"
+        },
+        {
+            "id": 10,
+            "nombre": "Chaclacayo"
+        },
+        {
+            "id": 11,
+            "nombre": "Chorrillos"
+        },
+        {
+            "id": 12,
+            "nombre": "Cieneguilla"
+        },
+        {
+            "id": 13,
+            "nombre": "Comas"
+        },
+        {
+            "id": 14,
+            "nombre": "El Agustino"
+        },
+        {
+            "id": 15,
+            "nombre": "Independencia"
+        },
+        {
+            "id": 16,
+            "nombre": "Jesus Maria"
+        },
+        {
+            "id": 17,
+            "nombre": "La Molina"
+        },
+        {
+            "id": 18,
+            "nombre": "La Perla"
+        },
+        {
+            "id": 19,
+            "nombre": "La Punta"
+        },
+        {
+            "id": 20,
+            "nombre": "La Victoria"
+        },
+        {
+            "id": 21,
+            "nombre": "Lince"
+        },
+        {
+            "id": 22,
+            "nombre": "Los Olivos"
+        },
+        {
+            "id": 23,
+            "nombre": "Lurigancho"
+        },
+        {
+            "id": 24,
+            "nombre": "Lurin"
+        },
+        {
+            "id": 25,
+            "nombre": "Magdalena Del Mar"
+        },
+        {
+            "id": 26,
+            "nombre": "Miraflores"
+        },
+        {
+            "id": 27,
+            "nombre": "Pachacamac"
+        },
+        {
+            "id": 28,
+            "nombre": "Pucusana"
+        },
+        {
+            "id": 29,
+            "nombre": "Pueblo Libre"
+        },
+        {
+            "id": 30,
+            "nombre": "Puente Piedra"
+        },
+        {
+            "id": 31,
+            "nombre": "Punta Hermosa"
+        },
+        {
+            "id": 32,
+            "nombre": "Punta Negra"
+        },
+        {
+            "id": 33,
+            "nombre": "Rimac"
+        },
+        {
+            "id": 34,
+            "nombre": "San Bartolo"
+        },
+        {
+            "id": 35,
+            "nombre": "San Borja"
+        },
+        {
+            "id": 36,
+            "nombre": "San Isidro"
+        },
+        {
+            "id": 37,
+            "nombre": "San Juan De Lurigancho"
+        },
+        {
+            "id": 38,
+            "nombre": "San Juan De Miraflores"
+        },
+        {
+            "id": 39,
+            "nombre": "San Luis"
+        },
+        {
+            "id": 40,
+            "nombre": "San Martin De Porres"
+        },
+        {
+            "id": 41,
+            "nombre": "San Miguel"
+        },
+        {
+            "id": 42,
+            "nombre": "Santa Anita"
+        },
+        {
+            "id": 43,
+            "nombre": "Santa Maria Del Mar"
+        },
+        {
+            "id": 44,
+            "nombre": "Santa Rosa"
+        },
+        {
+            "id": 45,
+            "nombre": "Santiago De Surco"
+        },
+        {
+            "id": 46,
+            "nombre": "Surquillo"
+        },
+        {
+            "id": 47,
+            "nombre": "Ventanilla"
+        },
+        {
+            "id": 48,
+            "nombre": "Villa El Salvador"
+        },
+        {
+            "id": 49,
+            "nombre": "Villa Maria Del Triunfo"
+        }
+    ]
+}

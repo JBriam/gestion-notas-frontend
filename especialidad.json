@@ -1,0 +1,56 @@
+{
+    "data": [
+        {
+            "id": 1,
+            "nombre": "Docencia e Investigación Universitaria"
+        },
+        {
+            "id": 2,
+            "nombre": "Educación Inicial"
+        },
+        {
+            "id": 3,
+            "nombre": "Educación Inicial Intercultural Bilingüe"
+        },
+        {
+            "id": 4,
+            "nombre": "Educación Primaria"
+        },
+        {
+            "id": 5,
+            "nombre": "Educación Primaria Intercultural Bilingüe"
+        },
+        {
+            "id": 6,
+            "nombre": "Ciencias Sociales"
+        },
+        {
+            "id": 7,
+            "nombre": "Ciencia y Tecnología"
+        },
+        {
+            "id": 8,
+            "nombre": "Filosofía"
+        },
+        {
+            "id": 9,
+            "nombre": "Historia"
+        },
+        {
+            "id": 10,
+            "nombre": "Idiomas Extranjeros"
+        },
+        {
+            "id": 11,
+            "nombre": "Lengua y Literatura"
+        },
+        {
+            "id": 12,
+            "nombre": "Matemáticas"
+        },
+        {
+            "id": 13,
+            "nombre": "Religión"
+        }
+    ]
+}

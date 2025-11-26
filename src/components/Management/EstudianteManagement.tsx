@@ -5,6 +5,11 @@ import { useValidation } from "../../utils/validation/useValidation";
 import { estudianteSchema } from "../../utils/validation/schemas";
 import "./EstudianteManagement.css";
 
+interface Distrito {
+  id: number;
+  nombre: string;
+}
+
 interface EstudianteForm extends Record<string, unknown> {
   nombres: string;
   apellidos: string;
@@ -403,6 +408,20 @@ const EstudianteManagement: React.FC = () => {
     }
   }, [error, success]);
 
+  const [distritos, setDistritos] = useState<Distrito[]>([]);
+  useEffect(() => {
+    const obtenerDistritos = async () => {
+      try {
+        const solicitud = await fetch('distritos.json')
+        const respuesta = await solicitud.json()
+        setDistritos(respuesta.distritos)
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      }
+    }
+    obtenerDistritos();
+  }, []);
+
   return (
     <div className="estudiante-management">
       <div className="management-header">
@@ -667,14 +686,20 @@ const EstudianteManagement: React.FC = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label>Distrito</label>
-                  <input
-                    type="text"
-                    name="distrito"
+                  <select
+                    name="distrito"   
                     value={formData.distrito}
                     onChange={handleInputChange}
                     disabled={loading}
                     className={validationErrors.distrito ? "input-error" : ""}
-                  />
+                  >
+                    <option value="">Selecciona un distrito</option>
+                    {distritos.map((distrito: Distrito) => (
+                      <option key={distrito.id} value={distrito.nombre}>
+                        {distrito.nombre}
+                      </option>
+                    ))}
+                  </select>
                   {validationErrors.distrito && (
                     <span className="error-text">
                       {validationErrors.distrito}
@@ -881,14 +906,20 @@ const EstudianteManagement: React.FC = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label>Distrito</label>
-                  <input
-                    type="text"
+                  <select
                     value={formData.distrito}
                     onChange={(e) =>
                       setFormData({ ...formData, distrito: e.target.value })
                     }
                     disabled={loading}
-                  />
+                  >
+                    <option value="">Selecciona un distrito</option>
+                    {distritos.map((distrito: Distrito) => (
+                      <option key={distrito.id} value={distrito.nombre}>
+                        {distrito.nombre}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="form-group">
                   <label>Fecha de Nacimiento</label>

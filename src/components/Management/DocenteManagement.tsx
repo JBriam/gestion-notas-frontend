@@ -5,6 +5,11 @@ import { useValidation } from "../../utils/validation/useValidation";
 import { docenteSchema } from "../../utils/validation/schemas";
 import "./DocenteManagement.css";
 
+interface Especialidad {
+  id: number;
+  nombre: string;
+}
+
 interface DocenteForm extends Record<string, unknown> {
   nombres: string;
   apellidos: string;
@@ -419,6 +424,20 @@ const DocenteManagement: React.FC = () => {
     setSuccess("");
   };
 
+  const [especialidad, setEspecialidad] = useState<Especialidad[]>([]);
+    useEffect(() => {
+      const obtenerEspecialidad = async () => {
+        try {
+          const solicitud = await fetch('especialidad.json')
+          const respuesta = await solicitud.json()
+          setEspecialidad(respuesta.data)
+        } catch (error) {
+          console.error('Error fetching data:', error)
+        }
+      }
+      obtenerEspecialidad();
+    }, []);
+
   return (
     <div className="docente-management">
       <div className="management-header">
@@ -685,17 +704,20 @@ const DocenteManagement: React.FC = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="especialidad">Especialidad</label>
-                  <input
-                    type="text"
-                    id="especialidad"
-                    name="especialidad"
+                  <select
+                    name="especialidad"   
                     value={formData.especialidad}
                     onChange={handleInputChange}
                     disabled={loading}
-                    className={
-                      validationErrors.especialidad ? "input-error" : ""
-                    }
-                  />
+                    className={validationErrors.especialidad ? "input-error" : ""}
+                  >
+                    <option value="">Selecciona una especialidad</option>
+                    {especialidad.map((esp: Especialidad) => (
+                      <option key={esp.id} value={esp.nombre}>
+                        {esp.nombre}
+                      </option>
+                    ))}
+                  </select>
                   {validationErrors.especialidad && (
                     <span className="error-text">
                       {validationErrors.especialidad}
@@ -920,14 +942,20 @@ const DocenteManagement: React.FC = () => {
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="especialidad">Especialidad</label>
-                  <input
-                    type="text"
-                    id="especialidad"
-                    name="especialidad"
+                  <select
                     value={formData.especialidad}
-                    onChange={handleInputChange}
+                    onChange={(e) =>
+                      setFormData({ ...formData, especialidad: e.target.value })
+                    }
                     disabled={loading}
-                  />
+                  >
+                    <option value="">Selecciona una especialidad</option>
+                    {especialidad.map((esp: Especialidad) => (
+                      <option key={esp.id} value={esp.nombre}>
+                        {esp.nombre}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="form-group">
                   <label htmlFor="fechaContratacion">
