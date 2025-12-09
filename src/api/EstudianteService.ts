@@ -30,13 +30,36 @@ export const EstudianteService = {
   },
 
   // Actualizar perfil del estudiante
-  async actualizarPerfil(id: number, perfil: ActualizarPerfilEstudianteRequest): Promise<EstudianteProfile> {
+  async actualizarPerfil(id: number, perfil: ActualizarPerfilEstudianteRequest, fotoFile?: File): Promise<EstudianteProfile> {
     try {
-      const response = await axiosInstance.put(`/estudiantes/${id}/perfil`, perfil);
+      let response;
+      
+      // Si hay un archivo de foto, usar FormData
+      if (fotoFile) {
+        const formData = new FormData();
+        formData.append('foto', fotoFile);
+        formData.append('nombres', perfil.nombres || '');
+        formData.append('apellidos', perfil.apellidos || '');
+        formData.append('telefono', perfil.telefono || '');
+        formData.append('direccion', perfil.direccion || '');
+        formData.append('distrito', perfil.distrito || '');
+        formData.append('fechaNacimiento', perfil.fechaNacimiento || '');
+        formData.append('email', perfil.email || '');
+        
+        response = await axiosInstance.put(`/estudiantes/${id}/perfil`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+      } else {
+        // Sin foto, enviar como JSON normal (sin el campo foto)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { foto, ...perfilSinFoto } = perfil;
+        response = await axiosInstance.put(`/estudiantes/${id}/perfil`, perfilSinFoto);
+      }
+      
       const perfilActualizado: EstudianteProfile = response.data;
       
       // Normalizar URL de la foto
-      if (perfilActualizado.foto) {
+      if (perfilActualizado && perfilActualizado.foto) {
         const foto = String(perfilActualizado.foto);
         if (!foto.startsWith('http') && !foto.startsWith('/')) {
           perfilActualizado.foto = `${axiosInstance.defaults.baseURL}/uploads/estudiantes/${foto}`;

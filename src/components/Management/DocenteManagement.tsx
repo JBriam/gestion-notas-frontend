@@ -10,6 +10,11 @@ interface Especialidad {
   nombre: string;
 }
 
+interface Distrito {
+  id: number;
+  nombre: string;
+}
+
 interface DocenteForm extends Record<string, unknown> {
   nombres: string;
   apellidos: string;
@@ -30,6 +35,19 @@ const DocenteManagement: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+  const [distritos, setDistritos] = useState<Distrito[]>([]);
+  useEffect(() => {
+    const obtenerDistritos = async () => {
+      try {
+        const solicitud = await fetch("distritos.json");
+        const respuesta = await solicitud.json();
+        setDistritos(respuesta.distritos);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    obtenerDistritos();
+  }, []);
 
   // Estados para modales
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -208,165 +226,167 @@ const DocenteManagement: React.FC = () => {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-        const isValid = validateForm();
-        if (!isValid) {
-          setError("Por favor corrige los errores en el formulario");
-          setLoading(false);
-          return;
-        }
-    
-        try {
-          if (
-            !formData.email ||
-            !formData.password ||
-            !formData.nombres ||
-            !formData.apellidos
-          ) {
-            setError(
-              "Los campos email, contraseña, nombres y apellidos son obligatorios"
-            );
-            return;
-          }
-    
-          if (formData.password && formData.password.length < 6) {
-            setError("La contraseña debe tener al menos 6 caracteres");
-            return;
-          }
-    
-          if (formData.password !== formData.confirmPassword) {
-            setError("Las contraseñas no coinciden");
-            return;
-          }
-    
-          setLoading(true);
-    
-          const fd = new FormData();
-    
-          fd.append("email", formData.email);
-          fd.append("password", formData.password);
-          fd.append("nombres", formData.nombres);
-          fd.append("apellidos", formData.apellidos);
 
-          if (formData.especialidad) fd.append("especialidad", formData.especialidad);
-          if (formData.telefono) fd.append("telefono", formData.telefono);
-          if (formData.direccion) fd.append("direccion", formData.direccion);
-          if (formData.distrito) fd.append("distrito", formData.distrito);
-          if (formData.fechaContratacion)
-            fd.append("fechaContratacion", formData.fechaContratacion);
-          if (formData.codigoDocente)
-            fd.append("codigoDocente", formData.codigoDocente);
-    
-          if (fotoFile) {
-            fd.append("foto", fotoFile);
-          }
-    
-          const created = await DocenteService.crear(fd);
-    
-          setSuccess("Docente creado exitosamente");
-    
-          if (created && created.foto) {
-            setImagePreview(created.foto as string);
-            setFormData((prev) => ({ ...prev, foto: created.foto as string }));
-          }
-    
-          setShowCreateModal(false);
-          clearAllErrors();
-          resetForm();
-          await cargarDocentes();
-        } catch (error) {
-          console.error("Error al crear docente:", error);
-          setError(
-            error instanceof Error ? error.message : "Error al crear el docente"
-          );
-        } finally {
-          setLoading(false);
-        }
+    const isValid = validateForm();
+    if (!isValid) {
+      setError("Por favor corrige los errores en el formulario");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      if (
+        !formData.email ||
+        !formData.password ||
+        !formData.nombres ||
+        !formData.apellidos
+      ) {
+        setError(
+          "Los campos email, contraseña, nombres y apellidos son obligatorios"
+        );
+        return;
+      }
+
+      if (formData.password && formData.password.length < 6) {
+        setError("La contraseña debe tener al menos 6 caracteres");
+        return;
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        setError("Las contraseñas no coinciden");
+        return;
+      }
+
+      setLoading(true);
+
+      const fd = new FormData();
+
+      fd.append("email", formData.email);
+      fd.append("password", formData.password);
+      fd.append("nombres", formData.nombres);
+      fd.append("apellidos", formData.apellidos);
+
+      if (formData.especialidad)
+        fd.append("especialidad", formData.especialidad);
+      if (formData.telefono) fd.append("telefono", formData.telefono);
+      if (formData.direccion) fd.append("direccion", formData.direccion);
+      if (formData.distrito) fd.append("distrito", formData.distrito);
+      if (formData.fechaContratacion)
+        fd.append("fechaContratacion", formData.fechaContratacion);
+      if (formData.codigoDocente)
+        fd.append("codigoDocente", formData.codigoDocente);
+
+      if (fotoFile) {
+        fd.append("foto", fotoFile);
+      }
+
+      const created = await DocenteService.crear(fd);
+
+      setSuccess("Docente creado exitosamente");
+
+      if (created && created.foto) {
+        setImagePreview(created.foto as string);
+        setFormData((prev) => ({ ...prev, foto: created.foto as string }));
+      }
+
+      setShowCreateModal(false);
+      clearAllErrors();
+      resetForm();
+      await cargarDocentes();
+    } catch (error) {
+      console.error("Error al crear docente:", error);
+      setError(
+        error instanceof Error ? error.message : "Error al crear el docente"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-        if (!selectedDocente?.idDocente) return;
-    
-        try {
-          if (!formData.email || !formData.nombres || !formData.apellidos) {
-            setError("Los campos email, nombres y apellidos son obligatorios");
-            return;
-          }
-    
-          setLoading(true);
-    
-          const fd = new FormData();
-    
-          fd.append("idDocente", String(selectedDocente.idDocente));
-          fd.append("email", formData.email);
-          fd.append("nombres", formData.nombres);
-          fd.append("apellidos", formData.apellidos);
-    
-          if (formData.especialidad) fd.append("especialidad", formData.especialidad);
-          if (formData.telefono) fd.append("telefono", formData.telefono);
-          if (formData.direccion) fd.append("direccion", formData.direccion);
-          if (formData.distrito) fd.append("distrito", formData.distrito);
-          if (formData.fechaContratacion)
-            fd.append("fechaContratacion", formData.fechaContratacion);
-          if (formData.codigoDocente)
-            fd.append("codigoDocente", formData.codigoDocente);
-    
-          if (formData.password) {
-            if (formData.password.length < 6) {
-              setError("La contraseña debe tener al menos 6 caracteres");
-              return;
-            }
-            if (formData.password !== formData.confirmPassword) {
-              setError("Las contraseñas no coinciden");
-              return;
-            }
-            fd.append("password", formData.password);
-          }
-    
-          if (fotoFile) {
-            fd.append("foto", fotoFile);
-          }
-    
-          const updated = await DocenteService.actualizar(fd);
-    
-          setSuccess("Docente actualizado exitosamente");
-          if (updated && updated.foto) {
-            setImagePreview(updated.foto as string);
-            setFormData((prev) => ({ ...prev, foto: updated.foto as string }));
-          }
-          setShowEditModal(false);
-          resetForm();
-          await cargarDocentes();
-        } catch (error) {
-          console.error("Error al actualizar docente:", error);
-          setError(
-            error instanceof Error
-              ? error.message
-              : "Error al actualizar estudiante"
-          );
-        } finally {
-          setLoading(false);
+    if (!selectedDocente?.idDocente) return;
+
+    try {
+      if (!formData.email || !formData.nombres || !formData.apellidos) {
+        setError("Los campos email, nombres y apellidos son obligatorios");
+        return;
+      }
+
+      setLoading(true);
+
+      const fd = new FormData();
+
+      fd.append("idDocente", String(selectedDocente.idDocente));
+      fd.append("email", formData.email);
+      fd.append("nombres", formData.nombres);
+      fd.append("apellidos", formData.apellidos);
+
+      if (formData.especialidad)
+        fd.append("especialidad", formData.especialidad);
+      if (formData.telefono) fd.append("telefono", formData.telefono);
+      if (formData.direccion) fd.append("direccion", formData.direccion);
+      if (formData.distrito) fd.append("distrito", formData.distrito);
+      if (formData.fechaContratacion)
+        fd.append("fechaContratacion", formData.fechaContratacion);
+      if (formData.codigoDocente)
+        fd.append("codigoDocente", formData.codigoDocente);
+
+      if (formData.password) {
+        if (formData.password.length < 6) {
+          setError("La contraseña debe tener al menos 6 caracteres");
+          return;
         }
-      };
-    
-      const handleDelete = async () => {
-        if (!selectedDocente?.idDocente) return;
-    
-        try {
-          setLoading(true);
-          await DocenteService.eliminar(selectedDocente.idDocente);
-          setSuccess("Docente eliminado exitosamente");
-          setShowDeleteModal(false);
-          setSelectedDocente(null);
-          await cargarDocentes();
-        } catch (error) {
-          console.error("Error al eliminar docente:", error);
-          setError("Error al eliminar el docente");
-        } finally {
-          setLoading(false);
+        if (formData.password !== formData.confirmPassword) {
+          setError("Las contraseñas no coinciden");
+          return;
         }
-      };
+        fd.append("password", formData.password);
+      }
+
+      if (fotoFile) {
+        fd.append("foto", fotoFile);
+      }
+
+      const updated = await DocenteService.actualizar(fd);
+
+      setSuccess("Docente actualizado exitosamente");
+      if (updated && updated.foto) {
+        setImagePreview(updated.foto as string);
+        setFormData((prev) => ({ ...prev, foto: updated.foto as string }));
+      }
+      setShowEditModal(false);
+      resetForm();
+      await cargarDocentes();
+    } catch (error) {
+      console.error("Error al actualizar docente:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Error al actualizar estudiante"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedDocente?.idDocente) return;
+
+    try {
+      setLoading(true);
+      await DocenteService.eliminar(selectedDocente.idDocente);
+      setSuccess("Docente eliminado exitosamente");
+      setShowDeleteModal(false);
+      setSelectedDocente(null);
+      await cargarDocentes();
+    } catch (error) {
+      console.error("Error al eliminar docente:", error);
+      setError("Error al eliminar el docente");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const openEditModal = (docente: Docente) => {
     setError("");
@@ -425,18 +445,18 @@ const DocenteManagement: React.FC = () => {
   };
 
   const [especialidad, setEspecialidad] = useState<Especialidad[]>([]);
-    useEffect(() => {
-      const obtenerEspecialidad = async () => {
-        try {
-          const solicitud = await fetch('especialidad.json')
-          const respuesta = await solicitud.json()
-          setEspecialidad(respuesta.data)
-        } catch (error) {
-          console.error('Error fetching data:', error)
-        }
+  useEffect(() => {
+    const obtenerEspecialidad = async () => {
+      try {
+        const solicitud = await fetch("especialidad.json");
+        const respuesta = await solicitud.json();
+        setEspecialidad(respuesta.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
       }
-      obtenerEspecialidad();
-    }, []);
+    };
+    obtenerEspecialidad();
+  }, []);
 
   return (
     <div className="docente-management">
@@ -575,7 +595,10 @@ const DocenteManagement: React.FC = () => {
             </div>
 
             {error && (
-              <div className="error-message" style={{ margin: '0 20px 15px 20px' }}>
+              <div
+                className="error-message"
+                style={{ margin: "0 20px 15px 20px" }}
+              >
                 {error}
               </div>
             )}
@@ -705,11 +728,13 @@ const DocenteManagement: React.FC = () => {
                 <div className="form-group">
                   <label htmlFor="especialidad">Especialidad</label>
                   <select
-                    name="especialidad"   
+                    name="especialidad"
                     value={formData.especialidad}
                     onChange={handleInputChange}
                     disabled={loading}
-                    className={validationErrors.especialidad ? "input-error" : ""}
+                    className={
+                      validationErrors.especialidad ? "input-error" : ""
+                    }
                   >
                     <option value="">Selecciona una especialidad</option>
                     {especialidad.map((esp: Especialidad) => (
@@ -748,16 +773,21 @@ const DocenteManagement: React.FC = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="distrito">Distrito</label>
-                <input
-                  type="text"
-                  id="distrito"
+                <label>Distrito</label>
+                <select
                   name="distrito"
                   value={formData.distrito}
                   onChange={handleInputChange}
                   disabled={loading}
                   className={validationErrors.distrito ? "input-error" : ""}
-                />
+                >
+                  <option value="">Selecciona un distrito</option>
+                  {distritos.map((distrito: Distrito) => (
+                    <option key={distrito.id} value={distrito.nombre}>
+                      {distrito.nombre}
+                    </option>
+                  ))}
+                </select>
                 {validationErrors.distrito && (
                   <span className="error-text">
                     {validationErrors.distrito}
@@ -879,7 +909,10 @@ const DocenteManagement: React.FC = () => {
             </div>
 
             {error && (
-              <div className="error-message" style={{ margin: '0 20px 15px 20px' }}>
+              <div
+                className="error-message"
+                style={{ margin: "0 20px 15px 20px" }}
+              >
                 {error}
               </div>
             )}
@@ -973,15 +1006,21 @@ const DocenteManagement: React.FC = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="distrito">Distrito</label>
-                <input
-                  type="text"
-                  id="distrito"
-                  name="distrito"
+                <label>Distrito</label>
+                <select
                   value={formData.distrito}
-                  onChange={handleInputChange}
+                  onChange={(e) =>
+                    setFormData({ ...formData, distrito: e.target.value })
+                  }
                   disabled={loading}
-                />
+                >
+                  <option value="">Selecciona un distrito</option>
+                  {distritos.map((distrito: Distrito) => (
+                    <option key={distrito.id} value={distrito.nombre}>
+                      {distrito.nombre}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="form-group">
                 <label htmlFor="direccion">Dirección</label>

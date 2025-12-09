@@ -1,76 +1,156 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../hooks/useAuth';
-import { EstudianteService } from '../../api/EstudianteService';
-import type { ActualizarPerfilEstudianteRequest } from '../../interfaces/Auth';
-import './Profile.css';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../hooks/useAuth";
+import { EstudianteService } from "../../api/EstudianteService";
+import type { ActualizarPerfilEstudianteRequest } from "../../interfaces/Auth";
+import "./Profile.css";
+
+interface Distrito {
+  id: number;
+  nombre: string;
+}
 
 export const ProfileStudent: React.FC = () => {
   const { state, updateProfile } = useAuth();
   const [formData, setFormData] = useState<ActualizarPerfilEstudianteRequest>({
-    nombres: '',
-    apellidos: '',
-    telefono: '',
-    direccion: '',
-    distrito: '',
-    foto: '',
-    fechaNacimiento: '',
-    email: '',
+    nombres: "",
+    apellidos: "",
+    telefono: "",
+    direccion: "",
+    distrito: "",
+    foto: "",
+    fechaNacimiento: "",
+    email: "",
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>('');
-  const [success, setSuccess] = useState<string>('');
+  const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
   const [isEditing, setIsEditing] = useState(false);
+  const [distritos, setDistritos] = useState<Distrito[]>([]);
+  useEffect(() => {
+    const obtenerDistritos = async () => {
+      try {
+        const solicitud = await fetch("distritos.json");
+        const respuesta = await solicitud.json();
+        setDistritos(respuesta.distritos);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    obtenerDistritos();
+  }, []);
 
   // Cargar datos del perfil al montar el componente
   useEffect(() => {
     if (state.perfilEstudiante) {
       setFormData({
-        nombres: state.perfilEstudiante.nombres || '',
-        apellidos: state.perfilEstudiante.apellidos || '',
-        telefono: state.perfilEstudiante.telefono || '',
-        direccion: state.perfilEstudiante.direccion || '',
-        distrito: state.perfilEstudiante.distrito || '',
-        foto: state.perfilEstudiante.foto || '',
-        fechaNacimiento: state.perfilEstudiante.fechaNacimiento || '',
-        email: state.perfilEstudiante.email || '',
+        nombres: state.perfilEstudiante.nombres || "",
+        apellidos: state.perfilEstudiante.apellidos || "",
+        telefono: state.perfilEstudiante.telefono || "",
+        direccion: state.perfilEstudiante.direccion || "",
+        distrito: state.perfilEstudiante.distrito || "",
+        foto: state.perfilEstudiante.foto || "",
+        fechaNacimiento: state.perfilEstudiante.fechaNacimiento || "",
+        email: state.perfilEstudiante.email || "",
       });
     }
   }, [state.perfilEstudiante]);
 
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [fotoFile, setFotoFile] = useState<File | null>(null);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    if (error) setError('');
-    if (success) setSuccess('');
+    if (error) setError("");
+    if (success) setSuccess("");
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        setError("Por favor selecciona un archivo de imagen válido");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return;
+
+          let width = img.width;
+          let height = img.height;
+          const maxSize = 100;
+
+          if (width > height) {
+            if (width > maxSize) {
+              height = (height * maxSize) / width;
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = (width * maxSize) / height;
+              height = maxSize;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+          // Solo guardar la vista previa, NO en formData.foto
+          setImagePreview(compressedBase64);
+          setFotoFile(file);
+        };
+        img.src = event.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+    setFotoFile(null);
+    const fileInput = document.getElementById("foto-edit") as HTMLInputElement;
+    if (fileInput) fileInput.value = "";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!state.perfilEstudiante?.idEstudiante) {
-      setError('No se encontró el ID del estudiante');
+      setError("No se encontró el ID del estudiante");
       return;
     }
 
     setLoading(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     try {
       const perfilActualizado = await EstudianteService.actualizarPerfil(
         state.perfilEstudiante.idEstudiante,
-        formData
+        formData,
+        fotoFile || undefined
       );
-      
+
       // Actualizar el contexto con los nuevos datos
       updateProfile(perfilActualizado, undefined);
-      
-      setSuccess('Perfil actualizado correctamente');
+
+      setSuccess("Perfil actualizado correctamente");
       setIsEditing(false);
+      setFotoFile(null);
+      setImagePreview(null);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Error al actualizar el perfil');
+      setError(
+        error instanceof Error ? error.message : "Error al actualizar el perfil"
+      );
     } finally {
       setLoading(false);
     }
@@ -80,19 +160,19 @@ export const ProfileStudent: React.FC = () => {
     // Restaurar los datos originales
     if (state.perfilEstudiante) {
       setFormData({
-        nombres: state.perfilEstudiante.nombres || '',
-        apellidos: state.perfilEstudiante.apellidos || '',
-        telefono: state.perfilEstudiante.telefono || '',
-        direccion: state.perfilEstudiante.direccion || '',
-        distrito: state.perfilEstudiante.distrito || '',
-        foto: state.perfilEstudiante.foto || '',
-        fechaNacimiento: state.perfilEstudiante.fechaNacimiento || '',
-        email: state.perfilEstudiante.email || '',
+        nombres: state.perfilEstudiante.nombres || "",
+        apellidos: state.perfilEstudiante.apellidos || "",
+        telefono: state.perfilEstudiante.telefono || "",
+        direccion: state.perfilEstudiante.direccion || "",
+        distrito: state.perfilEstudiante.distrito || "",
+        foto: state.perfilEstudiante.foto || "",
+        fechaNacimiento: state.perfilEstudiante.fechaNacimiento || "",
+        email: state.perfilEstudiante.email || "",
       });
     }
     setIsEditing(false);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
   };
 
   if (!state.perfilEstudiante) {
@@ -112,11 +192,11 @@ export const ProfileStudent: React.FC = () => {
         <div className="profile-header">
           <div className="profile-avatar">
             <img
-              src={state.perfilEstudiante.foto || '/assets/imgs/student.gif'}
+              src={state.perfilEstudiante.foto || "/assets/imgs/student.gif"}
               alt="Foto de perfil"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                target.src = '/assets/imgs/student.gif';
+                target.src = "/assets/imgs/student.gif";
               }}
             />
           </div>
@@ -124,7 +204,7 @@ export const ProfileStudent: React.FC = () => {
             <h2>{`${formData.nombres} ${formData.apellidos}`}</h2>
             <p className="profile-role">Estudiante</p>
             <p className="profile-code">
-              Código: {state.perfilEstudiante.codigoEstudiante || 'No asignado'}
+              Código: {state.perfilEstudiante.codigoEstudiante || "No asignado"}
             </p>
           </div>
           <div className="profile-actions">
@@ -186,7 +266,7 @@ export const ProfileStudent: React.FC = () => {
                 type="email"
                 id="email"
                 name="email"
-                value={formData.email || ''}
+                value={formData.email || ""}
                 onChange={handleInputChange}
                 disabled={!isEditing || loading}
               />
@@ -206,15 +286,21 @@ export const ProfileStudent: React.FC = () => {
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="distrito">Distrito</label>
-              <input
-                type="text"
-                id="distrito"
-                name="distrito"
+              <label>Distrito</label>
+              <select
                 value={formData.distrito}
-                onChange={handleInputChange}
+                onChange={(e) =>
+                  setFormData({ ...formData, distrito: e.target.value })
+                }
                 disabled={!isEditing || loading}
-              />
+              >
+                <option value="">Selecciona un distrito</option>
+                {distritos.map((distrito: Distrito) => (
+                  <option key={distrito.id} value={distrito.nombre}>
+                    {distrito.nombre}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="form-group">
               <label htmlFor="fechaNacimiento">Fecha de Nacimiento</label>
@@ -231,15 +317,74 @@ export const ProfileStudent: React.FC = () => {
 
           <div className="form-group">
             <label htmlFor="direccion">Dirección</label>
-            <input
-              type="text"
+            <textarea
               id="direccion"
               name="direccion"
               value={formData.direccion}
-              onChange={handleInputChange}
               disabled={!isEditing || loading}
+              style={{ resize: "none" }}
               placeholder="Ingrese su dirección"
             />
+          </div>
+
+          <div className="form-group">
+            <label>Foto del Estudiante</label>
+            <div className="image-upload-section">
+              <div className="image-input-group">
+                <input
+                  type="file"
+                  id="foto-edit"
+                  name="foto"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={!isEditing || loading}
+                  style={{ padding: "8px", marginBottom: "10px" }}
+                />
+              </div>
+              {(imagePreview || formData.foto) && (
+                <div
+                  style={{
+                    marginTop: "10px",
+                    textAlign: "center",
+                    position: "relative",
+                    display: "inline-block",
+                  }}
+                >
+                  <img
+                    src={imagePreview || formData.foto}
+                    alt="Preview"
+                    style={{
+                      maxWidth: "100px",
+                      maxHeight: "100px",
+                      border: "2px solid #ddd",
+                      borderRadius: "8px",
+                      objectFit: "cover",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    style={{
+                      position: "absolute",
+                      top: "-8px",
+                      right: "-8px",
+                      background: "#dc3545",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "50%",
+                      width: "24px",
+                      height: "24px",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      lineHeight: "1",
+                      padding: "0",
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {error && <div className="error-message">{error}</div>}
@@ -247,12 +392,8 @@ export const ProfileStudent: React.FC = () => {
 
           {isEditing && (
             <div className="form-actions">
-              <button
-                type="submit"
-                className="save-button"
-                disabled={loading}
-              >
-                {loading ? 'Guardando...' : 'Guardar Cambios'}
+              <button type="submit" className="save-button" disabled={loading}>
+                {loading ? "Guardando..." : "Guardar Cambios"}
               </button>
             </div>
           )}
