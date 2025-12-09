@@ -32,30 +32,27 @@ export const DocenteService = {
   // Actualizar perfil del docente
   async actualizarPerfil(id: number, perfil: ActualizarPerfilDocenteRequest, fotoFile?: File): Promise<DocenteProfile> {
     try {
-      let response;
+      // Siempre usar FormData porque el backend espera multipart/form-data
+      const formData = new FormData();
       
-      // Si hay un archivo de foto, usar FormData
+      // Solo agregar la foto si hay un archivo nuevo
       if (fotoFile) {
-        const formData = new FormData();
         formData.append('foto', fotoFile);
-        formData.append('nombres', perfil.nombres || '');
-        formData.append('apellidos', perfil.apellidos || '');
-        formData.append('telefono', perfil.telefono || '');
-        formData.append('direccion', perfil.direccion || '');
-        formData.append('distrito', perfil.distrito || '');
-        formData.append('fechaContratacion', perfil.fechaContratacion || '');
-        formData.append('especialidad', perfil.especialidad || '');
-        formData.append('email', perfil.email || '');
-        
-        response = await axiosInstance.put(`/docentes/${id}/perfil`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-      } else {
-        // Sin foto, enviar como JSON normal (sin el campo foto)
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { foto, ...perfilSinFoto } = perfil;
-        response = await axiosInstance.put(`/docentes/${id}/perfil`, perfilSinFoto);
       }
+      
+      // Agregar los demás campos
+      formData.append('nombres', perfil.nombres || '');
+      formData.append('apellidos', perfil.apellidos || '');
+      formData.append('telefono', perfil.telefono || '');
+      formData.append('direccion', perfil.direccion || '');
+      formData.append('distrito', perfil.distrito || '');
+      formData.append('fechaContratacion', perfil.fechaContratacion || '');
+      formData.append('especialidad', perfil.especialidad || '');
+      formData.append('email', perfil.email || '');
+      
+      const response = await axiosInstance.put(`/docentes/${id}/perfil`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       
       const perfilActualizado: DocenteProfile = response.data;
       
