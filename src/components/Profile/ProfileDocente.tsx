@@ -63,9 +63,20 @@ export const ProfileDocente: React.FC = () => {
     setSuccess('');
 
     try {
+      // Extraer solo el nombre del archivo si formData.foto es una URL completa
+      let fotoParaEnviar = formData.foto;
+      if (fotoParaEnviar && (fotoParaEnviar.startsWith('http') || fotoParaEnviar.includes('/uploads/'))) {
+        // Extraer solo el nombre del archivo de la URL
+        const partes = fotoParaEnviar.split('/');
+        fotoParaEnviar = partes[partes.length - 1];
+      }
+
       const perfilActualizado = await DocenteService.actualizarPerfil(
         state.perfilDocente.idDocente,
-        formData
+        {
+          ...formData,
+          foto: fotoParaEnviar
+        }
       );
       
       // Actualizar el contexto con los nuevos datos
@@ -294,6 +305,11 @@ export const ProfileDocente: React.FC = () => {
               ...prev,
               foto: nuevaFoto,
             }));
+            // Actualizar el contexto también
+            updateProfile(undefined, {
+              ...state.perfilDocente,
+              foto: nuevaFoto,
+            } as any);
             setSuccess('Foto actualizada correctamente');
           }}
         />

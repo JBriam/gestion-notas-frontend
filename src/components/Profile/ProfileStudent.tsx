@@ -61,9 +61,20 @@ export const ProfileStudent: React.FC = () => {
     setSuccess('');
 
     try {
+      // Extraer solo el nombre del archivo si formData.foto es una URL completa
+      let fotoParaEnviar = formData.foto;
+      if (fotoParaEnviar && (fotoParaEnviar.startsWith('http') || fotoParaEnviar.includes('/uploads/'))) {
+        // Extraer solo el nombre del archivo de la URL
+        const partes = fotoParaEnviar.split('/');
+        fotoParaEnviar = partes[partes.length - 1];
+      }
+
       const perfilActualizado = await EstudianteService.actualizarPerfil(
         state.perfilEstudiante.idEstudiante,
-        formData
+        {
+          ...formData,
+          foto: fotoParaEnviar
+        }
       );
       
       // Actualizar el contexto con los nuevos datos
@@ -279,6 +290,11 @@ export const ProfileStudent: React.FC = () => {
               ...prev,
               foto: nuevaFoto,
             }));
+            // Actualizar el contexto también
+            updateProfile({
+              ...state.perfilEstudiante,
+              foto: nuevaFoto,
+            } as any, undefined);
             setSuccess('Foto actualizada correctamente');
           }}
         />
