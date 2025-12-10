@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { EstudianteService } from '../../api/EstudianteService';
+import { ActualizarFotoModal } from '../Modals/ActualizarFotoModal';
 import type { ActualizarPerfilEstudianteRequest } from '../../interfaces/Auth';
 import './Profile.css';
 
@@ -20,6 +21,7 @@ export const ProfileStudent: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
   const [isEditing, setIsEditing] = useState(false);
+  const [modalFotoAbierto, setModalFotoAbierto] = useState(false);
 
   // Cargar datos del perfil al montar el componente
   useEffect(() => {
@@ -119,6 +121,14 @@ export const ProfileStudent: React.FC = () => {
                 target.src = '/assets/imgs/student.gif';
               }}
             />
+            <button
+              type="button"
+              className="btn-change-photo"
+              onClick={() => setModalFotoAbierto(true)}
+              title="Cambiar foto de perfil"
+            >
+              📷
+            </button>
           </div>
           <div className="profile-info">
             <h2>{`${formData.nombres} ${formData.apellidos}`}</h2>
@@ -257,6 +267,21 @@ export const ProfileStudent: React.FC = () => {
             </div>
           )}
         </form>
+
+        {/* Modal para actualizar foto */}
+        <ActualizarFotoModal
+          isOpen={modalFotoAbierto}
+          usuarioId={state.perfilEstudiante.idEstudiante || 0}
+          tipoUsuario="estudiante"
+          onClose={() => setModalFotoAbierto(false)}
+          onFotoActualizada={(nuevaFoto) => {
+            setFormData(prev => ({
+              ...prev,
+              foto: nuevaFoto,
+            }));
+            setSuccess('Foto actualizada correctamente');
+          }}
+        />
       </div>
     </div>
   );

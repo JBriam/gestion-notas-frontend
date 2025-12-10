@@ -25,6 +25,7 @@
 
 .profile-avatar {
   flex-shrink: 0;
+  position: relative;
 }
 
 .profile-avatar img {
@@ -34,6 +35,33 @@
   object-fit: cover;
   border: 4px solid rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-change-photo {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #007bff;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.btn-change-photo:hover {
+  background-color: #0056b3;
+  transform: scale(1.1);
+}
+
+.btn-change-photo:active {
+  transform: scale(0.95);
 }
 
 .profile-info {
