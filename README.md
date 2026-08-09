@@ -258,7 +258,8 @@ export const EstudianteService = {
 
 ## **Capturas de Pantalla**
 
-*(Próximamente se agregarán capturas del sistema funcionando)*
+### Login
+<img width="1915" height="906" alt="image" src="https://github.com/user-attachments/assets/6e1d7bd6-f06f-40b4-91db-4987c6c16890" />
 
 ## **Contribución**
 
